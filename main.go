@@ -1,28 +1,30 @@
-// This example produces LLVM IR generating "Hello, World" output.
-
 package main
 
 import (
-	"fmt"
-
+  "fmt"
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 )
 
 func main() {
-	// Create a new LLVM IR module.
 	m := ir.NewModule()
-	hello := constant.NewCharArrayFromString("Hello, world!\n\x00")
-	str := m.NewGlobalDef("str", hello)
-	// Add external function declaration of puts.
-	puts := m.NewFunc("puts", types.I32, ir.NewParam("", types.NewPointer(types.I8)))
-	main := m.NewFunc("main", types.I32)
-	entry := main.NewBlock("")
-	// Cast *[15]i8 to *i8.
-	zero := constant.NewInt(types.I64, 0)
-	gep := constant.NewGetElementPtr(hello.Typ, str, zero, zero)
-	entry.NewCall(puts, gep)
-	entry.NewRet(constant.NewInt(types.I32, 0))
+
+	globalG := m.NewGlobalDef("g", constant.NewInt(types.I32, 4))
+
+	funcAdd := m.NewFunc("add", types.I32,
+		ir.NewParam("x", types.I32),
+		ir.NewParam("y", types.I32),
+	)
+	ab := funcAdd.NewBlock("")
+	ab.NewRet(ab.NewAdd(funcAdd.Params[0], funcAdd.Params[1]))
+
+	funcMain := m.NewFunc(
+		"main",
+		types.I32,
+	)  // omit parameters
+	mb := funcMain.NewBlock("") // llir/llvm would give correct default name for block without name
+	mb.NewRet(mb.NewCall(funcAdd, constant.NewInt(types.I32, 1), mb.NewLoad(types.I32, globalG)))
+
 	fmt.Println(m)
 }
