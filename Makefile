@@ -1,9 +1,20 @@
+dir = generated/$(shell date +%s)
+
+all:
+	mkdir -p $(dir)
+	make build dir=$(dir)
+	make run dir=$(dir) -i
+
 clean:
 	rm -rf generated
-all:
-	mkdir generated
-	go run main.go > generated/out.ll
-	llc generated/out.ll -o generated/out.s
-	clang generated/out.s -o generated/out
-	./generated/out
+
+build:
+	go run main.go > $(dir)/out.ll
+	llc $(dir)/out.ll -o $(dir)/out.s
+	clang $(dir)/out.s -o $(dir)/out
+
+run:
+	@echo "----------------------\n"
+	@./$(dir)/out
+	@echo "----------------------\n"
 
