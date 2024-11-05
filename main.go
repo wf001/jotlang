@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	app = kingpin.New("jotc", "Compiler for the Jot programming language.").Version(VERSION).Author(AUTHOR)
+	app = kingpin.New("modo", "Compiler for the modo programming language.").Version(VERSION).Author(AUTHOR)
 
 	//logLevel = app.Flag("loglevel", "Set the level of logging to show").Default("info").Enum("debug", "verbose", "info", "warning", "error")
 	verbose  = app.Flag("verbose", "Which log tags to show").Short('v').Default("false").Bool()

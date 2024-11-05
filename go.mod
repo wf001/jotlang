@@ -1,4 +1,4 @@
-module github.com/wf001/jotlang
+module github.com/wf001/modo
 
 go 1.23.2
 
