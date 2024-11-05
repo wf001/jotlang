@@ -7,6 +7,7 @@ all:
 
 clean:
 	rm -rf generated
+	rm -rf modo
 
 build:
 	mkdir -p $(dir)
