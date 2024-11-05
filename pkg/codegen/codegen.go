@@ -9,7 +9,7 @@ import (
 func Codegen() *ir.Module {
 	m := ir.NewModule()
 
-	globalG := m.NewGlobalDef("g", constant.NewInt(types.I32, 4))
+	globalG := m.NewGlobalDef("g", constant.NewInt(types.I32, 58))
 
 	funcAdd := m.NewFunc("add", types.I32,
 		ir.NewParam("x", types.I32),
@@ -23,7 +23,7 @@ func Codegen() *ir.Module {
 		types.I32,
 	) // omit parameters
 	mb := funcMain.NewBlock("") // llir/llvm would give correct default name for block without name
-	mb.NewRet(mb.NewCall(funcAdd, constant.NewInt(types.I32, 1), mb.NewLoad(types.I32, globalG)))
+	mb.NewRet(mb.NewCall(funcAdd, constant.NewInt(types.I32, 59), mb.NewLoad(types.I32, globalG)))
 	return m
 
 }

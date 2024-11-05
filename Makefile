@@ -12,12 +12,10 @@ clean:
 build:
 	mkdir -p $(dir)
 	go build ./cmd/modo
-	llc ./a.ll -o ./a/out.s
-	clang ./out.s -o .//out
 
 run:
 	@echo "----------------------\n"
-	@./$(dir)/out
+	./modo run --debug -o $(dir)/out
 	@echo $?
 	@echo "----------------------\n"
 
