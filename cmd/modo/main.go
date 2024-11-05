@@ -17,14 +17,15 @@ const (
 )
 
 var (
-	app     = kingpin.New("modo", "Compiler for the modo programming language.").Version(VERSION).Author(AUTHOR)
-	verbose = app.Flag("verbose", "Which log tags to show").Short('v').Default("false").Bool()
+	app        = kingpin.New("modo", "Compiler for the modo programming language.").Version(VERSION).Author(AUTHOR)
+	appVerbose = app.Flag("verbose", "Which log tags to show").Bool()
+	appDebug   = app.Flag("debug", "Which log tags to show").Bool()
 
 	buildCmd    = app.Command("build", "Build an executable.")
 	buildOutput = buildCmd.Flag("output", "Output binary name.").Short('o').String()
 
-	runCmd    = app.Command("run", "Build and run an executable.")
-	buildExec = runCmd.Flag("exec", "evaluate passing string").String()
+	runCmd  = app.Command("run", "Build and run an executable.")
+	runExec = runCmd.Flag("exec", "evaluate passing string").String()
 )
 
 func asemble(llFile string, asmFile string) {
@@ -32,14 +33,14 @@ func asemble(llFile string, asmFile string) {
 	if err != nil {
 		fmt.Printf("rouph: Error: %v, %s\n", err, out)
 	}
-	log.Info(asmFile, "written asm: %s")
+	log.Debug(asmFile, "written asm: %s")
 }
 func compile(asmFile string, executableFile string) {
 	out, err := exec.Command("clang", asmFile, "-o", executableFile).CombinedOutput()
 	if err != nil {
 		fmt.Printf("rouph: Error: %v, %s\n", err, out)
 	}
-	log.Info(executableFile, "written executable: %s")
+	log.Debug(executableFile, "written executable: %s")
 }
 
 func prepareWorkingFile(artifactFilePrefix string) (string, string, string) {
@@ -51,10 +52,11 @@ func prepareWorkingFile(artifactFilePrefix string) (string, string, string) {
 		if err != nil {
 			fmt.Printf("rouph: Error: %v", err)
 		}
-		log.Info(artifactDir, "make dir: %s")
+		log.Debug(artifactDir, "make dir: %s")
 
 		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
 	}
+  log.Debug(artifactFilePrefix, "artifactFilePrefix = %s")
 
 	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
 	asmName := fmt.Sprintf("%s.s", artifactFilePrefix)
@@ -64,36 +66,46 @@ func prepareWorkingFile(artifactFilePrefix string) (string, string, string) {
 }
 
 func doRun(output string, evaluatee string) int {
-
-	log.Info("generating LL")
 	m := codegen.Codegen()
-	log.Info("generated LL")
+	log.Debug("code generated")
+
 	llName, asmName, executableName := prepareWorkingFile(output)
 
 	os.WriteFile(llName, []byte(m.String()), 0600)
-
+  log.Debug(llName, "written ll: %s")
 	asemble(llName, asmName)
 	compile(asmName, executableName)
-
-	log.Info(llName, "written LL: %s")
 
 	return 0
 
 }
+func showOpts(cmd string) {
+	m := map[string]interface{}{}
+	m["cmd"] = cmd
+	m["buildOutput"] = *buildOutput
+	m["exec"] = *runExec
+	m["debug"] = *appDebug
+	m["verbose"] = *appVerbose
+	log.Debug(m, "options = %#+v")
+}
+func setLogLevel() {
+	if *appVerbose {
+		log.SetLevelInfo()
+	}
+	if *appDebug {
+		log.SetLevelDebug()
+	}
+}
 
 func main() {
-	log.Info("main start")
 	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
-	log.Info(cmd, "%#+v")
-	log.Info(*buildOutput, "output opt = %#+v")
-	log.Info(*buildExec, "exec opt = %#+v")
+
+	setLogLevel()
+	showOpts(cmd)
 
 	switch cmd {
-	// Register user
 	case runCmd.FullCommand():
-		log.Info("call build")
-		os.Exit(doRun(*buildOutput, *buildExec))
+		status := doRun(*buildOutput, *runExec)
+		os.Exit(status)
 	}
-	log.Info("main end")
-	os.Exit(1)
 }

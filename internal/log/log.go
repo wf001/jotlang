@@ -1,31 +1,100 @@
 package log
 
 import (
-	"fmt"
+	"os"
 	"regexp"
 	"runtime"
-  "github.com/sirupsen/logrus"
+
+	"github.com/sirupsen/logrus"
 )
 
+var DEFAULT_FORMAT = "%+v"
+
+func getCaller() (string, int) {
+	_, file, line, _ := runtime.Caller(3)
+	files := regexp.MustCompile("[/]").Split(file, -1)
+
+	return files[len(files)-1], line
+}
+func getLogrus() *logrus.Entry {
+	file, line := getCaller()
+
+	return logrus.WithFields(logrus.Fields{
+		"file": file,
+		"line": line,
+	})
+}
+
+
+func Debug(value interface{}, args ...string) {
+	format := DEFAULT_FORMAT
+
+	if len(args) > 0 {
+		format = args[0]
+	}
+  getLogrus().Debugf(format, value)
+}
 
 func Info(value interface{}, args ...string) {
-	// Default format is "%s"
-	format := "%s"
-	
-	// If a format is provided in args, use it
+	format := DEFAULT_FORMAT
 	if len(args) > 0 {
 		format = args[0]
 	}
 
-	// Get file and line number
-	_, file, line, _ := runtime.Caller(1)
-	reg := "[/]"
-	files := regexp.MustCompile(reg).Split(file, -1)
+  getLogrus().Infof(format, value)
+}
+func Warn(value interface{}, args ...string) {
+	format := DEFAULT_FORMAT
+	if len(args) > 0 {
+		format = args[0]
+	}
 
-	// Print file name and line number
-	fmt.Printf("%s %d| ", files[len(files)-1], line)
-	
-	// Print the value using the specified or default format
-	fmt.Printf(format, value)
-	fmt.Println()
+  getLogrus().Warnf(format, value)
+}
+func Error(value interface{}, args ...string) {
+	format := DEFAULT_FORMAT
+	if len(args) > 0 {
+		format = args[0]
+	}
+
+  getLogrus().Errorf(format, value)
+}
+
+func Panic(value interface{}, args ...string) {
+	format := DEFAULT_FORMAT
+	if len(args) > 0 {
+		format = args[0]
+	}
+
+  getLogrus().Panicf(format, value)
+}
+
+func init() {
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.WarnLevel)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+	})
+}
+
+func SetOutputFile(fileName string) {
+	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0777)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	logrus.SetOutput(f)
+	defer f.Close()
+}
+
+func SetLevelError() {
+	logrus.SetLevel(logrus.ErrorLevel)
+}
+func SetLevelWarning() {
+	logrus.SetLevel(logrus.WarnLevel)
+}
+func SetLevelInfo() {
+	logrus.SetLevel(logrus.InfoLevel)
+}
+func SetLevelDebug() {
+	logrus.SetLevel(logrus.DebugLevel)
 }

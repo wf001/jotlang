@@ -5,6 +5,7 @@ go 1.23.2
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/llir/llvm v0.3.6
+	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
@@ -13,7 +14,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	golang.org/x/tools v0.1.4 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
