@@ -11,9 +11,9 @@ clean:
 
 build:
 	mkdir -p $(dir)
-	go run main.go > $(dir)/out.ll
-	llc $(dir)/out.ll -o $(dir)/out.s
-	clang $(dir)/out.s -o $(dir)/out
+	go build ./cmd/modo
+	llc ./a.ll -o ./a/out.s
+	clang ./out.s -o .//out
 
 run:
 	@echo "----------------------\n"

@@ -30,7 +30,7 @@ assert() {
 
 build(){
   mkdir -p "$dir"
-  go run main.go > "$dir"/out.ll
+  go run ./cmd/modo > "$dir"/out.ll
   llc "$dir"/out.ll -o "$dir"/out.s
   clang "$dir"/out.s -o "$dir"/out
 }
