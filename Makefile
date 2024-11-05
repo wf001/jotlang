@@ -15,7 +15,7 @@ build:
 
 run:
 	@echo "----------------------\n"
-	./modo run --debug -o $(dir)/out
+	./modo run --debug
 	@echo $?
 	@echo "----------------------\n"
 

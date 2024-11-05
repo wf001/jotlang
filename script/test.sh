@@ -11,7 +11,7 @@ assert() {
   expected="$1"
   input="$2"
 
-  ./"$dir"/out
+  ./modo run -o "$dir/out"
 
   actual="$?"
 
@@ -28,11 +28,9 @@ assert() {
   fi
 }
 
-build(){
+build-compiler(){
   mkdir -p "$dir"
-  go run ./cmd/modo > "$dir"/out.ll
-  llc "$dir"/out.ll -o "$dir"/out.s
-  clang "$dir"/out.s -o "$dir"/out
+  go build ./cmd/modo
 }
 
 summary(){
@@ -42,10 +40,10 @@ summary(){
 }
 
 testit(){
-  assert 5 '5'
+  assert 117 '117'
 }
 
-build
+build-compiler
 testit
 summary
 
