@@ -25,14 +25,13 @@ func getLogrus() *logrus.Entry {
 	})
 }
 
-
 func Debug(value interface{}, args ...string) {
 	format := DEFAULT_FORMAT
 
 	if len(args) > 0 {
 		format = args[0]
 	}
-  getLogrus().Debugf(format, value)
+	getLogrus().Debugf(format, value)
 }
 
 func Info(value interface{}, args ...string) {
@@ -41,7 +40,7 @@ func Info(value interface{}, args ...string) {
 		format = args[0]
 	}
 
-  getLogrus().Infof(format, value)
+	logrus.Infof(format, value)
 }
 func Warn(value interface{}, args ...string) {
 	format := DEFAULT_FORMAT
@@ -49,7 +48,7 @@ func Warn(value interface{}, args ...string) {
 		format = args[0]
 	}
 
-  getLogrus().Warnf(format, value)
+	logrus.Warnf(format, value)
 }
 func Error(value interface{}, args ...string) {
 	format := DEFAULT_FORMAT
@@ -57,7 +56,7 @@ func Error(value interface{}, args ...string) {
 		format = args[0]
 	}
 
-  getLogrus().Errorf(format, value)
+	logrus.Errorf(format, value)
 }
 
 func Panic(value interface{}, args ...string) {
@@ -66,14 +65,16 @@ func Panic(value interface{}, args ...string) {
 		format = args[0]
 	}
 
-  getLogrus().Panicf(format, value)
+	logrus.Panicf(format, value)
 }
 
 func init() {
 	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(logrus.WarnLevel)
 	logrus.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
+		ForceColors:            true,
+		FullTimestamp:          true,
+		DisableLevelTruncation: true,
 	})
 }
 
