@@ -18,44 +18,32 @@ const (
 
 var (
 	app        = kingpin.New("modo", "Compiler for the modo programming language.").Version(VERSION).Author(AUTHOR)
-	appVerbose = app.Flag("verbose", "Which log tags to show").Bool()
-	appDebug   = app.Flag("debug", "Which log tags to show").Bool()
-	appOutput  = app.Flag("output", "Output binary name.").Short('o').String()
+	appVerbose = app.Flag("verbose", "Use verbose log").Bool()
+	appDebug   = app.Flag("debug", "Use debug log").Bool()
+	appOutput  = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
+	appPersistTemps     = app.Flag("persist-temps", "Persist all of build artifacts").Bool()
 
 	buildCmd = app.Command("build", "Build an executable.")
 
 	runCmd  = app.Command("run", "Build and run an executable.")
-	runExec = runCmd.Flag("exec", "evaluate passing string").String()
+	runExec = runCmd.Flag("exec", "evaluate <EXEC>").String()
+
+	currentTime = time.Now().Unix()
 )
 
 func showOpts(cmd string) {
 	m := map[string]interface{}{}
 	m["cmd"] = cmd
 	m["appOutput"] = *appOutput
+	m["appPersistTemps"] = *appPersistTemps
 	m["exec"] = *runExec
 	m["debug"] = *appDebug
 	m["verbose"] = *appVerbose
 	log.Debug(m, "options = %#+v")
 }
 
-func asemble(llFile string, asmFile string) {
-	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
-	if err != nil {
-		log.Panic(map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile}, "fail to asemble: %s")
-	}
-	log.Debug(asmFile, "written asm: %s")
-}
-func compile(asmFile string, executableFile string) {
-	out, err := exec.Command("clang", asmFile, "-o", executableFile).CombinedOutput()
-	if err != nil {
-		log.Panic(map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile}, "fail to compile: %s")
-	}
-	log.Debug(executableFile, "written executable: %s")
-}
-
 func prepareWorkingFile(artifactFilePrefix string) (string, string, string) {
 	if artifactFilePrefix == "" {
-		currentTime := time.Now().Unix()
 		generated := "generated"
 		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
 		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
@@ -67,17 +55,39 @@ func prepareWorkingFile(artifactFilePrefix string) (string, string, string) {
 		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
 	}
 	log.Debug(artifactFilePrefix, "artifactFilePrefix = %s")
+	log.Info(artifactFilePrefix, "persist all of build artifact in %s")
 
 	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
 	asmName := fmt.Sprintf("%s.s", artifactFilePrefix)
 	executableName := fmt.Sprintf("%s", artifactFilePrefix)
-	return llName, asmName, executableName
 
+	return llName, asmName, executableName
 }
+
+func asemble(llFile string, asmFile string) {
+	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
+	if err != nil {
+		log.Panic(map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile}, "fail to asemble: %s")
+	}
+	log.Debug(asmFile, "written asm: %s")
+}
+
+func compile(asmFile string, executableFile string) {
+	out, err := exec.Command("clang", asmFile, "-o", executableFile).CombinedOutput()
+	if err != nil {
+		log.Panic(map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile}, "fail to compile: %s")
+	}
+	log.Debug(executableFile, "written executable: %s")
+}
+
 func run(executableName string) int {
 	cmd := exec.Command(executableName)
-	cmd.Run()
+	err := cmd.Run()
 	log.Debug(executableName, "executed: %s")
+	if err != nil {
+		log.Error(err, "fail to run: %s")
+	}
+
 	return cmd.ProcessState.ExitCode()
 }
 
@@ -87,10 +97,14 @@ func doRun(output string, evaluatee string) int {
 
 	llName, asmName, executableName := prepareWorkingFile(output)
 
-	os.WriteFile(llName, []byte(m.String()), 0600)
+	err := os.WriteFile(llName, []byte(m.String()), 0600)
+	if err != nil {
+		log.Panic(map[string]interface{}{"err": err, "llName": llName}, "fail to write ll: %s")
+	}
 	log.Debug(llName, "written ll: %s")
 	asemble(llName, asmName)
 	compile(asmName, executableName)
+
 	return run(executableName)
 }
 
@@ -110,6 +124,7 @@ func main() {
 	showOpts(cmd)
 
 	switch cmd {
+
 	case runCmd.FullCommand():
 		status := doRun(*appOutput, *runExec)
 		os.Exit(status)
