@@ -17,11 +17,11 @@ const (
 )
 
 var (
-	app        = kingpin.New("modo", "Compiler for the modo programming language.").Version(VERSION).Author(AUTHOR)
-	appVerbose = app.Flag("verbose", "Use verbose log").Bool()
-	appDebug   = app.Flag("debug", "Use debug log").Bool()
-	appOutput  = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
-	appPersistTemps     = app.Flag("persist-temps", "Persist all of build artifacts").Bool()
+	app             = kingpin.New("modo", "Compiler for the modo programming language.").Version(VERSION).Author(AUTHOR)
+	appVerbose      = app.Flag("verbose", "Use verbose log").Bool()
+	appDebug        = app.Flag("debug", "Use debug log").Bool()
+	appOutput       = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
+	appPersistTemps = app.Flag("persist-temps", "Persist all of build artifacts").Bool()
 
 	buildCmd = app.Command("build", "Build an executable.")
 
@@ -40,6 +40,15 @@ func showOpts(cmd string) {
 	m["debug"] = *appDebug
 	m["verbose"] = *appVerbose
 	log.Debug(m, "options = %#+v")
+}
+
+func setLogLevel() {
+	if *appVerbose {
+		log.SetLevelInfo()
+	}
+	if *appDebug {
+		log.SetLevelDebug()
+	}
 }
 
 func prepareWorkingFile(artifactFilePrefix string) (string, string, string) {
@@ -80,10 +89,10 @@ func compile(asmFile string, executableFile string) {
 	log.Debug(executableFile, "written executable: %s")
 }
 
-func run(executableName string) int {
-	cmd := exec.Command(executableName)
+func run(executableFile string) int {
+	cmd := exec.Command(executableFile)
 	err := cmd.Run()
-	log.Debug(executableName, "executed: %s")
+	log.Debug(executableFile, "executed: %s")
 	if err != nil {
 		log.Error(err, "fail to run: %s")
 	}
@@ -91,11 +100,11 @@ func run(executableName string) int {
 	return cmd.ProcessState.ExitCode()
 }
 
-func doRun(output string, evaluatee string) int {
+func doRun(workingDirPrefix string, evaluatee string) int {
 	m := codegen.Codegen()
 	log.Debug("code generated")
 
-	llName, asmName, executableName := prepareWorkingFile(output)
+	llName, asmName, executableName := prepareWorkingFile(workingDirPrefix)
 
 	err := os.WriteFile(llName, []byte(m.String()), 0600)
 	if err != nil {
@@ -106,15 +115,6 @@ func doRun(output string, evaluatee string) int {
 	compile(asmName, executableName)
 
 	return run(executableName)
-}
-
-func setLogLevel() {
-	if *appVerbose {
-		log.SetLevelInfo()
-	}
-	if *appDebug {
-		log.SetLevelDebug()
-	}
 }
 
 func main() {
