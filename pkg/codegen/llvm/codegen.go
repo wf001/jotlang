@@ -45,7 +45,7 @@ func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 	return llName, asmName, executableName
 }
 
-func Asemble(llFile string, asmFile string) {
+func doAsemble(llFile string, asmFile string) {
 	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
 	if err != nil {
 		log.Panic(map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile}, "fail to asemble: %s")
@@ -64,7 +64,7 @@ func Codegen(s string) *ir.Module {
 	return m
 }
 
-func DoAssemble(node string, workingDirPrefix string, currentTime int64) (string, string) {
+func Assemble(node string, workingDirPrefix string, currentTime int64) (string, string) {
 	m := Codegen(node)
 	log.Debug("code generated")
 	log.Debug(m.String(), "IR = \n %s\n")
@@ -76,7 +76,7 @@ func DoAssemble(node string, workingDirPrefix string, currentTime int64) (string
 		log.Panic(map[string]interface{}{"err": err, "llName": llName}, "fail to write ll: %s")
 	}
 	log.Debug(llName, "written ll: %s")
-	Asemble(llName, asmName)
+	doAsemble(llName, asmName)
 
 	return asmName, executableName
 

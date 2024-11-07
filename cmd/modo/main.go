@@ -50,7 +50,7 @@ func setLogLevel() {
 	}
 }
 
-func Compile(asmFile string, executableFile string) {
+func compile(asmFile string, executableFile string) {
 	out, err := exec.Command("clang", asmFile, "-o", executableFile).CombinedOutput()
 	if err != nil {
 		log.Panic(map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile}, "fail to compile: %s")
@@ -80,10 +80,10 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	log.Debug("code parsed")
 
 	// Node -> LLVM IR -> write assembly
-	asmName, executableName := codegen.DoAssemble(token, workingDirPrefix, currentTime)
+	asmName, executableName := codegen.Assemble(token, workingDirPrefix, currentTime)
 
-  // assembly file -> write executable
-	Compile(asmName, executableName)
+	// assembly file -> write executable
+	compile(asmName, executableName)
 
 	return 0, executableName
 }

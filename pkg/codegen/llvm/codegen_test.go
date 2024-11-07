@@ -16,4 +16,3 @@ func TestPrepareWarkingFile(t *testing.T) {
 		t.Errorf("have = %s, want = %s", "out", executableName)
 	}
 }
-
