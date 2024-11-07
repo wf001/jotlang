@@ -1,6 +1,9 @@
 package codegen
 
 import (
+	"fmt"
+	"os"
+	"os/exec"
 	"strconv"
 
 	"github.com/llir/llvm/ir"
@@ -9,19 +12,46 @@ import (
 	"github.com/wf001/modo/internal/log"
 )
 
-// return ir from Node object
 func newInt32(s string) *constant.Int {
 
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
-    log.Panic(err, "fail to newInt32: %s")
+		log.Panic(err, "fail to newInt32: %s")
 	}
-  res := constant.NewInt(types.I32, i)
-  log.Debug(res, "%#v")
-  return res
+	res := constant.NewInt(types.I32, i)
+	log.Debug(res, "%#v")
+	return res
 }
 
+func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, string, string) {
+	if artifactFilePrefix == "" {
+		generated := "generated"
+		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
+		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
+		if err != nil {
+			log.Panic(map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir}, "fail to make directory: %s")
+		}
+		log.Debug(artifactDir, "make dir: %s")
 
+		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
+	}
+	log.Debug(artifactFilePrefix, "artifactFilePrefix = %s")
+	log.Info(artifactFilePrefix, "persist all of build artifact in %s")
+
+	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
+	asmName := fmt.Sprintf("%s.s", artifactFilePrefix)
+	executableName := fmt.Sprintf("%s", artifactFilePrefix)
+
+	return llName, asmName, executableName
+}
+
+func Asemble(llFile string, asmFile string) {
+	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
+	if err != nil {
+		log.Panic(map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile}, "fail to asemble: %s")
+	}
+	log.Debug(asmFile, "written asm: %s")
+}
 func Codegen(s string) *ir.Module {
 	m := ir.NewModule()
 	funcMain := m.NewFunc(
@@ -30,9 +60,26 @@ func Codegen(s string) *ir.Module {
 	)
 	mb := funcMain.NewBlock("")
 
-
 	mb.NewRet(newInt32(s))
 	return m
+}
+
+func DoAssemble(node string, workingDirPrefix string, currentTime int64) (string, string) {
+	m := Codegen(node)
+	log.Debug("code generated")
+	log.Debug(m.String(), "IR = \n %s\n")
+
+	llName, asmName, executableName := prepareWorkingFile(workingDirPrefix, currentTime)
+
+	err := os.WriteFile(llName, []byte(m.String()), 0600)
+	if err != nil {
+		log.Panic(map[string]interface{}{"err": err, "llName": llName}, "fail to write ll: %s")
+	}
+	log.Debug(llName, "written ll: %s")
+	Asemble(llName, asmName)
+
+	return asmName, executableName
+
 }
 
 // func Codegen(s string) *ir.Module {
@@ -56,4 +103,3 @@ func Codegen(s string) *ir.Module {
 // 	return m
 //
 // }
-
