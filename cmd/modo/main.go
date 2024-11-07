@@ -8,7 +8,7 @@ import (
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/wf001/modo/internal/log"
-	"github.com/wf001/modo/pkg/codegen"
+	"github.com/wf001/modo/pkg/codegen/llvm"
 	"github.com/wf001/modo/pkg/lexer"
 	"github.com/wf001/modo/pkg/parser"
 )
@@ -104,7 +104,7 @@ func run(executableFile string) int {
 
 func doRun(workingDirPrefix string, evaluatee string) int {
   token := lexer.Lex(evaluatee)
-	log.Debug("code lexed")
+  log.Debug(token, "code lexed token: %#+v")
 
   parser.Parse(token)
 	log.Debug("code parsed")

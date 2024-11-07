@@ -4,6 +4,7 @@ all:
 	mkdir -p $(dir)
 	make build dir=$(dir)
 	make run dir=$(dir) -i
+	rm -rf modo
 
 clean:
 	rm -rf generated

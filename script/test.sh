@@ -11,7 +11,7 @@ assert() {
   expected="$1"
   input="$2"
 
-  ./modo run -o "$dir/out"
+  ./modo run -o "$dir/out" --exec "$input"
 
   actual="$?"
 
@@ -40,6 +40,7 @@ summary(){
 }
 
 testit(){
+  assert 4 '4'
   assert 117 '117'
 }
 
