@@ -9,6 +9,8 @@ import (
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/wf001/modo/internal/log"
 	"github.com/wf001/modo/pkg/codegen"
+	"github.com/wf001/modo/pkg/lexer"
+	"github.com/wf001/modo/pkg/parser"
 )
 
 const (
@@ -101,8 +103,15 @@ func run(executableFile string) int {
 }
 
 func doRun(workingDirPrefix string, evaluatee string) int {
-	m := codegen.Codegen()
+  token := lexer.Lex(evaluatee)
+	log.Debug("code lexed")
+
+  parser.Parse(token)
+	log.Debug("code parsed")
+
+	m := codegen.Codegen(token)
 	log.Debug("code generated")
+  log.Debug(m.String(), "IR = \n %s\n")
 
 	llName, asmName, executableName := prepareWorkingFile(workingDirPrefix)
 

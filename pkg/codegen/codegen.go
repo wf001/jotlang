@@ -6,7 +6,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 )
 
-func Codegen() *ir.Module {
+func Codegen(s string) *ir.Module {
 	m := ir.NewModule()
 
 	globalG := m.NewGlobalDef("g", constant.NewInt(types.I32, 58))

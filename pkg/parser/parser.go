@@ -1,4 +1,5 @@
 package parser
 
-// Add takes two integers a and b and returns their sum.
-
+func Parse(s string) {
+	return
+}
