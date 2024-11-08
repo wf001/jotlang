@@ -1,13 +1,41 @@
 package lexer
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/wf001/modo/internal/log"
 )
 
-var OPERATORS_REG_EXP = `^[+\-*/]$`
-var NUMBER_REG_EXP = `^[+-]?\d+$`
+var FRACTIONAL_REG_EXP = `\d+\.\d+`
+var INTEGER_REG_EXP = `\d+`
+var BINARY_OPERATORS_REG_EXP = `[+\-*/<>]`
+var PARREN_REG_EXP = `[()[\]{}"]`
+var USER_DEFINED_REG_EXP = `\w+`
+
+var THREADING_REG_EXP = `->|->>`
+var BRANCH_REG_EXP = `\b(if|cond)\b`
+var DEFINITION_REG_EXP = `\b(def|defn|let)\b`
+var RESERVED_REG_EXP = strings.Join(
+	[]string{
+		THREADING_REG_EXP,
+		BRANCH_REG_EXP,
+    DEFINITION_REG_EXP,
+	},
+	"|")
+
+var REG_EXP = fmt.Sprintf(
+	"%s",
+	strings.Join([]string{
+		FRACTIONAL_REG_EXP,
+		INTEGER_REG_EXP,
+		RESERVED_REG_EXP,
+		BINARY_OPERATORS_REG_EXP,
+		PARREN_REG_EXP,
+		USER_DEFINED_REG_EXP,
+	}, "|"),
+)
 
 type TokenKind = int
 
@@ -32,20 +60,9 @@ func newToken(kind TokenKind, cur *Token, val string) *Token {
 	cur.Next = tok
 	return tok
 }
-func parseIf(s string, expr string) string {
-	re := regexp.MustCompile(expr)
-	if re.MatchString(s) {
-		return s
-	}
-	return ""
-}
-
-func parseIfOperator(c string) string {
-	return parseIf(c, OPERATORS_REG_EXP)
-}
-
-func parseIfNumber(c string) string {
-	return parseIf(c, NUMBER_REG_EXP)
+func splitExpression(expr string) []string {
+	re := regexp.MustCompile(REG_EXP)
+	return re.FindAllString(expr, -1)
 }
 
 // return Token array from string
