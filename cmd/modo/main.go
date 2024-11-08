@@ -38,7 +38,7 @@ func showOpts(cmd string) {
 	m["exec"] = *runExec
 	m["debug"] = *appDebug
 	m["verbose"] = *appVerbose
-	log.Debug(m, "options = %#+v")
+	log.Debug( "options = %#+v", m)
 }
 
 func setLogLevel() {
@@ -53,17 +53,17 @@ func setLogLevel() {
 func compile(asmFile string, executableFile string) {
 	out, err := exec.Command("clang", asmFile, "-o", executableFile).CombinedOutput()
 	if err != nil {
-		log.Panic(map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile}, "fail to compile: %s")
+		log.Panic("fail to compile: %+v", map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile})
 	}
-	log.Debug(executableFile, "written executable: %s")
+	log.Debug("written executable: %s", executableFile)
 }
 
 func run(executableFile string) int {
 	cmd := exec.Command(executableFile)
 	err := cmd.Run()
-	log.Debug(executableFile, "executed: %s")
+	log.Debug("executed: %s", executableFile)
 	if err != nil {
-		log.Error(err, "fail to run: %s")
+		log.Error("fail to run: %s", err)
 	}
 
 	return cmd.ProcessState.ExitCode()
@@ -73,11 +73,11 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	currentTime := time.Now().Unix()
 	// string -> Token
 	token := lexer.Lex(evaluatee)
-	log.Debug(token, "code lexed token: %#+v")
+	log.Debug("code lexed token: %#+v", token)
 
 	// Token -> Node
 	parser.Parse(token)
-	log.Debug("code parsed")
+	log.DebugMessage("code parsed")
 
 	// Node -> LLVM IR -> write assembly
 	asmName, executableName := codegen.Assemble(token, workingDirPrefix, currentTime)
@@ -91,7 +91,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 func doRun(workingDirPrefix string, evaluatee string) int {
 	err, executableName := doBuild(workingDirPrefix, evaluatee)
 	if err != 0 {
-		log.Panic(map[string]interface{}{"err": err, "llName": executableName}, "fail to run: %s")
+		log.Panic("fail to run: %s", map[string]interface{}{"err": err, "llName": executableName})
 	}
 	return run(executableName)
 }

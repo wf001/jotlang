@@ -10,62 +10,70 @@ import (
 
 var DEFAULT_FORMAT = "%+v"
 
-func getCaller() (string, int) {
-	_, file, line, _ := runtime.Caller(3)
+func getCaller() (string, string, int) {
+	pc, file, line, _ := runtime.Caller(3)
 	files := regexp.MustCompile("[/]").Split(file, -1)
+	funcName := regexp.MustCompile("[/]").Split(runtime.FuncForPC(pc).Name(), -1)
 
-	return files[len(files)-1], line
+	return funcName[len(funcName)-1], files[len(files)-1], line
 }
 func getLogrus() *logrus.Entry {
-	file, line := getCaller()
+	funcName, file, line := getCaller()
 
 	return logrus.WithFields(logrus.Fields{
+		"func": funcName,
 		"file": file,
 		"line": line,
 	})
 }
 
-func Debug(value interface{}, args ...string) {
-	format := DEFAULT_FORMAT
-
-	if len(args) > 0 {
-		format = args[0]
-	}
-	getLogrus().Debugf(format, value)
+func DebugMessage(message string) {
+	Debug("", message)
 }
 
-func Info(value interface{}, args ...string) {
-	format := DEFAULT_FORMAT
-	if len(args) > 0 {
-		format = args[0]
+func Debug(format string, value ...interface{}) {
+	defaultFormat := DEFAULT_FORMAT
+	if format == "" {
+		format = defaultFormat
 	}
 
-	logrus.Infof(format, value)
-}
-func Warn(value interface{}, args ...string) {
-	format := DEFAULT_FORMAT
-	if len(args) > 0 {
-		format = args[0]
-	}
-
-	logrus.Warnf(format, value)
-}
-func Error(value interface{}, args ...string) {
-	format := DEFAULT_FORMAT
-	if len(args) > 0 {
-		format = args[0]
-	}
-
-	logrus.Errorf(format, value)
+	getLogrus().Debugf(format, value...)
 }
 
-func Panic(value interface{}, args ...string) {
-	format := DEFAULT_FORMAT
-	if len(args) > 0 {
-		format = args[0]
+func Info(format string, value ...interface{}) {
+	defaultFormat := DEFAULT_FORMAT
+	if format == "" {
+		format = defaultFormat
 	}
 
-	logrus.Panicf(format, value)
+	logrus.Infof(format, value...)
+}
+
+func Warn(format string, value ...interface{}) {
+	defaultFormat := DEFAULT_FORMAT
+	if format == "" {
+		format = defaultFormat
+	}
+
+	logrus.Warnf(format, value...)
+}
+
+func Error(format string, value ...interface{}) {
+	defaultFormat := DEFAULT_FORMAT
+	if format == "" {
+		format = defaultFormat
+	}
+
+	logrus.Errorf(format, value...)
+}
+
+func Panic(format string, value ...interface{}) {
+	defaultFormat := DEFAULT_FORMAT
+	if format == "" {
+		format = defaultFormat
+	}
+
+	logrus.Panicf(format, value...)
 }
 
 func init() {

@@ -21,7 +21,7 @@ var RESERVED_REG_EXP = strings.Join(
 	[]string{
 		THREADING_REG_EXP,
 		BRANCH_REG_EXP,
-    DEFINITION_REG_EXP,
+		DEFINITION_REG_EXP,
 	},
 	"|")
 
@@ -62,11 +62,13 @@ func newToken(kind TokenKind, cur *Token, val string) *Token {
 }
 func splitExpression(expr string) []string {
 	re := regexp.MustCompile(REG_EXP)
-	return re.FindAllString(expr, -1)
+	res := re.FindAllString(expr, -1)
+  log.Debug("splitted expr: %+v", res)
+	return res
 }
 
 // return Token array from string
 func Lex(s string) string {
-	log.Debug(s)
+	log.Debug("original source: %s", s)
 	return s
 }

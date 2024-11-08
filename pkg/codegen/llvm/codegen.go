@@ -16,10 +16,10 @@ func newInt32(s string) *constant.Int {
 
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
-		log.Panic(err, "fail to newInt32: %s")
+		log.Panic("fail to newInt32: %s", err)
 	}
 	res := constant.NewInt(types.I32, i)
-	log.Debug(res, "%#v")
+	log.Debug("%#v", res)
 	return res
 }
 
@@ -29,14 +29,14 @@ func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
 		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
 		if err != nil {
-			log.Panic(map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir}, "fail to make directory: %s")
+			log.Panic("fail to make directory: %s", map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir})
 		}
-		log.Debug(artifactDir, "make dir: %s")
+		log.Debug("make dir: %s", artifactDir)
 
 		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
 	}
-	log.Debug(artifactFilePrefix, "artifactFilePrefix = %s")
-	log.Info(artifactFilePrefix, "persist all of build artifact in %s")
+	log.Debug("artifactFilePrefix = %s", artifactFilePrefix)
+	log.Info("persist all of build artifact in %s", artifactFilePrefix)
 
 	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
 	asmName := fmt.Sprintf("%s.s", artifactFilePrefix)
@@ -48,9 +48,9 @@ func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 func doAsemble(llFile string, asmFile string) {
 	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
 	if err != nil {
-		log.Panic(map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile}, "fail to asemble: %s")
+		log.Panic("fail to asemble: %s", map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile})
 	}
-	log.Debug(asmFile, "written asm: %s")
+	log.Debug("written asm: %s", asmFile)
 }
 func Codegen(s string) *ir.Module {
 	m := ir.NewModule()
@@ -66,16 +66,16 @@ func Codegen(s string) *ir.Module {
 
 func Assemble(node string, workingDirPrefix string, currentTime int64) (string, string) {
 	m := Codegen(node)
-	log.Debug("code generated")
-	log.Debug(m.String(), "IR = \n %s\n")
+	log.DebugMessage("code generated")
+	log.Debug("IR = \n %s\n", m.String())
 
 	llName, asmName, executableName := prepareWorkingFile(workingDirPrefix, currentTime)
 
 	err := os.WriteFile(llName, []byte(m.String()), 0600)
 	if err != nil {
-		log.Panic(map[string]interface{}{"err": err, "llName": llName}, "fail to write ll: %s")
+		log.Panic("fail to write ll: %s", map[string]interface{}{"err": err, "llName": llName})
 	}
-	log.Debug(llName, "written ll: %s")
+	log.Debug("written ll: %s", llName)
 	doAsemble(llName, asmName)
 
 	return asmName, executableName
