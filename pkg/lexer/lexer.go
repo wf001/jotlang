@@ -63,7 +63,7 @@ func newToken(kind TokenKind, cur *Token, val string) *Token {
 func splitExpression(expr string) []string {
 	re := regexp.MustCompile(REG_EXP)
 	res := re.FindAllString(expr, -1)
-  log.Debug("splitted expr: %+v", res)
+	log.Debug("splitted expr: %+v", res)
 	return res
 }
 

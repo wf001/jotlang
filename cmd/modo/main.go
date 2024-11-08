@@ -38,7 +38,7 @@ func showOpts(cmd string) {
 	m["exec"] = *runExec
 	m["debug"] = *appDebug
 	m["verbose"] = *appVerbose
-	log.Debug( "options = %#+v", m)
+	log.Debug("options = %#+v", m)
 }
 
 func setLogLevel() {

@@ -53,9 +53,9 @@ func TestParseIfNumber(t *testing.T) {
 		[]string{
 			"(", "defn", "f", "[", "arg", "]", "(", "let", "[", "x", "1", "y", "3", "]",
 			"(", "if", "x", ">", "1", "(", "2", "+", "y", ")", "(", "4", "-", "5", ")",
-			")",")",")",
+			")", ")", ")",
 		},
-    splitExpression("(defn f [arg] (let [x 1 y 3] (if x>1 (2+y) (4-5))))"),
+		splitExpression("(defn f [arg] (let [x 1 y 3] (if x>1 (2+y) (4-5))))"),
 	)
 	t.Log(REG_EXP)
 }
