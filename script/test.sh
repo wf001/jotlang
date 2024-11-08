@@ -11,7 +11,7 @@ assert() {
   expected="$1"
   input="$2"
 
-  ./modo run -o "$dir/out" --exec "$input"
+  ./generated/test/modo run -o "$dir/out" --exec "$input"
 
   actual="$?"
 
@@ -30,7 +30,7 @@ assert() {
 
 build-compiler(){
   mkdir -p "$dir"
-  go build ./cmd/modo
+  go build -o ./generated/test/modo ./cmd/modo 
 }
 
 summary(){
