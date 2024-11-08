@@ -21,5 +21,12 @@ run:
 	@echo "----------------------\n"
 
 
-test:
+test-all:
+	make test-compiler
+	make test-go
+
+test-compiler:
+	./script/test.sh
+
+test-go:
 	go test -v ./...
