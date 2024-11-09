@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseIfNumber(t *testing.T) {
+func TestSplitExpression(t *testing.T) {
 	assert.ElementsMatch(t, []string{}, splitExpression(""))
 	assert.ElementsMatch(t, []string{"1"}, splitExpression("1"))
 	assert.ElementsMatch(t, []string{"123", "+", "45"}, splitExpression("123+45"))
