@@ -66,19 +66,22 @@ func splitExpression(expr string) []string {
 }
 
 func doLexicalAnalyse(expr []string) *types.Token {
-	token := new(types.Token)
-	curToken := new(types.Token)
-	head := curToken
+	cur := new(types.Token)
+	head := cur
+	next := new(types.Token)
 
 	for _, e := range expr {
 		if isInteger(e) {
-			token = newToken(types.TK_NUM, curToken, e)
-			curToken = token
+			next = newToken(types.TK_NUM, cur, e)
+			cur = next
 		} else if isBinaryOperator(e) {
-			token = newToken(types.TK_OPERATOR, curToken, e)
-			curToken = token
+			next = newToken(types.TK_OPERATOR, cur, e)
+			cur = next
+		} else {
+			log.Panic("include invalid signature")
 		}
 	}
+	head = head.Next
 	log.DebugToken(head)
 	return head
 }

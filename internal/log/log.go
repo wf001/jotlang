@@ -34,8 +34,9 @@ func BLUE(body string) string {
 }
 
 func DebugToken(tok *types.Token) {
+	Debug(BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {
-		Debug(BLUE(fmt.Sprintf("token: %p %#+v", tok, tok)))
+		Debug(BLUE(fmt.Sprintf("\t %p %#+v", tok, tok)))
 	}
 }
 
@@ -90,11 +91,8 @@ func Panic(format string, value ...interface{}) {
 
 func init() {
 	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.WarnLevel)
-	logrus.SetFormatter(&logrus.TextFormatter{
-		DisableTimestamp:       true,
-		DisableLevelTruncation: true,
-	})
+	SetLevelWarning()
+	SetFormatter()
 }
 
 func SetOutputFile(fileName string) {
@@ -104,6 +102,13 @@ func SetOutputFile(fileName string) {
 	}
 	logrus.SetOutput(f)
 	defer f.Close()
+}
+
+func SetFormatter() {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableTimestamp:       true,
+		DisableLevelTruncation: true,
+	})
 }
 
 func SetLevelError() {
