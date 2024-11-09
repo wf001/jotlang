@@ -16,7 +16,7 @@ build:
 
 run:
 	@echo "----------------------\n"
-	./modo run --debug --exec "1"
+	./modo run --debug --exec "1+2"
 	@echo $?
 	@echo "----------------------\n"
 

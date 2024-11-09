@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/wf001/modo/internal/log"
+	"github.com/wf001/modo/pkg/types"
 )
 
 var FRACTIONAL_REG_EXP = `\d+\.\d+`
@@ -23,52 +24,69 @@ var RESERVED_REG_EXP = strings.Join(
 		BRANCH_REG_EXP,
 		DEFINITION_REG_EXP,
 	},
-	"|")
+	"|",
+)
 
-var REG_EXP = fmt.Sprintf(
+var ALL_REG_EXP = fmt.Sprintf(
 	"%s",
-	strings.Join([]string{
-		FRACTIONAL_REG_EXP,
-		INTEGER_REG_EXP,
-		RESERVED_REG_EXP,
-		BINARY_OPERATORS_REG_EXP,
-		PARREN_REG_EXP,
-		USER_DEFINED_REG_EXP,
-	}, "|"),
+	strings.Join(
+		[]string{
+			FRACTIONAL_REG_EXP,
+			INTEGER_REG_EXP,
+			RESERVED_REG_EXP,
+			BINARY_OPERATORS_REG_EXP,
+			PARREN_REG_EXP,
+			USER_DEFINED_REG_EXP,
+		},
+		"|",
+	),
 )
 
-type TokenKind = int
-
-const (
-	TK_NUM TokenKind = iota + 1
-	TK_OPERATOR
-)
-
-type ModoToken struct {
+func isInteger(s string) bool {
+	re := regexp.MustCompile(INTEGER_REG_EXP)
+	return re.MatchString(s)
+}
+func isBinaryOperator(s string) bool {
+	re := regexp.MustCompile(BINARY_OPERATORS_REG_EXP)
+	return re.MatchString(s)
 }
 
-type Token struct {
-	Kind TokenKind
-	Next *Token
-	Val  string
-}
-
-func newToken(kind TokenKind, cur *Token, val string) *Token {
-	tok := new(Token)
+func newToken(kind types.TokenKind, cur *types.Token, val string) *types.Token {
+	tok := new(types.Token)
 	tok.Kind = kind
 	tok.Val = val
 	cur.Next = tok
 	return tok
 }
 func splitExpression(expr string) []string {
-	re := regexp.MustCompile(REG_EXP)
+	re := regexp.MustCompile(ALL_REG_EXP)
 	res := re.FindAllString(expr, -1)
-	log.Debug("splitted expr: %+v", res)
+	log.Debug("splitted expr: %#+v", res)
 	return res
+}
+
+func doLexicalAnalyse(expr []string) *types.Token {
+	token := new(types.Token)
+	curToken := new(types.Token)
+	head := curToken
+
+	for _, e := range expr {
+		if isInteger(e) {
+			token = newToken(types.TK_NUM, curToken, e)
+			curToken = token
+		} else if isBinaryOperator(e) {
+			token = newToken(types.TK_OPERATOR, curToken, e)
+			curToken = token
+		}
+	}
+	log.DebugToken(head)
+	return head
 }
 
 // return Token array from string
 func Lex(s string) string {
 	log.Debug("original source: %s", s)
+	arr := splitExpression(s)
+	_ = doLexicalAnalyse(arr)
 	return s
 }

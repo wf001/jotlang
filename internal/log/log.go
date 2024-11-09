@@ -1,11 +1,13 @@
 package log
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"runtime"
 
 	"github.com/sirupsen/logrus"
+	"github.com/wf001/modo/pkg/types"
 )
 
 var DEFAULT_FORMAT = "%+v"
@@ -25,6 +27,16 @@ func getLogrus() *logrus.Entry {
 		"file": file,
 		"line": line,
 	})
+}
+
+func BLUE(body string) string {
+	return fmt.Sprintf("\x1b[36m%s\x1b[0m", body)
+}
+
+func DebugToken(tok *types.Token) {
+	for ; tok != nil; tok = tok.Next {
+		Debug(BLUE(fmt.Sprintf("token: %p %#+v", tok, tok)))
+	}
 }
 
 func DebugMessage(message string) {
