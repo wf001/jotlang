@@ -92,8 +92,7 @@ func init() {
 	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(logrus.WarnLevel)
 	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors:            true,
-		FullTimestamp:          true,
+		DisableTimestamp:       true,
 		DisableLevelTruncation: true,
 	})
 }
