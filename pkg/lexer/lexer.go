@@ -12,7 +12,7 @@ import (
 var FRACTIONAL_REG_EXP = `\d+\.\d+`
 var INTEGER_REG_EXP = `\d+`
 var BINARY_OPERATORS_REG_EXP = `[+\-*/<>]`
-var PARREN_REG_EXP = `[()[\]{}"]`
+var PARREN_REG_EXP = `[()[\]{}"]` // paren, bracket, brace
 var USER_DEFINED_REG_EXP = `\w+`
 
 var THREADING_REG_EXP = `->|->>`
@@ -46,6 +46,10 @@ func isInteger(s string) bool {
 	re := regexp.MustCompile(INTEGER_REG_EXP)
 	return re.MatchString(s)
 }
+func isParen(s string) bool {
+	re := regexp.MustCompile(PARREN_REG_EXP)
+	return re.MatchString(s)
+}
 func isBinaryOperator(s string) bool {
 	re := regexp.MustCompile(BINARY_OPERATORS_REG_EXP)
 	return re.MatchString(s)
@@ -77,19 +81,21 @@ func doLexicalAnalyse(expr []string) *types.Token {
 		} else if isBinaryOperator(e) {
 			next = newToken(types.TK_OPERATOR, cur, e)
 			cur = next
+		} else if isParen(e) {
+			next = newToken(types.TK_PAREN, cur, e)
+			cur = next
 		} else {
-			log.Panic("include invalid signature")
+			log.Panic("include invalid signature: have '%+v'", e)
 		}
 	}
 	head = head.Next
-	log.DebugToken(head)
+	log.DebugTokens(head)
 	return head
 }
 
 // return Token array from string
-func Lex(s string) string {
+func Lex(s string) *types.Token {
 	log.Debug("original source: %s", s)
 	arr := splitExpression(s)
-	_ = doLexicalAnalyse(arr)
-	return s
+	return doLexicalAnalyse(arr)
 }

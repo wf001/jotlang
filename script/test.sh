@@ -40,8 +40,8 @@ summary(){
 }
 
 testit(){
-  assert 4 '4'
-  assert 117 '117'
+  assert 17 '(+ 4 13)'
+  assert 17 '(17)'
 }
 
 build-compiler

@@ -9,7 +9,9 @@ import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
+	"github.com/llir/llvm/ir/value"
 	"github.com/wf001/modo/internal/log"
+	modoTypes "github.com/wf001/modo/pkg/types"
 )
 
 func newInt32(s string) *constant.Int {
@@ -52,7 +54,19 @@ func doAsemble(llFile string, asmFile string) {
 	}
 	log.Debug("written asm: %s", asmFile)
 }
-func Codegen(s string) *ir.Module {
+func Codegen(mb *ir.Block, node *modoTypes.Node) value.Value {
+	switch node.Kind {
+	case modoTypes.ND_INT:
+		return newInt32(node.Val)
+	case modoTypes.ND_ADD:
+		rhs := Codegen(mb, node.Lhs)
+		lhs := Codegen(mb, node.Rhs)
+		return mb.NewAdd(lhs, rhs)
+	}
+	return nil
+}
+
+func Assemble(node *modoTypes.Node, workingDirPrefix string, currentTime int64) (string, string) {
 	m := ir.NewModule()
 	funcMain := m.NewFunc(
 		"main",
@@ -60,12 +74,9 @@ func Codegen(s string) *ir.Module {
 	)
 	mb := funcMain.NewBlock("")
 
-	mb.NewRet(newInt32(s))
-	return m
-}
+	res := Codegen(mb, node)
+	mb.NewRet(res)
 
-func Assemble(node string, workingDirPrefix string, currentTime int64) (string, string) {
-	m := Codegen(node)
 	log.DebugMessage("code generated")
 	log.Debug("IR = \n %s\n", m.String())
 
@@ -76,30 +87,9 @@ func Assemble(node string, workingDirPrefix string, currentTime int64) (string, 
 		log.Panic("fail to write ll: %s", map[string]interface{}{"err": err, "llName": llName})
 	}
 	log.Debug("written ll: %s", llName)
+
 	doAsemble(llName, asmName)
 
 	return asmName, executableName
 
 }
-
-// func Codegen(s string) *ir.Module {
-// 	m := ir.NewModule()
-//
-// 	globalG := m.NewGlobalDef("g", constant.NewInt(types.I32, 58))
-//
-// 	funcAdd := m.NewFunc("add", types.I32,
-// 		ir.NewParam("x", types.I32),
-// 		ir.NewParam("y", types.I32),
-// 	)
-// 	ab := funcAdd.NewBlock("")
-// 	ab.NewRet(ab.NewAdd(funcAdd.Params[0], funcAdd.Params[1]))
-//
-// 	funcMain := m.NewFunc(
-// 		"main",
-// 		types.I32,
-// 	) // omit parameters
-// 	mb := funcMain.NewBlock("") // llir/llvm would give correct default name for block without name
-// 	mb.NewRet(mb.NewCall(funcAdd, constant.NewInt(types.I32, 59), mb.NewLoad(types.I32, globalG)))
-// 	return m
-//
-// }

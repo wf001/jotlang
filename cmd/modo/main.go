@@ -76,11 +76,11 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	log.Debug("code lexed token: %#+v", token)
 
 	// Token -> Node
-	parser.Parse(token)
+	node := parser.Parse(token)
 	log.DebugMessage("code parsed")
 
 	// Node -> LLVM IR -> write assembly
-	asmName, executableName := codegen.Assemble(token, workingDirPrefix, currentTime)
+	asmName, executableName := codegen.Assemble(node, workingDirPrefix, currentTime)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)

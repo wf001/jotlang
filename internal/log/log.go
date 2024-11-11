@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/wf001/modo/pkg/types"
@@ -32,16 +33,31 @@ func getLogrus() *logrus.Entry {
 func BLUE(body string) string {
 	return fmt.Sprintf("\x1b[36m%s\x1b[0m", body)
 }
+func GREEN(body string) string {
+	return fmt.Sprintf("\x1b[32m%s\x1b[0m", body)
+}
 
-func DebugToken(tok *types.Token) {
+func DebugTokens(tok *types.Token) {
 	Debug(BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {
 		Debug(BLUE(fmt.Sprintf("\t %p %#+v", tok, tok)))
 	}
 }
 
+func DebugNode(node *types.Node, depth int) {
+	Debug(BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
+
+	for ; node != nil; node = node.Next {
+		switch node.Kind {
+		case types.ND_ADD:
+			DebugNode(node.Lhs, depth+1)
+			DebugNode(node.Rhs, depth+1)
+		}
+	}
+}
+
 func DebugMessage(message string) {
-	Debug("", message)
+	Debug("", GREEN(message))
 }
 
 func Debug(format string, value ...interface{}) {
