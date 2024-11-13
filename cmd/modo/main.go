@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"os"
 	"os/exec"
 	"time"
@@ -26,8 +27,9 @@ var (
 
 	buildCmd = app.Command("build", "Build an executable.")
 
-	runCmd  = app.Command("run", "Build and run an executable.")
-	runExec = runCmd.Flag("exec", "evaluate <EXEC>").String()
+	runCmd    = app.Command("run", "Build and run an executable.")
+	runExec   = runCmd.Flag("exec", "evaluate <EXEC>").String()
+	inputFile = runCmd.Arg("file", "source file").String()
 )
 
 func showOpts(cmd string) {
@@ -38,6 +40,7 @@ func showOpts(cmd string) {
 	m["exec"] = *runExec
 	m["debug"] = *appDebug
 	m["verbose"] = *appVerbose
+	m["inputFile"] = *inputFile
 	log.Debug("options = %#+v", m)
 }
 
@@ -97,15 +100,28 @@ func doRun(workingDirPrefix string, evaluatee string) int {
 }
 
 func main() {
+	log.Warn("%#+v", os.Args[1:])
 	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	setLogLevel()
 	showOpts(cmd)
+	data, _ := os.Open(*inputFile)
+	defer data.Close()
+	scanner := bufio.NewScanner(data)
+	var input_arr = ""
+	for scanner.Scan() {
+		input_arr += scanner.Text()
+	}
+	arg := input_arr
+	log.Warn("%#+v", arg)
 
 	switch cmd {
 
 	case runCmd.FullCommand():
-		status := doRun(*appOutput, *runExec)
-		os.Exit(status)
+		if *runExec != "" {
+			os.Exit(doRun(*appOutput, *runExec))
+		} else {
+			os.Exit(doRun(*appOutput, arg))
+		}
 	}
 }
