@@ -47,6 +47,8 @@ testit(){
   assert 35 '(+ 1 2 3 4 5 20)'
   assert 10 '(+ 1 2 (+ 3 4))'
   assert 10 '(+ (+ 1 2) (+ 3 4))'
+  assert 21 '(+ (+ 1 2) (+ (+ 9 5) 4))'
+  assert 39 '(+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8))'
 }
 
 build-compiler

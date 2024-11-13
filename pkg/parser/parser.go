@@ -52,7 +52,6 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 
 // return Node object from Token array
 func Parse(tok *types.Token) *types.Node {
-	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	_, node := expr(tok)
 	log.DebugNode(node, 0)
 

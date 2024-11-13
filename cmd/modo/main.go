@@ -76,7 +76,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	currentTime := time.Now().Unix()
 	// string -> Token
 	token := lexer.Lex(evaluatee)
-	log.Debug("code lexed token: %#+v", token)
+	log.DebugMessage("code lexed ")
 
 	// Token -> Node
 	node := parser.Parse(token)

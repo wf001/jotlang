@@ -13,23 +13,6 @@ import (
 
 var DEFAULT_FORMAT = "%+v"
 
-func getCaller() (string, string, int) {
-	pc, file, line, _ := runtime.Caller(3)
-	files := regexp.MustCompile("[/]").Split(file, -1)
-	funcName := regexp.MustCompile("[/]").Split(runtime.FuncForPC(pc).Name(), -1)
-
-	return funcName[len(funcName)-1], files[len(files)-1], line
-}
-func getLogrus() *logrus.Entry {
-	funcName, file, line := getCaller()
-
-	return logrus.WithFields(logrus.Fields{
-		"func": funcName,
-		"file": file,
-		"line": line,
-	})
-}
-
 const (
 	FgBlack int = iota + 30
 	FgRed
@@ -40,6 +23,23 @@ const (
 	FgCyan
 	FgWhite
 )
+
+func getCaller() (string, string, int) {
+	pc, file, line, _ := runtime.Caller(4)
+	files := regexp.MustCompile("[/]").Split(file, -1)
+	funcName := regexp.MustCompile("[/]").Split(runtime.FuncForPC(pc).Name(), -1)
+
+	return funcName[len(funcName)-1], files[len(files)-1], line
+}
+func logrusWithField() *logrus.Entry {
+	funcName, file, line := getCaller()
+
+	return logrus.WithFields(logrus.Fields{
+		"func": funcName,
+		"file": file,
+		"line": line,
+	})
+}
 
 func BLUE(body string) string {
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", FgCyan, body)
@@ -54,7 +54,7 @@ func YELLOW(body string) string {
 func DebugTokens(tok *types.Token) {
 	Debug(BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {
-		Debug(BLUE(fmt.Sprintf("\t %p %#+v", tok, tok)))
+		debug(BLUE(fmt.Sprintf("\t %p %#+v", tok, tok)))
 	}
 }
 
@@ -62,7 +62,7 @@ func DebugNode(node *types.Node, depth int) {
 	if node == nil {
 		return
 	}
-	Debug(BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
+	debug(BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
 
 	switch node.Kind {
 	case types.ND_INT:
@@ -70,19 +70,25 @@ func DebugNode(node *types.Node, depth int) {
 	case types.ND_ADD:
 		DebugNode(node.Child, depth+1)
 	}
+	if node.Next != nil && node.Kind != types.ND_INT {
+		DebugNode(node.Next, depth)
+	}
 }
 
 func DebugMessage(message string) {
-	Debug("", YELLOW(message))
+	debug("", YELLOW(message))
 }
 
 func Debug(format string, value ...interface{}) {
+	debug(format, value...)
+}
+
+func debug(format string, value ...interface{}) {
 	defaultFormat := DEFAULT_FORMAT
 	if format == "" {
 		format = defaultFormat
 	}
-
-	getLogrus().Debugf(format, value...)
+	logrusWithField().Debugf(format, value...)
 }
 
 func Info(format string, value ...interface{}) {

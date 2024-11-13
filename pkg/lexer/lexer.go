@@ -65,7 +65,7 @@ func newToken(kind types.TokenKind, cur *types.Token, val string) *types.Token {
 func splitExpression(expr string) []string {
 	re := regexp.MustCompile(ALL_REG_EXP)
 	res := re.FindAllString(expr, -1)
-	log.Debug("splitted expr: %#+v", res)
+	log.Debug(log.YELLOW("splitted expr: %#+v"), res)
 	return res
 }
 
@@ -95,7 +95,7 @@ func doLexicalAnalyse(expr []string) *types.Token {
 
 // return Token array from string
 func Lex(s string) *types.Token {
-	log.Debug("original source: %s", s)
+	log.Debug(log.YELLOW("original source: '%s'"), s)
 	arr := splitExpression(s)
 	return doLexicalAnalyse(arr)
 }

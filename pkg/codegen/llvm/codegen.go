@@ -21,7 +21,6 @@ func newInt32(s string) *constant.Int {
 		log.Panic("fail to newInt32: %s", err)
 	}
 	res := constant.NewInt(types.I32, i)
-	log.Debug("%#v", res)
 	return res
 }
 
@@ -33,11 +32,11 @@ func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 		if err != nil {
 			log.Panic("fail to make directory: %s", map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir})
 		}
-		log.Debug("make dir: %s", artifactDir)
+		log.Debug(log.YELLOW("make dir: %s"), artifactDir)
 
 		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
 	}
-	log.Debug("artifactFilePrefix = %s", artifactFilePrefix)
+	log.Debug(log.YELLOW("artifactFilePrefix = %s"), artifactFilePrefix)
 	log.Info("persist all of build artifact in %s", artifactFilePrefix)
 
 	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
