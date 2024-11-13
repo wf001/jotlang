@@ -98,6 +98,10 @@ func (tok *Token) IsOperationAdd() bool {
 	return tok.Kind == TK_OPERATOR && tok.Val == OPERATOR_ADD
 }
 
+func (tok *Token) IsNum() bool {
+	return tok.Kind == TK_NUM
+}
+
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {

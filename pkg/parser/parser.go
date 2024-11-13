@@ -33,7 +33,7 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 		if tok.IsOperationAdd() {
 			nextToken, childHead := expr(tok.Next)
 			prevNode := childHead
-			for nextToken.Kind == types.TK_NUM || nextToken.Val == "(" {
+			for nextToken.IsNum() || nextToken.IsParenOpen() {
 				nextToken, prevNode.Next = expr(nextToken)
 				prevNode = prevNode.Next
 			}
@@ -50,7 +50,7 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 	return tok, head
 }
 
-// return Node object from Token array
+// take Token object, return Node object
 func Parse(tok *types.Token) *types.Node {
 	_, node := expr(tok)
 	node.DebugNode(0)
