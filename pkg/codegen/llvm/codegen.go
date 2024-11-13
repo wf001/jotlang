@@ -20,8 +20,7 @@ func newInt32(s string) *constant.Int {
 	if err != nil {
 		log.Panic("fail to newInt32: %s", err)
 	}
-	res := constant.NewInt(types.I32, i)
-	return res
+	return constant.NewInt(types.I32, i)
 }
 
 func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, string, string) {
@@ -30,7 +29,7 @@ func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
 		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
 		if err != nil {
-			log.Panic("fail to make directory: %s", map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir})
+			log.Panic("fail to make directory: %+v", map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir})
 		}
 		log.Debug(log.YELLOW("make dir: %s"), artifactDir)
 
@@ -49,7 +48,7 @@ func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 func doAsemble(llFile string, asmFile string) {
 	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
 	if err != nil {
-		log.Panic("fail to asemble: %s", map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile})
+		log.Panic("fail to asemble: %+v", map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile})
 	}
 	log.Debug("written asm: %s", asmFile)
 }
@@ -90,7 +89,7 @@ func Assemble(node *modoTypes.Node, workingDirPrefix string, currentTime int64) 
 
 	err := os.WriteFile(llName, []byte(ir.String()), 0600)
 	if err != nil {
-		log.Panic("fail to write ll: %s", map[string]interface{}{"err": err, "llName": llName})
+		log.Panic("fail to write ll: %+v", map[string]interface{}{"err": err, "llName": llName})
 	}
 	log.Debug("written ll: %s", llName)
 
