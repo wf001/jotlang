@@ -31,13 +31,13 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 	if tok.Val == "(" {
 		tok = tok.Next
 		if tok.Val == "+" {
-			nextTk, childHead := expr(tok.Next)
+			nextToken, childHead := expr(tok.Next)
 			prevNode := childHead
-			for nextTk.Kind == types.TK_NUM {
-				nextTk, prevNode.Next = expr(nextTk)
+			for nextToken.Kind == types.TK_NUM || nextToken.Val == "(" {
+				nextToken, prevNode.Next = expr(nextToken)
 				prevNode = prevNode.Next
 			}
-			tok = nextTk
+			tok = nextToken
 			head = newNode(types.ND_ADD, childHead)
 		}
 		if tok.Val != ")" {

@@ -112,7 +112,6 @@ func main() {
 		input_arr += scanner.Text()
 	}
 	arg := input_arr
-	log.Warn("%#+v", arg)
 
 	switch cmd {
 

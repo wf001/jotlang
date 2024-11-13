@@ -1,7 +1,7 @@
 #!/bin/bash
 
 dir="generated/test/$(date +%s)"
-msg="OK"
+msg="\033[0;32mOK\033[0m"
 code=0
 total_tests=0
 passed_count=0
@@ -23,7 +23,7 @@ assert() {
   else
     ((failed_count++))
     echo -e "\033[0;31m$input => $expected expected, but got $actual\033[0m"
-    msg="NG"
+    msg="\033[0;31mNG\033[0m"
     code=-1
   fi
 }
@@ -44,6 +44,9 @@ testit(){
   assert 17 '(+ 4 13)'
   assert 6 '(+ 1 2 3)'
   assert 20 '(+ 1 2 3 4 10)'
+  assert 35 '(+ 1 2 3 4 5 20)'
+  assert 10 '(+ 1 2 (+ 3 4))'
+  assert 10 '(+ (+ 1 2) (+ 3 4))'
 }
 
 build-compiler

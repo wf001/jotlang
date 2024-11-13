@@ -50,13 +50,11 @@ func DebugNode(node *types.Node, depth int) {
 	}
 	Debug(BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
 
-	for ; node != nil; node = node.Next {
-		switch node.Kind {
-		case types.ND_INT:
-			DebugNode(node.Next, depth)
-		case types.ND_ADD:
-			DebugNode(node.Child, depth+1)
-		}
+	switch node.Kind {
+	case types.ND_INT:
+		DebugNode(node.Next, depth)
+	case types.ND_ADD:
+		DebugNode(node.Child, depth+1)
 	}
 }
 
