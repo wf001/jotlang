@@ -53,7 +53,7 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 // return Node object from Token array
 func Parse(tok *types.Token) *types.Node {
 	_, node := expr(tok)
-	log.DebugNode(node, 0)
+	node.DebugNode(0)
 
 	return node
 }

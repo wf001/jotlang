@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	"github.com/wf001/modo/internal/log"
 )
 
 // ########
@@ -94,17 +96,24 @@ func (tok *Token) IsOperationAdd() bool {
 	return tok.Kind == TK_OPERATOR && tok.Val == OPERATOR_ADD
 }
 
+func (tok *Token) DebugTokens() {
+	log.Debug(log.BLUE("[token]"))
+	for ; tok != nil; tok = tok.Next {
+		log.Debug(log.BLUE(fmt.Sprintf("\t %p %#+v", tok, tok)))
+	}
+}
+
 // ########
 // Node
 // ########
 type NodeKind string
 
 const (
-	ND_ADD = NodeKind("ND_KIND_ADD") // +
-	ND_SUB = NodeKind("ND_SUB")      // -
-	ND_MUL = NodeKind("ND_MUL")      // *
-	ND_DIV = NodeKind("ND_DIV")      // /
-	ND_INT = NodeKind("ND_INT")      // /
+	ND_ADD = NodeKind("ND_ADD") // +
+	ND_SUB = NodeKind("ND_SUB") // -
+	ND_MUL = NodeKind("ND_MUL") // *
+	ND_DIV = NodeKind("ND_DIV") // /
+	ND_INT = NodeKind("ND_INT") // 0-9
 )
 
 type Node struct {
@@ -120,4 +129,21 @@ type Node struct {
 	Func  string
 	Args  *Node
 	Val   string
+}
+
+func (node *Node) DebugNode(depth int) {
+	if node == nil {
+		return
+	}
+	log.Debug(log.BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
+
+	switch node.Kind {
+	case ND_INT:
+		node.Next.DebugNode(depth)
+	case ND_ADD:
+		node.Child.DebugNode(depth + 1)
+	}
+	if node.Next != nil && node.Kind != ND_INT {
+		node.Next.DebugNode(depth)
+	}
 }

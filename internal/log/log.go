@@ -5,10 +5,8 @@ import (
 	"os"
 	"regexp"
 	"runtime"
-	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wf001/modo/pkg/types"
 )
 
 var DEFAULT_FORMAT = "%+v"
@@ -49,30 +47,6 @@ func GREEN(body string) string {
 }
 func YELLOW(body string) string {
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", FgYellow, body)
-}
-
-func DebugTokens(tok *types.Token) {
-	Debug(BLUE("[token]"))
-	for ; tok != nil; tok = tok.Next {
-		debug(BLUE(fmt.Sprintf("\t %p %#+v", tok, tok)))
-	}
-}
-
-func DebugNode(node *types.Node, depth int) {
-	if node == nil {
-		return
-	}
-	debug(BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
-
-	switch node.Kind {
-	case types.ND_INT:
-		DebugNode(node.Next, depth)
-	case types.ND_ADD:
-		DebugNode(node.Child, depth+1)
-	}
-	if node.Next != nil && node.Kind != types.ND_INT {
-		DebugNode(node.Next, depth)
-	}
 }
 
 func DebugMessage(message string) {

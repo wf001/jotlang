@@ -55,7 +55,7 @@ func doLexicalAnalyse(splittedProgram []string) *types.Token {
 		}
 	}
 	head = head.Next
-	log.DebugTokens(head)
+	head.DebugTokens()
 	return head
 }
 
