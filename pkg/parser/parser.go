@@ -28,9 +28,9 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 	if tok.Kind == types.TK_EOL {
 		return tok, nil
 	}
-	if tok.Val == "(" {
+	if tok.IsParenOpen() {
 		tok = tok.Next
-		if tok.Val == "+" {
+		if tok.IsOperationAdd() {
 			nextToken, childHead := expr(tok.Next)
 			prevNode := childHead
 			for nextToken.Kind == types.TK_NUM || nextToken.Val == "(" {
@@ -40,7 +40,7 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 			tok = nextToken
 			head = newNode(types.ND_ADD, childHead)
 		}
-		if tok.Val != ")" {
+		if !tok.IsParenClose() {
 			log.Panic("must be ) :have %+v", tok)
 		}
 		return tok.Next, head

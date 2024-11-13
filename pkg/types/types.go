@@ -1,5 +1,14 @@
 package types
 
+import (
+	"fmt"
+	"strings"
+)
+
+// ########
+// Token
+// ########
+
 type TokenKind = string
 
 const (
@@ -15,6 +24,79 @@ type Token struct {
 	Val  string
 }
 
+var (
+	FRACTIONAL_REG_EXP = `\d+\.\d+`
+	INTEGER_REG_EXP    = `\d+`
+
+	PARREN_OPEN      = "("
+	PARREN_CLOSE     = ")"
+	BRACKET_OPEN     = "["
+	BRACKET_CLOSE    = "]"
+	BRACE_OPEN       = "{"
+	BRACE_CLOSE      = "}"
+	BRACKETS_REG_EXP = fmt.Sprintf("[%s%s%s\\%s%s%s]", PARREN_OPEN, PARREN_CLOSE, BRACKET_OPEN, BRACKET_CLOSE, BRACE_OPEN, BRACE_CLOSE)
+
+	OPERATOR_ADD      = "+"
+	OPERATOR_SUB      = "-"
+	OPERATOR_MUL      = "*"
+	OPERATOR_DIV      = "/"
+	OPERATOR_LT       = "<"
+	OPERATOR_GT       = ">"
+	OPERATORS_REG_EXP = fmt.Sprintf("[%s\\%s%s%s%s%s]", OPERATOR_ADD, OPERATOR_SUB, OPERATOR_MUL, OPERATOR_DIV, OPERATOR_LT, OPERATOR_GT)
+
+	THREADING_FIRST   = "->"
+	THREADING_LAST    = "->>"
+	THREADING_REG_EXP = fmt.Sprintf("%s|%s", THREADING_FIRST, THREADING_LAST)
+
+	EXPR_IF        = "if"
+	EXPR_COND      = "cond"
+	BRANCH_REG_EXP = fmt.Sprintf("\\b(%s|%s)\\b", EXPR_IF, EXPR_COND)
+
+	EXPR_DEF           = "def"
+	EXPR_DEFN          = "defn"
+	EXPR_LET           = "let"
+	DEFINITION_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s)\\b", EXPR_DEF, EXPR_DEFN, EXPR_LET)
+
+	RESERVED_REG_EXP = strings.Join(
+		[]string{
+			THREADING_REG_EXP,
+			BRANCH_REG_EXP,
+			DEFINITION_REG_EXP,
+		},
+		"|",
+	)
+
+	USER_DEFINED_REG_EXP = `\w+`
+
+	ALL_REG_EXP = fmt.Sprintf(
+		"%s",
+		strings.Join(
+			[]string{
+				FRACTIONAL_REG_EXP,
+				INTEGER_REG_EXP,
+				RESERVED_REG_EXP,
+				OPERATORS_REG_EXP,
+				BRACKETS_REG_EXP,
+				USER_DEFINED_REG_EXP,
+			},
+			"|",
+		),
+	)
+)
+
+func (tok *Token) IsParenOpen() bool {
+	return tok.Kind == TK_PAREN && tok.Val == PARREN_OPEN
+}
+func (tok *Token) IsParenClose() bool {
+	return tok.Kind == TK_PAREN && tok.Val == PARREN_CLOSE
+}
+func (tok *Token) IsOperationAdd() bool {
+	return tok.Kind == TK_OPERATOR && tok.Val == OPERATOR_ADD
+}
+
+// ########
+// Node
+// ########
 type NodeKind string
 
 const (
