@@ -30,11 +30,25 @@ func getLogrus() *logrus.Entry {
 	})
 }
 
+const (
+	FgBlack int = iota + 30
+	FgRed
+	FgGreen
+	FgYellow
+	FgBlue
+	FgMagenta
+	FgCyan
+	FgWhite
+)
+
 func BLUE(body string) string {
-	return fmt.Sprintf("\x1b[36m%s\x1b[0m", body)
+	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", FgCyan, body)
 }
 func GREEN(body string) string {
-	return fmt.Sprintf("\x1b[32m%s\x1b[0m", body)
+	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", FgGreen, body)
+}
+func YELLOW(body string) string {
+	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", FgYellow, body)
 }
 
 func DebugTokens(tok *types.Token) {
@@ -59,7 +73,7 @@ func DebugNode(node *types.Node, depth int) {
 }
 
 func DebugMessage(message string) {
-	Debug("", GREEN(message))
+	Debug("", YELLOW(message))
 }
 
 func Debug(format string, value ...interface{}) {
