@@ -89,9 +89,11 @@ var (
 func (tok *Token) IsParenOpen() bool {
 	return tok.Kind == TK_PAREN && tok.Val == PARREN_OPEN
 }
+
 func (tok *Token) IsParenClose() bool {
 	return tok.Kind == TK_PAREN && tok.Val == PARREN_CLOSE
 }
+
 func (tok *Token) IsOperationAdd() bool {
 	return tok.Kind == TK_OPERATOR && tok.Val == OPERATOR_ADD
 }
@@ -135,7 +137,16 @@ func (node *Node) DebugNode(depth int) {
 	if node == nil {
 		return
 	}
-	log.Debug(log.BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
+	log.Debug(
+		log.BLUE(
+			fmt.Sprintf(
+				"%s %p %#+v %#+v",
+				strings.Repeat("\t", depth),
+				node,
+				node.Kind,
+				node.Val),
+		),
+	)
 
 	switch node.Kind {
 	case ND_INT:

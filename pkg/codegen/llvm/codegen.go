@@ -8,10 +8,11 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
-	"github.com/llir/llvm/ir/types"
+	llirTypes "github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
+
 	"github.com/wf001/modo/internal/log"
-	modoTypes "github.com/wf001/modo/pkg/types"
+	"github.com/wf001/modo/pkg/types"
 )
 
 func newInt32(s string) *constant.Int {
@@ -20,7 +21,7 @@ func newInt32(s string) *constant.Int {
 	if err != nil {
 		log.Panic("fail to newInt32: %s", err)
 	}
-	return constant.NewInt(types.I32, i)
+	return constant.NewInt(llirTypes.I32, i)
 }
 
 func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, string, string) {
@@ -52,11 +53,11 @@ func doAsemble(llFile string, asmFile string) {
 	}
 	log.Debug("written asm: %s", asmFile)
 }
-func Codegen(mb *ir.Block, node *modoTypes.Node) value.Value {
+func Codegen(mb *ir.Block, node *types.Node) value.Value {
 	switch node.Kind {
-	case modoTypes.ND_INT:
+	case types.ND_INT:
 		return newInt32(node.Val)
-	case modoTypes.ND_ADD:
+	case types.ND_ADD:
 		fst := Codegen(mb, node.Child)
 		snd := Codegen(mb, node.Child.Next)
 		res := mb.NewAdd(fst, snd)
@@ -71,11 +72,11 @@ func Codegen(mb *ir.Block, node *modoTypes.Node) value.Value {
 	return nil
 }
 
-func Assemble(node *modoTypes.Node, workingDirPrefix string, currentTime int64) (string, string) {
+func Assemble(node *types.Node, workingDirPrefix string, currentTime int64) (string, string) {
 	ir := ir.NewModule()
 	funcMain := ir.NewFunc(
 		"main",
-		types.I32,
+		llirTypes.I32,
 	)
 	llBlock := funcMain.NewBlock("")
 
