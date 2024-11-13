@@ -45,13 +45,17 @@ func DebugTokens(tok *types.Token) {
 }
 
 func DebugNode(node *types.Node, depth int) {
+	if node == nil {
+		return
+	}
 	Debug(BLUE(fmt.Sprintf("%s %p %#+v %#+v", strings.Repeat("\t", depth), node, node.Kind, node.Val)))
 
 	for ; node != nil; node = node.Next {
 		switch node.Kind {
+		case types.ND_INT:
+			DebugNode(node.Next, depth)
 		case types.ND_ADD:
-			DebugNode(node.Lhs, depth+1)
-			DebugNode(node.Rhs, depth+1)
+			DebugNode(node.Child, depth+1)
 		}
 	}
 }

@@ -26,17 +26,16 @@ const (
 )
 
 type Node struct {
-	Kind NodeKind
-	Next *Node
-	Lhs  *Node
-	Rhs  *Node
-	Cond *Node
-	Then *Node
-	Else *Node
-	Init *Node
-	Inc  *Node
-	Body *Node
-	Func string
-	Args *Node
-	Val  string
+	Kind  NodeKind
+	Next  *Node
+	Child *Node
+	Cond  *Node
+	Then  *Node
+	Else  *Node
+	Init  *Node
+	Inc   *Node
+	Body  *Node
+	Func  string
+	Args  *Node
+	Val   string
 }

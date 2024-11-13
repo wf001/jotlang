@@ -100,7 +100,6 @@ func doRun(workingDirPrefix string, evaluatee string) int {
 }
 
 func main() {
-	log.Warn("%#+v", os.Args[1:])
 	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	setLogLevel()

@@ -59,30 +59,37 @@ func Codegen(mb *ir.Block, node *modoTypes.Node) value.Value {
 	case modoTypes.ND_INT:
 		return newInt32(node.Val)
 	case modoTypes.ND_ADD:
-		rhs := Codegen(mb, node.Lhs)
-		lhs := Codegen(mb, node.Rhs)
-		return mb.NewAdd(lhs, rhs)
+		fst := Codegen(mb, node.Child)
+		snd := Codegen(mb, node.Child.Next)
+		res := mb.NewAdd(fst, snd)
+		child := node.Child.Next.Next
+		for ; child != nil; child = child.Next {
+			fst = res
+			snd = Codegen(mb, child)
+			res = mb.NewAdd(fst, snd)
+		}
+		return res
 	}
 	return nil
 }
 
 func Assemble(node *modoTypes.Node, workingDirPrefix string, currentTime int64) (string, string) {
-	m := ir.NewModule()
-	funcMain := m.NewFunc(
+	ir := ir.NewModule()
+	funcMain := ir.NewFunc(
 		"main",
 		types.I32,
 	)
-	mb := funcMain.NewBlock("")
+	llBlock := funcMain.NewBlock("")
 
-	res := Codegen(mb, node)
-	mb.NewRet(res)
+	res := Codegen(llBlock, node)
+	llBlock.NewRet(res)
 
 	log.DebugMessage("code generated")
-	log.Debug("IR = \n %s\n", m.String())
+	log.Debug("IR = \n %s\n", ir.String())
 
 	llName, asmName, executableName := prepareWorkingFile(workingDirPrefix, currentTime)
 
-	err := os.WriteFile(llName, []byte(m.String()), 0600)
+	err := os.WriteFile(llName, []byte(ir.String()), 0600)
 	if err != nil {
 		log.Panic("fail to write ll: %s", map[string]interface{}{"err": err, "llName": llName})
 	}

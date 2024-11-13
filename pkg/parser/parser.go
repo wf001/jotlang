@@ -7,59 +7,47 @@ import (
 	"github.com/wf001/modo/pkg/types"
 )
 
-func newNode(kind types.NodeKind, lhs *types.Node, rhs *types.Node) *types.Node {
-	node := new(types.Node)
-	node.Kind = kind
-	node.Lhs = lhs
-	node.Rhs = rhs
-	return node
+func newNode(kind types.NodeKind, child *types.Node) *types.Node {
+	return &types.Node{
+		Kind:  kind,
+		Child: child,
+	}
 }
 
 func newNodeNum(tok *types.Token) *types.Node {
-	node := new(types.Node)
-	node.Kind = types.ND_INT
-	node.Val = tok.Val
-	return node
-}
-
-func primary(tok *types.Token) (*types.Token, *types.Node) {
-	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
-
-	if tok.Kind != types.TK_NUM {
-		log.Panic("must be number: have %+v", tok)
+	return &types.Node{
+		Kind: types.ND_INT,
+		Val:  tok.Val,
 	}
-
-	//validate if number
-	return tok.Next, newNodeNum(tok)
-}
-
-func add(tok *types.Token) (*types.Token, *types.Node) {
-	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
-
-	if tok.Val == "+" {
-		tok, lNode := primary(tok.Next)
-		tok, rNode := primary(tok)
-		return tok, newNode(types.ND_ADD, lNode, rNode)
-	} else {
-		log.Panic("must be + :have %+v", tok)
-	}
-	return tok, nil
 }
 
 func expr(tok *types.Token) (*types.Token, *types.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
+	head := &types.Node{}
 
+	if tok.Kind == types.TK_EOL {
+		return tok, nil
+	}
 	if tok.Val == "(" {
 		tok = tok.Next
-		tok, node := expr(tok)
-		if tok.Val != ")" {
-			log.Panic("must be ) : have %+v", tok)
+		if tok.Val == "+" {
+			nextTk, childHead := expr(tok.Next)
+			prevNode := childHead
+			for nextTk.Kind == types.TK_NUM {
+				nextTk, prevNode.Next = expr(nextTk)
+				prevNode = prevNode.Next
+			}
+			tok = nextTk
+			head = newNode(types.ND_ADD, childHead)
 		}
-		tok = tok.Next
-		return tok, node
+		if tok.Val != ")" {
+			log.Panic("must be ) :have %+v", tok)
+		}
+		return tok.Next, head
+	} else if tok.Kind == types.TK_NUM {
+		return tok.Next, newNodeNum(tok)
 	}
-
-	return add(tok)
+	return tok, head
 }
 
 // return Node object from Token array
