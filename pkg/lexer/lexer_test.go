@@ -7,7 +7,7 @@ import (
 	"github.com/wf001/modo/pkg/types"
 )
 
-func TestSplitExpression(t *testing.T) {
+func TestSplitProgram(t *testing.T) {
 	assert.ElementsMatch(t, []string{}, splitProgram(""))
 	assert.ElementsMatch(t, []string{"1"}, splitProgram("1"))
 	assert.ElementsMatch(t, []string{"123", "+", "45"}, splitProgram("123+45"))
