@@ -97,7 +97,6 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 
 	// Token -> Node
 	node := parser.ConstructParser(token).Parse()
-
 	log.DebugMessage("code parsed")
 
 	// Node -> AST -> write assembly
@@ -117,19 +116,25 @@ func doRun(workingDirPrefix string, evaluatee string) int {
 	return run(executableName)
 }
 
-func main() {
-	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
-
-	setLogLevel()
-	showOpts(cmd)
+func readFile(inputFile *string) string {
 	data, _ := os.Open(*inputFile)
 	defer data.Close()
+
 	scanner := bufio.NewScanner(data)
 	var input_arr = ""
 	for scanner.Scan() {
 		input_arr += scanner.Text()
 	}
-	arg := input_arr
+	return input_arr
+}
+
+func main() {
+	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
+
+	setLogLevel()
+	showOpts(cmd)
+
+	arg := readFile(inputFile)
 
 	switch cmd {
 
