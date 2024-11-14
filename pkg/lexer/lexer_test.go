@@ -60,3 +60,89 @@ func TestSplitProgram(t *testing.T) {
 	)
 	t.Log(types.ALL_REG_EXP)
 }
+
+func TestLexOneInteger(t *testing.T) {
+	assert.Equal(t, &types.Token{Kind: types.TK_NUM, Val: "1"}, Lex("1"))
+}
+
+func TestLexOperationAdd(t *testing.T) {
+	want := &types.Token{
+		Kind: types.TK_PAREN,
+		Val:  "(",
+		Next: &types.Token{
+			Kind: types.TK_OPERATOR,
+			Val:  "+",
+			Next: &types.Token{
+				Kind: types.TK_NUM,
+				Val:  "1",
+				Next: &types.Token{
+					Kind: types.TK_NUM,
+					Val:  "2",
+					Next: &types.Token{
+						Kind: types.TK_PAREN,
+						Val:  ")",
+					},
+				},
+			},
+		},
+	}
+
+	assert.EqualValues(t, want, Lex("(+ 1 2)"))
+}
+
+func TestLexOperationAddTakingAdd(t *testing.T) {
+	want := &types.Token{
+		Kind: types.TK_PAREN,
+		Val:  "(",
+		Next: &types.Token{
+			Kind: types.TK_OPERATOR,
+			Val:  "+",
+			Next: &types.Token{
+				Kind: types.TK_PAREN,
+				Val:  "(",
+				Next: &types.Token{
+					Kind: types.TK_OPERATOR,
+					Val:  "+",
+					Next: &types.Token{
+						Kind: types.TK_NUM,
+						Val:  "1",
+						Next: &types.Token{
+							Kind: types.TK_NUM,
+							Val:  "2",
+							Next: &types.Token{
+								Kind: types.TK_PAREN,
+								Val:  ")",
+								Next: &types.Token{
+									Kind: types.TK_PAREN,
+									Val:  "(",
+									Next: &types.Token{
+										Kind: types.TK_OPERATOR,
+										Val:  "+",
+										Next: &types.Token{
+											Kind: types.TK_NUM,
+											Val:  "3",
+											Next: &types.Token{
+												Kind: types.TK_NUM,
+												Val:  "4",
+												Next: &types.Token{
+													Kind: types.TK_PAREN,
+													Val:  ")",
+													Next: &types.Token{
+														Kind: types.TK_PAREN,
+														Val:  ")",
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	assert.EqualValues(t, want, Lex("(+ (+ 1 2) (+ 3 4))"))
+}
