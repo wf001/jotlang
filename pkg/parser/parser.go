@@ -11,12 +11,6 @@ type parser struct {
 	token *types.Token
 }
 
-func ConstructParser(token *types.Token) *parser {
-	return &parser{
-		token: token,
-	}
-}
-
 func newNode(kind types.NodeKind, child *types.Node) *types.Node {
 	return &types.Node{
 		Kind:  kind,
@@ -58,6 +52,12 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 		return tok.Next, newNodeNum(tok)
 	}
 	return tok, head
+}
+
+func ConstructParser(token *types.Token) *parser {
+	return &parser{
+		token: token,
+	}
 }
 
 // take Token object, return Node object

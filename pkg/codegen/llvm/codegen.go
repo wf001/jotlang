@@ -19,12 +19,6 @@ type assembler struct {
 	node *types.Node
 }
 
-func ConstructAssembler(node *types.Node) *assembler {
-	return &assembler{
-		node: node,
-	}
-}
-
 func newInt32(s string) *constant.Int {
 
 	i, err := strconv.ParseInt(s, 10, 32)
@@ -81,6 +75,12 @@ func codegen(mb *ir.Block, node *types.Node) value.Value {
 		return res
 	}
 	return nil
+}
+
+func ConstructAssembler(node *types.Node) *assembler {
+	return &assembler{
+		node: node,
+	}
 }
 
 func (a assembler) Assemble(workingDirPrefix string, currentTime int64) (string, string) {
