@@ -96,11 +96,11 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	log.DebugMessage("code lexed ")
 
 	// Token -> Node
-	node := parser.ConstructParser(token).Parse()
+	node := parser.Construct(token).Parse()
 	log.DebugMessage("code parsed")
 
 	// Node -> AST -> write assembly
-	asmName, executableName := codegen.ConstructAssembler(node).Assemble(workingDirPrefix, currentTime)
+	asmName, executableName := codegen.Construct(node).Assemble(workingDirPrefix, currentTime)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)

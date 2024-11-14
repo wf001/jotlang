@@ -54,7 +54,7 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 	return tok, head
 }
 
-func ConstructParser(token *types.Token) *parser {
+func Construct(token *types.Token) *parser {
 	return &parser{
 		token: token,
 	}

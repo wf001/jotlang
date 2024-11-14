@@ -77,7 +77,7 @@ func codegen(mb *ir.Block, node *types.Node) value.Value {
 	return nil
 }
 
-func ConstructAssembler(node *types.Node) *assembler {
+func Construct(node *types.Node) *assembler {
 	return &assembler{
 		node: node,
 	}
