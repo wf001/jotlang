@@ -63,18 +63,19 @@ func doAsemble(llFile string, asmFile string) {
 	}
 	log.Debug("written asm: %s", asmFile)
 }
-func Codegen(mb *ir.Block, node *types.Node) value.Value {
+
+func codegen(mb *ir.Block, node *types.Node) value.Value {
 	switch node.Kind {
 	case types.ND_INT:
 		return newInt32(node.Val)
 	case types.ND_ADD:
-		fst := Codegen(mb, node.Child)
-		snd := Codegen(mb, node.Child.Next)
+		fst := codegen(mb, node.Child)
+		snd := codegen(mb, node.Child.Next)
 		res := mb.NewAdd(fst, snd)
 		child := node.Child.Next.Next
 		for ; child != nil; child = child.Next {
 			fst = res
-			snd = Codegen(mb, child)
+			snd = codegen(mb, child)
 			res = mb.NewAdd(fst, snd)
 		}
 		return res
@@ -90,7 +91,7 @@ func (a assembler) Assemble(workingDirPrefix string, currentTime int64) (string,
 	)
 	llBlock := funcMain.NewBlock("")
 
-	res := Codegen(llBlock, a.node)
+	res := codegen(llBlock, a.node)
 	llBlock.NewRet(res)
 
 	log.DebugMessage("code generated")
