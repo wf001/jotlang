@@ -31,6 +31,7 @@ assert() {
 build-compiler(){
   mkdir -p "$dir"
   go build -o ./generated/test/modo ./cmd/modo 
+  echo -e "\033[0;32mcompiled!\033[0m"
 }
 
 summary(){
