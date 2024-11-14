@@ -8,12 +8,12 @@ import (
 )
 
 type parser struct {
-	Token *types.Token
+	token *types.Token
 }
 
 func ConstructParser(token *types.Token) *parser {
 	return &parser{
-		Token: token,
+		token: token,
 	}
 }
 
@@ -62,7 +62,7 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 
 // take Token object, return Node object
 func (p parser) Parse() *types.Node {
-	_, node := expr(p.Token)
+	_, node := expr(p.token)
 	node.DebugNode(0)
 
 	return node

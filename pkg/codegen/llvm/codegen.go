@@ -15,6 +15,16 @@ import (
 	"github.com/wf001/modo/pkg/types"
 )
 
+type assembler struct {
+	node *types.Node
+}
+
+func ConstructAssembler(node *types.Node) *assembler {
+	return &assembler{
+		node: node,
+	}
+}
+
 func newInt32(s string) *constant.Int {
 
 	i, err := strconv.ParseInt(s, 10, 32)
@@ -72,7 +82,7 @@ func Codegen(mb *ir.Block, node *types.Node) value.Value {
 	return nil
 }
 
-func Assemble(node *types.Node, workingDirPrefix string, currentTime int64) (string, string) {
+func (a assembler) Assemble(workingDirPrefix string, currentTime int64) (string, string) {
 	ir := ir.NewModule()
 	funcMain := ir.NewFunc(
 		"main",
@@ -80,7 +90,7 @@ func Assemble(node *types.Node, workingDirPrefix string, currentTime int64) (str
 	)
 	llBlock := funcMain.NewBlock("")
 
-	res := Codegen(llBlock, node)
+	res := Codegen(llBlock, a.node)
 	llBlock.NewRet(res)
 
 	log.DebugMessage("code generated")

@@ -41,6 +41,14 @@ func Parse(p IParser) {
 	p.Parse()
 }
 
+type IAssebler interface {
+	Assemble() (string, string)
+}
+
+func Assemble(a IAssebler) {
+	a.Assemble()
+}
+
 func showOpts(cmd string) {
 	m := map[string]interface{}{}
 	m["cmd"] = cmd
@@ -92,8 +100,8 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 
 	log.DebugMessage("code parsed")
 
-	// Node -> LLVM IR -> write assembly
-	asmName, executableName := codegen.Assemble(node, workingDirPrefix, currentTime)
+	// Node -> AST -> write assembly
+	asmName, executableName := codegen.ConstructAssembler(node).Assemble(workingDirPrefix, currentTime)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)
