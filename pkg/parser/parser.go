@@ -7,6 +7,16 @@ import (
 	"github.com/wf001/modo/pkg/types"
 )
 
+type Parser struct {
+	Token *types.Token
+}
+
+func ConstructParser(token *types.Token) *Parser {
+	return &Parser{
+		Token: token,
+	}
+}
+
 func newNode(kind types.NodeKind, child *types.Node) *types.Node {
 	return &types.Node{
 		Kind:  kind,
@@ -51,8 +61,8 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 }
 
 // take Token object, return Node object
-func Parse(tok *types.Token) *types.Node {
-	_, node := expr(tok)
+func (p Parser) Parse() *types.Node {
+	_, node := expr(p.Token)
 	node.DebugNode(0)
 
 	return node

@@ -11,6 +11,7 @@ import (
 	codegen "github.com/wf001/modo/pkg/codegen/llvm"
 	"github.com/wf001/modo/pkg/lexer"
 	"github.com/wf001/modo/pkg/parser"
+	"github.com/wf001/modo/pkg/types"
 )
 
 const (
@@ -31,6 +32,14 @@ var (
 	runExec   = runCmd.Flag("exec", "evaluate <EXEC>").String()
 	inputFile = runCmd.Arg("file", "source file").String()
 )
+
+type IParser interface {
+	Parse() *types.Node
+}
+
+func Parse(p IParser) {
+	p.Parse()
+}
 
 func showOpts(cmd string) {
 	m := map[string]interface{}{}
@@ -79,7 +88,8 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	log.DebugMessage("code lexed ")
 
 	// Token -> Node
-	node := parser.Parse(token)
+	node := parser.ConstructParser(token).Parse()
+
 	log.DebugMessage("code parsed")
 
 	// Node -> LLVM IR -> write assembly
