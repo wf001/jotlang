@@ -1,11 +1,11 @@
-package codegen
+package io
 
 import (
 	"testing"
 )
 
 func TestPrepareWarkingFile(t *testing.T) {
-	llName, asmName, executableName := prepareWorkingFile("out", 123)
+	llName, asmName, executableName := PrepareWorkingFile("out", 123)
 	if llName != "out.ll" {
 		t.Errorf("have = %s, want = %s", "out.ll", llName)
 	}

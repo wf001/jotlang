@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -26,28 +25,6 @@ func newInt32(s string) *constant.Int {
 		log.Panic("fail to newInt32: %s", err)
 	}
 	return constant.NewInt(llirTypes.I32, i)
-}
-
-func prepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, string, string) {
-	if artifactFilePrefix == "" {
-		generated := "generated"
-		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
-		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
-		if err != nil {
-			log.Panic("fail to make directory: %+v", map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir})
-		}
-		log.Debug(log.YELLOW("make dir: %s"), artifactDir)
-
-		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
-	}
-	log.Debug(log.YELLOW("artifactFilePrefix = %s"), artifactFilePrefix)
-	log.Info("persist all of build artifact in %s", artifactFilePrefix)
-
-	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
-	asmName := fmt.Sprintf("%s.s", artifactFilePrefix)
-	executableName := fmt.Sprintf("%s", artifactFilePrefix)
-
-	return llName, asmName, executableName
 }
 
 func doAsemble(llFile string, asmFile string) {
@@ -83,7 +60,7 @@ func Construct(node *types.Node) *assembler {
 	}
 }
 
-func (a assembler) Assemble(workingDirPrefix string, currentTime int64) (string, string) {
+func (a assembler) Assemble(llName string, asmName string) {
 	ir := ir.NewModule()
 	funcMain := ir.NewFunc(
 		"main",
@@ -97,8 +74,6 @@ func (a assembler) Assemble(workingDirPrefix string, currentTime int64) (string,
 	log.DebugMessage("code generated")
 	log.Debug("IR = \n %s\n", ir.String())
 
-	llName, asmName, executableName := prepareWorkingFile(workingDirPrefix, currentTime)
-
 	err := os.WriteFile(llName, []byte(ir.String()), 0600)
 	if err != nil {
 		log.Panic("fail to write ll: %+v", map[string]interface{}{"err": err, "llName": llName})
@@ -106,7 +81,4 @@ func (a assembler) Assemble(workingDirPrefix string, currentTime int64) (string,
 	log.Debug("written ll: %s", llName)
 
 	doAsemble(llName, asmName)
-
-	return asmName, executableName
-
 }

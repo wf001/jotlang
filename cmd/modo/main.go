@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
+	"github.com/wf001/modo/internal/io"
 	"github.com/wf001/modo/internal/log"
 	codegen "github.com/wf001/modo/pkg/codegen/llvm"
 	"github.com/wf001/modo/pkg/lexer"
@@ -99,8 +100,10 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	node := parser.Construct(token).Parse()
 	log.DebugMessage("code parsed")
 
+	llName, asmName, executableName := io.PrepareWorkingFile(workingDirPrefix, currentTime)
+
 	// Node -> AST -> write assembly
-	asmName, executableName := codegen.Construct(node).Assemble(workingDirPrefix, currentTime)
+	codegen.Construct(node).Assemble(llName, asmName)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)
