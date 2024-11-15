@@ -10,7 +10,7 @@ import (
 	llirTypes "github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"github.com/wf001/modo/internal/log"
+	"github.com/wf001/modo/pkg/log"
 	"github.com/wf001/modo/pkg/types"
 )
 

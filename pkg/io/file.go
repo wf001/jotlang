@@ -1,10 +1,12 @@
 package io
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"os/exec"
 
-	"github.com/wf001/modo/internal/log"
+	"github.com/wf001/modo/pkg/log"
 )
 
 func PrepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, string, string) {
@@ -27,4 +29,16 @@ func PrepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 	executableName := fmt.Sprintf("%s", artifactFilePrefix)
 
 	return llName, asmName, executableName
+}
+
+func ReadFile(inputFile *string) string {
+	data, _ := os.Open(*inputFile)
+	defer data.Close()
+
+	scanner := bufio.NewScanner(data)
+	var input_arr = ""
+	for scanner.Scan() {
+		input_arr += scanner.Text()
+	}
+	return input_arr
 }

@@ -3,7 +3,7 @@ package lexer
 import (
 	"regexp"
 
-	"github.com/wf001/modo/internal/log"
+	"github.com/wf001/modo/pkg/log"
 	"github.com/wf001/modo/pkg/types"
 )
 

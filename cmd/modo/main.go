@@ -1,16 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"os"
 	"os/exec"
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
-	"github.com/wf001/modo/internal/io"
-	"github.com/wf001/modo/internal/log"
-	codegen "github.com/wf001/modo/pkg/codegen/llvm"
+	llvmCodegen "github.com/wf001/modo/pkg/codegen/llvm"
+	"github.com/wf001/modo/pkg/io"
 	"github.com/wf001/modo/pkg/lexer"
+	"github.com/wf001/modo/pkg/log"
 	"github.com/wf001/modo/pkg/parser"
 	"github.com/wf001/modo/pkg/types"
 )
@@ -103,7 +102,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	llName, asmName, executableName := io.PrepareWorkingFile(workingDirPrefix, currentTime)
 
 	// Node -> AST -> write assembly
-	codegen.Construct(node).Assemble(llName, asmName)
+	llvmCodegen.Construct(node).Assemble(llName, asmName)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)
@@ -119,25 +118,13 @@ func doRun(workingDirPrefix string, evaluatee string) int {
 	return run(executableName)
 }
 
-func readFile(inputFile *string) string {
-	data, _ := os.Open(*inputFile)
-	defer data.Close()
-
-	scanner := bufio.NewScanner(data)
-	var input_arr = ""
-	for scanner.Scan() {
-		input_arr += scanner.Text()
-	}
-	return input_arr
-}
-
 func main() {
 	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	setLogLevel()
 	showOpts(cmd)
 
-	arg := readFile(inputFile)
+	arg := io.ReadFile(inputFile)
 
 	switch cmd {
 
