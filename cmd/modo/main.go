@@ -49,6 +49,7 @@ func Assemble(a IAssebler) {
 	a.Assemble()
 }
 
+// HACK: It might be better to move it to different package?
 func showOpts(cmd string) {
 	m := map[string]interface{}{}
 	m["cmd"] = cmd
@@ -89,7 +90,7 @@ func run(executableFile string) int {
 	return cmd.ProcessState.ExitCode()
 }
 
-func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
+func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	currentTime := time.Now().Unix()
 	// string -> Token
 	token := lexer.Lex(evaluatee)
@@ -107,12 +108,13 @@ func doBuild(workingDirPrefix string, evaluatee string) (int, string) {
 	// assembly file -> write executable
 	compile(asmName, executableName)
 
-	return 0, executableName
+	return nil, executableName
 }
 
+// HACK: It might be better if the return type matches that of doBuild
 func doRun(workingDirPrefix string, evaluatee string) int {
 	err, executableName := doBuild(workingDirPrefix, evaluatee)
-	if err != 0 {
+	if err != nil {
 		log.Panic("fail to run: %s", map[string]interface{}{"err": err, "llName": executableName})
 	}
 	return run(executableName)
