@@ -42,7 +42,7 @@ func Parse(p IParser) {
 }
 
 type IAssebler interface {
-	Assemble() (string, string)
+	Assemble()
 }
 
 func Assemble(a IAssebler) {
