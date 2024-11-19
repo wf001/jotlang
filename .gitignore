@@ -2,3 +2,5 @@ generated
 /modo
 !cmd/modo/
 sample/
+.clj-kondo
+.lsp
