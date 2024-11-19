@@ -120,7 +120,13 @@ const (
 	ND_MUL = NodeKind("ND_MUL") // *
 	ND_DIV = NodeKind("ND_DIV") // /
 	ND_INT = NodeKind("ND_INT") // 0-9
+	ND_NIL = NodeKind("ND_NIL") // nil
 )
+
+type Prog struct {
+	Declares  *Node
+	FuncCalls *Node
+}
 
 type Node struct {
 	Kind  NodeKind
@@ -129,11 +135,6 @@ type Node struct {
 	Cond  *Node
 	Then  *Node
 	Else  *Node
-	Init  *Node
-	Inc   *Node
-	Body  *Node
-	Func  string
-	Args  *Node
 	Val   string
 }
 
