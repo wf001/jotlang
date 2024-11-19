@@ -25,7 +25,7 @@ func newNodeNum(tok *types.Token) *types.Node {
 	}
 }
 
-func matchedFuncCall(tok *types.Token) (bool, types.NodeKind) {
+func matchedNodeKind(tok *types.Token) (bool, types.NodeKind) {
 	if tok.Kind != types.TK_OPERATOR {
 		return false, types.ND_NIL
 	}
@@ -46,7 +46,7 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 	if tok.IsParenOpen() {
 		tok = tok.Next
 
-		if isFuncCall, kind := matchedFuncCall(tok); isFuncCall {
+		if isFuncCall, kind := matchedNodeKind(tok); isFuncCall {
 			nextToken, argHead := program(tok.Next)
 			prevNode := argHead
 			for nextToken.IsNum() || nextToken.IsParenOpen() {

@@ -115,12 +115,18 @@ func (tok *Token) DebugTokens() {
 type NodeKind string
 
 const (
+	// Arithmetic ND_CORE
 	ND_ADD = NodeKind("ND_ADD") // +
 	ND_SUB = NodeKind("ND_SUB") // -
 	ND_MUL = NodeKind("ND_MUL") // *
 	ND_DIV = NodeKind("ND_DIV") // /
-	ND_INT = NodeKind("ND_INT") // 0-9
+	ND_MOD = NodeKind("ND_MOD") // mod
+	// Logical
+	ND_AND = NodeKind("ND_AND") // and
+	ND_OR  = NodeKind("ND_OR")  // or
+	// type
 	ND_NIL = NodeKind("ND_NIL") // nil
+	ND_INT = NodeKind("ND_INT") // 0-9
 )
 
 type Prog struct {
@@ -136,6 +142,13 @@ type Node struct {
 	Then  *Node
 	Else  *Node
 	Val   string
+}
+
+func (node *Node) IsInteger() bool {
+	return node.Kind == ND_INT
+}
+func (node *Node) IsNary() bool {
+	return node.Kind == ND_ADD
 }
 
 func (node *Node) DebugNode(depth int) {

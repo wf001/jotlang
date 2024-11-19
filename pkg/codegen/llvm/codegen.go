@@ -18,6 +18,18 @@ type assembler struct {
 	node *types.Node
 }
 
+var naryMap = map[types.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
+	types.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
+		return block.NewAdd(x, y)
+	},
+	types.ND_SUB: func(block *ir.Block, x, y value.Value) value.Value {
+		return block.NewSub(x, y)
+	},
+	types.ND_MUL: func(block *ir.Block, x, y value.Value) value.Value {
+		return block.NewMul(x, y)
+	},
+}
+
 func newInt32(s string) *constant.Int {
 
 	i, err := strconv.ParseInt(s, 10, 32)
@@ -36,18 +48,25 @@ func doAsemble(llFile string, asmFile string) {
 }
 
 func gen(mb *ir.Block, node *types.Node) value.Value {
-	switch node.Kind {
-	case types.ND_INT:
+
+	if node.IsInteger() {
 		return newInt32(node.Val)
-	case types.ND_ADD:
+
+	} else if node.IsNary() {
+		// nary takes arguments more than 2
+		child := node.Child
 		fst := gen(mb, node.Child)
+
+		child = child.Next
 		snd := gen(mb, node.Child.Next)
-		res := mb.NewAdd(fst, snd)
-		child := node.Child.Next.Next
-		for ; child != nil; child = child.Next {
+
+		nary := naryMap[node.Kind]
+		res := nary(mb, fst, snd)
+
+		for child = child.Next; child != nil; child = child.Next {
 			fst = res
 			snd = gen(mb, child)
-			res = mb.NewAdd(fst, snd)
+			res = nary(mb, fst, snd)
 		}
 		return res
 	}
