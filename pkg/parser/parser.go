@@ -25,7 +25,18 @@ func newNodeNum(tok *types.Token) *types.Node {
 	}
 }
 
-func expr(tok *types.Token) (*types.Token, *types.Node) {
+func matchedFuncCall(tok *types.Token) (bool, types.NodeKind) {
+	if tok.Kind != types.TK_OPERATOR {
+		return false, types.ND_NIL
+	}
+	switch tok.Val {
+	case types.OPERATOR_ADD:
+		return true, types.ND_ADD
+	}
+	return false, types.ND_NIL
+}
+
+func program(tok *types.Token) (*types.Token, *types.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &types.Node{}
 
@@ -34,16 +45,18 @@ func expr(tok *types.Token) (*types.Token, *types.Node) {
 	}
 	if tok.IsParenOpen() {
 		tok = tok.Next
-		if tok.IsOperationAdd() {
-			nextToken, childHead := expr(tok.Next)
-			prevNode := childHead
+
+		if isFuncCall, kind := matchedFuncCall(tok); isFuncCall {
+			nextToken, argHead := program(tok.Next)
+			prevNode := argHead
 			for nextToken.IsNum() || nextToken.IsParenOpen() {
-				nextToken, prevNode.Next = expr(nextToken)
+				nextToken, prevNode.Next = program(nextToken)
 				prevNode = prevNode.Next
 			}
+			head = newNode(kind, argHead)
 			tok = nextToken
-			head = newNode(types.ND_ADD, childHead)
 		}
+
 		if !tok.IsParenClose() {
 			log.Panic("must be ) :have %+v", tok)
 		}
@@ -62,7 +75,7 @@ func Construct(token *types.Token) *parser {
 
 // take Token object, return Node object
 func (p parser) Parse() *types.Node {
-	_, node := expr(p.token)
+	_, node := program(p.token)
 	node.DebugNode(0)
 
 	return node
