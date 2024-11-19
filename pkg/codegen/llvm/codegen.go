@@ -35,23 +35,36 @@ func doAsemble(llFile string, asmFile string) {
 	log.Debug("written asm: %s", asmFile)
 }
 
-func codegen(mb *ir.Block, node *types.Node) value.Value {
+func gen(mb *ir.Block, node *types.Node) value.Value {
 	switch node.Kind {
 	case types.ND_INT:
 		return newInt32(node.Val)
 	case types.ND_ADD:
-		fst := codegen(mb, node.Child)
-		snd := codegen(mb, node.Child.Next)
+		fst := gen(mb, node.Child)
+		snd := gen(mb, node.Child.Next)
 		res := mb.NewAdd(fst, snd)
 		child := node.Child.Next.Next
 		for ; child != nil; child = child.Next {
 			fst = res
-			snd = codegen(mb, child)
+			snd = gen(mb, child)
 			res = mb.NewAdd(fst, snd)
 		}
 		return res
 	}
 	return nil
+}
+
+func codegen(node *types.Node) *ir.Module {
+	ir := ir.NewModule()
+	funcMain := ir.NewFunc(
+		"main",
+		llirTypes.I32,
+	)
+	llBlock := funcMain.NewBlock("")
+
+	res := gen(llBlock, node)
+	llBlock.NewRet(res)
+	return ir
 }
 
 func Construct(node *types.Node) *assembler {
@@ -61,15 +74,7 @@ func Construct(node *types.Node) *assembler {
 }
 
 func (a assembler) Assemble(llName string, asmName string) {
-	ir := ir.NewModule()
-	funcMain := ir.NewFunc(
-		"main",
-		llirTypes.I32,
-	)
-	llBlock := funcMain.NewBlock("")
-
-	res := codegen(llBlock, a.node)
-	llBlock.NewRet(res)
+	ir := codegen(a.node)
 
 	log.DebugMessage("code generated")
 	log.Debug("IR = \n %s\n", ir.String())
