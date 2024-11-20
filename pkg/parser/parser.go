@@ -25,15 +25,15 @@ func newNodeInt(tok *types.Token) *types.Node {
 	}
 }
 
-func matchedNodeKind(tok *types.Token) (bool, types.NodeKind) {
+func matchedNodeKind(tok *types.Token) (types.NodeKind, bool) {
 	if tok.Kind != types.TK_OPERATOR {
-		return false, types.ND_NIL
+		return types.ND_NIL, false
 	}
 	switch tok.Val {
 	case types.OPERATOR_ADD:
-		return true, types.ND_ADD
+		return types.ND_ADD, true
 	}
-	return false, types.ND_NIL
+	return types.ND_NIL, false
 }
 
 func expr(tok *types.Token, head *types.Node, kind types.NodeKind) (*types.Token, *types.Node) {
@@ -58,7 +58,7 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 	if tok.IsParenOpen() {
 		tok = tok.Next
 
-		if isExprCall, kind := matchedNodeKind(tok); isExprCall {
+		if kind, isExprCall := matchedNodeKind(tok); isExprCall {
 			tok, head = expr(tok, head, kind)
 		}
 
