@@ -32,8 +32,8 @@ var naryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) v
 }
 var binaryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
 	modoTypes.ND_EQ: func(block *ir.Block, x, y value.Value) value.Value {
-    res := block.NewICmp(enum.IPredEQ, x, y)
-    return block.NewZExt(res, types.I32)
+		res := block.NewICmp(enum.IPredEQ, x, y)
+		return block.NewZExt(res, types.I32)
 	},
 }
 

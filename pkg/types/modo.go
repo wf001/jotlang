@@ -141,7 +141,7 @@ const (
 	ND_MUL = NodeKind("ND_MUL") // *
 	ND_DIV = NodeKind("ND_DIV") // /
 	ND_MOD = NodeKind("ND_MOD") // mod
-	ND_EQ = NodeKind("ND_EQ") // =
+	ND_EQ  = NodeKind("ND_EQ")  // =
 	// Logical
 	ND_AND = NodeKind("ND_AND") // and
 	ND_OR  = NodeKind("ND_OR")  // or
@@ -156,7 +156,7 @@ type Prog struct {
 }
 
 type Cores struct {
-  Core  map[string]*llirTypes.LLIRAlloca
+	Core map[string]*llirTypes.LLIRAlloca
 }
 
 // TODO
@@ -168,14 +168,14 @@ type Globals struct {
 }
 
 type Node struct {
-	Kind  NodeKind
-	Next  *Node
-	Child *Node
-	Cond  *Node
-	Then  *Node
-	Else  *Node
-	Val   string
-  LocalVar *llirTypes.LLIRAlloca
+	Kind     NodeKind
+	Next     *Node
+	Child    *Node
+	Cond     *Node
+	Then     *Node
+	Else     *Node
+	Val      string
+	LocalVar *llirTypes.LLIRAlloca
 }
 
 func (node *Node) IsInteger() bool {
