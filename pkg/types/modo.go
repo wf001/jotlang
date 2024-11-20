@@ -141,6 +141,7 @@ const (
 	ND_MUL = NodeKind("ND_MUL") // *
 	ND_DIV = NodeKind("ND_DIV") // /
 	ND_MOD = NodeKind("ND_MOD") // mod
+	ND_EQ = NodeKind("ND_EQ") // =
 	// Logical
 	ND_AND = NodeKind("ND_AND") // and
 	ND_OR  = NodeKind("ND_OR")  // or
@@ -179,6 +180,9 @@ func (node *Node) IsInteger() bool {
 func (node *Node) IsNary() bool {
 	return node.Kind == ND_ADD
 }
+func (node *Node) IsBinary() bool {
+	return node.Kind == ND_EQ
+}
 
 func (node *Node) DebugNode(depth int) {
 	if node == nil {
@@ -199,6 +203,8 @@ func (node *Node) DebugNode(depth int) {
 	case ND_INT:
 		node.Next.DebugNode(depth)
 	case ND_ADD:
+		node.Child.DebugNode(depth + 1)
+	case ND_EQ:
 		node.Child.DebugNode(depth + 1)
 	}
 	if node.Next != nil && node.Kind != ND_INT {

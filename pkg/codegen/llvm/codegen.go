@@ -7,6 +7,7 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -29,12 +30,18 @@ var naryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) v
 		return block.NewMul(x, y)
 	},
 }
+var binaryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
+	modoTypes.ND_EQ: func(block *ir.Block, x, y value.Value) value.Value {
+    res := block.NewICmp(enum.IPredEQ, x, y)
+    return block.NewZExt(res, types.I32)
+	},
+}
 
 func newI32(s string) *constant.Int {
 
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
-		log.Panic("fail to newInt32: %s", err)
+		log.Panic("fail to newI32: %s", err)
 	}
 	return constant.NewInt(types.I32, i)
 }
@@ -56,7 +63,7 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 		return newI32(node.Val)
 
 	} else if node.IsNary() {
-		// nary takes arguments more than 2
+		// nary takes more than 2 arguments
 		child := node.Child
 		fst := gen(mb, node.Child)
 
@@ -71,6 +78,19 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 			snd = gen(mb, child)
 			res = nary(mb, fst, snd)
 		}
+		return res
+
+	} else if node.IsBinary() {
+		// binary takes exactly 2 arguments
+		child := node.Child
+		fst := gen(mb, node.Child)
+
+		child = child.Next
+		snd := gen(mb, node.Child.Next)
+
+		binary := binaryMap[node.Kind]
+		res := binary(mb, fst, snd)
+
 		return res
 	}
 	return nil
