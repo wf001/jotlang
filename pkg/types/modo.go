@@ -155,13 +155,16 @@ type Prog struct {
 	FuncCalls *Node
 }
 
+type Cores struct {
+  Core  map[string]*llirTypes.LLIRAlloca
+}
+
 // TODO
 type AllocaInst interface {
 }
 
-type Variables struct {
-	Locals  map[string]*llirTypes.LLIRAlloca
-	Globals map[string]*llirTypes.LLIRAlloca
+type Globals struct {
+	Var map[string]*llirTypes.LLIRAlloca
 }
 
 type Node struct {
@@ -172,6 +175,7 @@ type Node struct {
 	Then  *Node
 	Else  *Node
 	Val   string
+  LocalVar *llirTypes.LLIRAlloca
 }
 
 func (node *Node) IsInteger() bool {
