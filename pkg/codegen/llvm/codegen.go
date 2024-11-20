@@ -7,25 +7,25 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
-	llirTypes "github.com/llir/llvm/ir/types"
+	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
 	"github.com/wf001/modo/pkg/log"
-	"github.com/wf001/modo/pkg/types"
+	modoTypes "github.com/wf001/modo/pkg/types"
 )
 
 type assembler struct {
-	node *types.Node
+	node *modoTypes.Node
 }
 
-var naryMap = map[types.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
-	types.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
+var naryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
+	modoTypes.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewAdd(x, y)
 	},
-	types.ND_SUB: func(block *ir.Block, x, y value.Value) value.Value {
+	modoTypes.ND_SUB: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewSub(x, y)
 	},
-	types.ND_MUL: func(block *ir.Block, x, y value.Value) value.Value {
+	modoTypes.ND_MUL: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewMul(x, y)
 	},
 }
@@ -36,7 +36,7 @@ func newInt32(s string) *constant.Int {
 	if err != nil {
 		log.Panic("fail to newInt32: %s", err)
 	}
-	return constant.NewInt(llirTypes.I32, i)
+	return constant.NewInt(types.I32, i)
 }
 
 func doAsemble(llFile string, asmFile string) {
@@ -47,7 +47,7 @@ func doAsemble(llFile string, asmFile string) {
 	log.Debug("written asm: %s", asmFile)
 }
 
-func gen(mb *ir.Block, node *types.Node) value.Value {
+func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 
 	if node.IsInteger() {
 		return newInt32(node.Val)
@@ -73,11 +73,11 @@ func gen(mb *ir.Block, node *types.Node) value.Value {
 	return nil
 }
 
-func codegen(node *types.Node) *ir.Module {
+func codegen(node *modoTypes.Node) *ir.Module {
 	ir := ir.NewModule()
 	funcMain := ir.NewFunc(
 		"main",
-		llirTypes.I32,
+		types.I32,
 	)
 	llBlock := funcMain.NewBlock("")
 
@@ -86,7 +86,7 @@ func codegen(node *types.Node) *ir.Module {
 	return ir
 }
 
-func Construct(node *types.Node) *assembler {
+func Construct(node *modoTypes.Node) *assembler {
 	return &assembler{
 		node: node,
 	}
