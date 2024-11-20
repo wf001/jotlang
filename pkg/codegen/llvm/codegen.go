@@ -30,7 +30,7 @@ var naryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) v
 	},
 }
 
-func newInt32(s string) *constant.Int {
+func newI32(s string) *constant.Int {
 
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
@@ -50,7 +50,7 @@ func doAsemble(llFile string, asmFile string) {
 func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 
 	if node.IsInteger() {
-		return newInt32(node.Val)
+		return newI32(node.Val)
 
 	} else if node.IsNary() {
 		// nary takes arguments more than 2
