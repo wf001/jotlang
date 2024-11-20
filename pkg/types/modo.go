@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/wf001/modo/pkg/llirTypes"
 	"github.com/wf001/modo/pkg/log"
 )
 
@@ -132,6 +133,15 @@ const (
 type Prog struct {
 	Declares  *Node
 	FuncCalls *Node
+}
+
+// TODO
+type AllocaInst interface {
+}
+
+type Variables struct {
+	Locals  map[string]*llirTypes.LLIRAlloca
+	Globals map[string]*llirTypes.LLIRAlloca
 }
 
 type Node struct {
