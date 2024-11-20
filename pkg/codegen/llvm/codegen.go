@@ -42,7 +42,10 @@ func newI32(s string) *constant.Int {
 func doAsemble(llFile string, asmFile string) {
 	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
 	if err != nil {
-		log.Panic("fail to asemble: %+v", map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile})
+		log.Panic(
+			"fail to asemble: %+v",
+			map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile},
+		)
 	}
 	log.Debug("written asm: %s", asmFile)
 }

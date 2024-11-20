@@ -20,7 +20,9 @@ const (
 )
 
 var (
-	app             = kingpin.New("modo", "Compiler for the modo programming language.").Version(VERSION).Author(AUTHOR)
+	app = kingpin.New("modo", "Compiler for the modo programming language.").
+		Version(VERSION).
+		Author(AUTHOR)
 	appVerbose      = app.Flag("verbose", "Use verbose log").Bool()
 	appDebug        = app.Flag("debug", "Use debug log").Bool()
 	appOutput       = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
@@ -74,7 +76,10 @@ func setLogLevel() {
 func compile(asmFile string, executableFile string) {
 	out, err := exec.Command("clang", asmFile, "-o", executableFile).CombinedOutput()
 	if err != nil {
-		log.Panic("fail to compile: %+v", map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile})
+		log.Panic(
+			"fail to compile: %+v",
+			map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile},
+		)
 	}
 	log.Debug("written executable: %s", executableFile)
 }

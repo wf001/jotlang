@@ -15,7 +15,10 @@ func PrepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
 		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
 		if err != nil {
-			log.Panic("fail to make directory: %+v", map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir})
+			log.Panic(
+				"fail to make directory: %+v",
+				map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir},
+			)
 		}
 		log.Debug(log.YELLOW("make dir: %s"), artifactDir)
 
