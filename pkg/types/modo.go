@@ -39,13 +39,15 @@ var (
 	BRACE_CLOSE      = "}"
 	BRACKETS_REG_EXP = fmt.Sprintf("[%s%s%s\\%s%s%s]", PARREN_OPEN, PARREN_CLOSE, BRACKET_OPEN, BRACKET_CLOSE, BRACE_OPEN, BRACE_CLOSE)
 
-	OPERATOR_ADD      = "+"
-	OPERATOR_SUB      = "-"
-	OPERATOR_MUL      = "*"
-	OPERATOR_DIV      = "/"
-	OPERATOR_LT       = "<"
-	OPERATOR_GT       = ">"
-	OPERATORS_REG_EXP = fmt.Sprintf("[%s\\%s%s%s%s%s]", OPERATOR_ADD, OPERATOR_SUB, OPERATOR_MUL, OPERATOR_DIV, OPERATOR_LT, OPERATOR_GT)
+	NARY_OPERATOR_ADD = "+"
+	NARY_OPERATOR_SUB = "-"
+	NARY_OPERATOR_MUL = "*"
+	NARY_OPERATOR_DIV = "/"
+
+	BINARY_OPERATOR_EQ = "="
+	BINARY_OPERATOR_LT = "<"
+	BINARY_OPERATOR_GT = ">"
+	OPERATORS_REG_EXP  = fmt.Sprintf("[%s\\%s%s%s%s%s%s]", NARY_OPERATOR_ADD, NARY_OPERATOR_SUB, NARY_OPERATOR_MUL, NARY_OPERATOR_DIV, BINARY_OPERATOR_EQ, BINARY_OPERATOR_LT, BINARY_OPERATOR_GT)
 
 	THREADING_FIRST   = "->"
 	THREADING_LAST    = "->>"
@@ -96,7 +98,7 @@ func (tok *Token) IsParenClose() bool {
 }
 
 func (tok *Token) IsOperationAdd() bool {
-	return tok.Kind == TK_OPERATOR && tok.Val == OPERATOR_ADD
+	return tok.Kind == TK_OPERATOR && tok.Val == NARY_OPERATOR_ADD
 }
 
 func (tok *Token) IsNum() bool {

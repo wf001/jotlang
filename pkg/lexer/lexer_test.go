@@ -58,6 +58,13 @@ func TestSplitProgram(t *testing.T) {
 		},
 		splitProgram("(defn f [arg] (let [x 1 y 3] (if x>1 (2+y) (4-5))))"),
 	)
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"(", "=", "1", "1", ")",
+		},
+		splitProgram("(= 1 1)"),
+	)
 	t.Log(types.ALL_REG_EXP)
 }
 

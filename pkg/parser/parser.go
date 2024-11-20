@@ -30,7 +30,7 @@ func matchedNodeKind(tok *types.Token) (types.NodeKind, bool) {
 		return types.ND_NIL, false
 	}
 	switch tok.Val {
-	case types.OPERATOR_ADD:
+	case types.NARY_OPERATOR_ADD:
 		return types.ND_ADD, true
 	}
 	return types.ND_NIL, false
