@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/llir/llvm/ir"
 	"github.com/wf001/modo/pkg/log"
-	"github.com/wf001/modo/pkg/types/llir"
+	llirTypes "github.com/wf001/modo/pkg/types/llir"
 )
 
 // ########
@@ -153,10 +154,16 @@ const (
 type Prog struct {
 	Declares  *Node
 	FuncCalls *Node
+	Lib       *Libs
 }
 
-type Cores struct {
-	Core map[string]*llirTypes.LLIRAlloca
+type Libs struct {
+	Core map[string]*CoreProp
+}
+
+type CoreProp struct {
+	FuncPtr *ir.Func
+	Args    []*ir.InstAlloca
 }
 
 // TODO

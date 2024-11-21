@@ -11,6 +11,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
+	"github.com/wf001/modo/pkg/lib"
 	"github.com/wf001/modo/pkg/log"
 	modoTypes "github.com/wf001/modo/pkg/types"
 )
@@ -98,6 +99,8 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 
 func codegen(node *modoTypes.Node) *ir.Module {
 	ir := ir.NewModule()
+	ir, _ = lib.Gen(ir)
+
 	funcMain := ir.NewFunc(
 		"main",
 		types.I32,

@@ -1,6 +1,8 @@
 package llirTypes
 
-import "github.com/llir/llvm/ir"
+import (
+	"github.com/llir/llvm/ir"
+)
 
 type LLIRAlloca struct {
 	Alloca *ir.InstAlloca
