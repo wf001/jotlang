@@ -14,6 +14,7 @@ func genPrintf(module *ir.Module, libs *modoTypes.Libs) (*ir.Module, *modoTypes.
 		types.I32,
 		ir.NewParam("format", types.NewPointer(types.I8)),
 	)
+	printfFunc.Sig.Variadic = true
 
 	libs.Core = map[string]*modoTypes.CoreProp{}
 	libs.Core["prn"] = &modoTypes.CoreProp{
