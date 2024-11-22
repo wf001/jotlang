@@ -57,19 +57,25 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 	if tok.Kind == types.TK_EOL {
 		return tok, nil
 	}
+
 	if tok.IsParenOpen() {
 		tok = tok.Next
 
 		if kind, isExprCall := matchedNodeKind(tok); isExprCall {
 			tok, head = expr(tok, head, kind)
+		} else if tok.Val == "prn" {
+			nextToken, nextNode := expr(tok, head, types.ND_LIB)
+			tok, head = nextToken, nextNode
 		}
 
 		if !tok.IsParenClose() {
 			log.Panic("must be ) :have %+v", tok)
 		}
 		return tok.Next, head
+
 	} else if tok.Kind == types.TK_NUM {
 		return tok.Next, newNodeInt(tok)
+
 	}
 	return tok, head
 }

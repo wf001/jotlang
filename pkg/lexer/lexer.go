@@ -21,6 +21,10 @@ func isBinaryOperator(s string) bool {
 	re := regexp.MustCompile(types.OPERATORS_REG_EXP)
 	return re.MatchString(s)
 }
+func isLibCore(s string) bool {
+	re := regexp.MustCompile(types.LIB_CORE_REG_EXP)
+	return re.MatchString(s)
+}
 
 func newToken(kind types.TokenKind, cur *types.Token, val string) *types.Token {
 	tok := &types.Token{
@@ -52,6 +56,9 @@ func doLexicalAnalyse(splittedProgram []string) *types.Token {
 			cur = next
 		} else if isParen(p) {
 			next = newToken(types.TK_PAREN, cur, p)
+			cur = next
+		} else if isLibCore(p) {
+			next = newToken(types.TK_LIB, cur, p)
 			cur = next
 		} else {
 			log.Panic("include invalid signature: have '%+v'", p)

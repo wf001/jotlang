@@ -8,24 +8,17 @@ import (
 )
 
 func genPrintf(module *ir.Module, libs *modoTypes.Libs) (*ir.Module, *modoTypes.Libs) {
-	stdLibFunc := module.NewFunc(
-		"core.printf",
+	formatStr := module.NewGlobalDef("format", constant.NewCharArray([]byte("%d\n\x00")))
+	printfFunc := module.NewFunc(
+		"printf",
 		types.I32,
 		ir.NewParam("format", types.NewPointer(types.I8)),
 	)
-	stdLibFunc.Sig.Variadic = true
 
-	entry := stdLibFunc.NewBlock("entry")
-
-	// フォーマット文字列 "%f\n" を定義
-	formatStr := entry.NewAlloca(types.NewArray(4, types.I8)) // "%f\n" + null terminator
-	entry.NewStore(constant.NewCharArray([]byte("%s\n\x00")), formatStr)
-
-	entry.NewRet(constant.NewInt(types.I32, 0))
-
-	libs.Core["printf"] = &modoTypes.CoreProp{
-		FuncPtr: stdLibFunc,
-		Args:    []*ir.InstAlloca{formatStr},
+	libs.Core = map[string]*modoTypes.CoreProp{}
+	libs.Core["prn"] = &modoTypes.CoreProp{
+		FuncPtr: printfFunc,
+		Args:    []*ir.Global{formatStr},
 	}
 
 	return module, libs

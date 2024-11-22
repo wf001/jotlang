@@ -19,6 +19,7 @@ const (
 	TK_NUM      = TokenKind("TK_NUM")
 	TK_OPERATOR = TokenKind("TK_OPERATOR")
 	TK_PAREN    = TokenKind("TK_PAREN")
+	TK_LIB      = TokenKind("TK_LIB")
 	TK_EOL      = TokenKind("TK_EOL")
 )
 
@@ -88,6 +89,8 @@ var (
 		},
 		"|",
 	)
+	LIB_CORE_PRN     = "prn"
+	LIB_CORE_REG_EXP = fmt.Sprintf("\\b(%s)\\b", LIB_CORE_PRN)
 
 	USER_DEFINED_REG_EXP = `\w+`
 
@@ -100,6 +103,7 @@ var (
 				RESERVED_REG_EXP,
 				OPERATORS_REG_EXP,
 				BRACKETS_REG_EXP,
+				LIB_CORE_PRN,
 				USER_DEFINED_REG_EXP,
 			},
 			"|",
@@ -149,6 +153,8 @@ const (
 	// type
 	ND_NIL = NodeKind("ND_NIL") // nil
 	ND_INT = NodeKind("ND_INT") // 0-9
+	// lib
+	ND_LIB = NodeKind("ND_LIB") // standard library
 )
 
 type Prog struct {
@@ -163,7 +169,7 @@ type Libs struct {
 
 type CoreProp struct {
 	FuncPtr *ir.Func
-	Args    []*ir.InstAlloca
+	Args    []*ir.Global
 }
 
 // TODO
@@ -194,6 +200,9 @@ func (node *Node) IsNary() bool {
 func (node *Node) IsBinary() bool {
 	return node.Kind == ND_EQ
 }
+func (node *Node) IsLibrary() bool {
+	return node.Kind == ND_LIB
+}
 
 func (node *Node) DebugNode(depth int) {
 	if node == nil {
@@ -216,6 +225,8 @@ func (node *Node) DebugNode(depth int) {
 	case ND_ADD:
 		node.Child.DebugNode(depth + 1)
 	case ND_EQ:
+		node.Child.DebugNode(depth + 1)
+	case ND_LIB:
 		node.Child.DebugNode(depth + 1)
 	}
 	if node.Next != nil && node.Kind != ND_INT {
