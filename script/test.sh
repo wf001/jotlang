@@ -11,20 +11,20 @@ assert() {
   expected="$1"
   input="$2"
 
-  ./generated/test/modo run -o "$dir/out" --exec "$input"
-
-  actual="$?"
+  # 実行結果を変数に格納
+  actual_output=$(./generated/test/modo run -o "$dir/out" --exec "$input")
+  actual_exit_code="$?"
 
   ((total_tests++))
 
-  if [ "$actual" = "$expected" ]; then
+  # 実行結果をdiffで比較
+  diff_result=$(diff <(echo "$expected") <(echo "$actual_output"))
+  if [ "$actual_exit_code" -eq 0 ] && [ -z "$diff_result" ]; then
     ((passed_count++))
-    echo -e "\033[0;32m$input => $actual\033[0m"
+    echo -e "\033[0;32m$input => OK\033[0m"
   else
     ((failed_count++))
-    echo -e "\033[0;31m$input => $expected expected, but got $actual\033[0m"
-    msg="\033[0;31mNG\033[0m"
-    code=-1
+    echo -e "\033[0;31m$input => $expected expected, but got $actual_output\033[0m"
   fi
 }
 
@@ -41,17 +41,17 @@ summary(){
 }
 
 testit(){
-  assert 17 '17'
-  assert 17 '(+ 4 13)'
-  assert 6 '(+ 1 2 3)'
-  assert 20 '(+ 1 2 3 4 10)'
-  assert 35 '(+ 1 2 3 4 5 20)'
-  assert 10 '(+ 1 2 (+ 3 4))'
-  assert 10 '(+ (+ 1 2) (+ 3 4))'
-  assert 21 '(+ (+ 1 2) (+ (+ 9 5) 4))'
-  assert 39 '(+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8))'
-  assert 1 '(= 5 (+ 3 2))'
-  assert 0 '(= (+ 4 3) (+ 3 2))'
+  assert 17 '(prn 17)'
+  assert 17 '(prn (+ 4 13))'
+  assert 6 '(prn (+ 1 2 3))'
+  assert 20 '(prn (+ 1 2 3 4 10))'
+  assert 35 '(prn (+ 1 2 3 4 5 20))'
+  assert 10 '(prn (+ 1 2 (+ 3 4)))'
+  assert 10 '(prn (+ (+ 1 2) (+ 3 4)))'
+  assert 21 '(prn (+ (+ 1 2) (+ (+ 9 5) 4)))'
+  assert 39 '(prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))'
+  assert 1 '(prn (= 5 (+ 3 2)))'
+  assert 0 '(prn (= (+ 4 3) (+ 3 2)))'
 }
 
 build-compiler
