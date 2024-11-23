@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"time"
@@ -86,11 +87,13 @@ func compile(asmFile string, executableFile string) {
 
 func run(executableFile string) int {
 	cmd := exec.Command(executableFile)
-	err := cmd.Run()
+	// TODO: it works, but correctly?
+	out, err := cmd.Output()
 	log.Debug("executed: %s", executableFile)
 	if err != nil {
 		log.Error("fail to run: %s", err)
 	}
+	fmt.Println(string(out))
 
 	return cmd.ProcessState.ExitCode()
 }
