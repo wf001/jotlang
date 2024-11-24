@@ -127,6 +127,10 @@ func (tok *Token) IsNum() bool {
 	return tok.Kind == TK_NUM
 }
 
+func (tok *Token) IsLibrary() bool {
+	return tok.Kind == TK_LIB
+}
+
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {
@@ -164,12 +168,16 @@ type Prog struct {
 }
 
 type Libs struct {
-	Core map[string]*CoreProp
+	Core      map[string]*CoreProp
+	GlobalVar map[string]*CoreGlobalVars
 }
 
 type CoreProp struct {
 	FuncPtr *ir.Func
-	Args    []*ir.Global
+}
+
+type CoreGlobalVars struct {
+	Vars *ir.Global
 }
 
 // TODO

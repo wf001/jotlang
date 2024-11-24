@@ -63,7 +63,7 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 
 		if kind, isExprCall := matchedNodeKind(tok); isExprCall {
 			tok, head = expr(tok, head, kind)
-		} else if tok.Val == "prn" {
+		} else if tok.IsLibrary() {
 			nextToken, nextNode := expr(tok, head, types.ND_LIB)
 			tok, head = nextToken, nextNode
 		}

@@ -103,7 +103,7 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 		// means calling standard library
 		arg := gen(mb, node.Child)
 		prnFuncmap := coreLibs.Core["prn"]
-		mb.NewCall(prnFuncmap.FuncPtr, prnFuncmap.Args[0], arg)
+		mb.NewCall(prnFuncmap.FuncPtr, coreLibs.GlobalVar["formatDigit"].Vars, arg)
 
 		return newI32("0")
 	}

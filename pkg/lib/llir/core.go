@@ -8,7 +8,6 @@ import (
 )
 
 func genPrintf(module *ir.Module, libs *modoTypes.Libs) (*ir.Module, *modoTypes.Libs) {
-	formatStr := module.NewGlobalDef("format", constant.NewCharArray([]byte("%d\n\x00")))
 	printfFunc := module.NewFunc(
 		"printf",
 		types.I32,
@@ -16,17 +15,23 @@ func genPrintf(module *ir.Module, libs *modoTypes.Libs) (*ir.Module, *modoTypes.
 	)
 	printfFunc.Sig.Variadic = true
 
-	libs.Core = map[string]*modoTypes.CoreProp{}
 	libs.Core["prn"] = &modoTypes.CoreProp{
 		FuncPtr: printfFunc,
-		Args:    []*ir.Global{formatStr},
 	}
 
 	return module, libs
 
 }
+func genGlobal(module *ir.Module, libs *modoTypes.Libs) (*ir.Module, *modoTypes.Libs) {
+	formatStr := module.NewGlobalDef("formatDigit", constant.NewCharArray([]byte("%d\n\x00")))
+	libs.GlobalVar["formatDigit"] = &modoTypes.CoreGlobalVars{
+		Vars: formatStr,
+	}
+	return module, libs
+}
 
 func GenCore(ir *ir.Module, libs *modoTypes.Libs) (*ir.Module, *modoTypes.Libs) {
-	module, libs := genPrintf(ir, &modoTypes.Libs{})
+	module, libs := genGlobal(ir, libs)
+	module, libs = genPrintf(ir, libs)
 	return module, libs
 }

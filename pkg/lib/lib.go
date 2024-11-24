@@ -7,5 +7,8 @@ import (
 )
 
 func Gen(ir *ir.Module) (*ir.Module, *types.Libs) {
-	return core.GenCore(ir, &types.Libs{})
+	libs := &types.Libs{}
+	libs.Core = map[string]*types.CoreProp{}
+	libs.GlobalVar = map[string]*types.CoreGlobalVars{}
+	return core.GenCore(ir, libs)
 }
