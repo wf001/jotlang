@@ -20,7 +20,7 @@ type assembler struct {
 	node *modoTypes.Node
 }
 
-var coreLibs *modoTypes.Libs
+var coreLibs *modoTypes.BuiltinLibProp
 
 var naryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
 	modoTypes.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
@@ -102,8 +102,7 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 	} else if node.IsLibrary() {
 		// means calling standard library
 		arg := gen(mb, node.Child)
-		prnFuncmap := coreLibs.Core["prn"]
-		mb.NewCall(prnFuncmap.FuncPtr, coreLibs.GlobalVar["formatDigit"].Vars, arg)
+		mb.NewCall(coreLibs.Printf.FuncPtr, coreLibs.GlobalVar.FormatDigit, arg)
 
 		return newI32("0")
 	}
@@ -111,11 +110,11 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 }
 
 func codegen(node *modoTypes.Node) *ir.Module {
-	ir := ir.NewModule()
-	mod, libs := lib.Gen(ir)
-	coreLibs = libs
+	module := ir.NewModule()
+	coreLibs = &modoTypes.BuiltinLibProp{}
+	lib.DeclareBuiltin(module, coreLibs)
 
-	funcMain := mod.NewFunc(
+	funcMain := module.NewFunc(
 		"main",
 		types.I32,
 	)
@@ -123,7 +122,7 @@ func codegen(node *modoTypes.Node) *ir.Module {
 
 	res := gen(llBlock, node)
 	llBlock.NewRet(res)
-	return ir
+	return module
 }
 
 func Construct(node *modoTypes.Node) *assembler {

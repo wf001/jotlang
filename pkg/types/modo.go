@@ -161,31 +161,11 @@ const (
 	ND_LIB = NodeKind("ND_LIB") // standard library
 )
 
-type Prog struct {
-	Declares  *Node
-	FuncCalls *Node
-	Lib       *Libs
-}
-
-type Libs struct {
-	Core      map[string]*CoreProp
-	GlobalVar map[string]*CoreGlobalVars
-}
-
-type CoreProp struct {
-	FuncPtr *ir.Func
-}
-
-type CoreGlobalVars struct {
-	Vars *ir.Global
-}
-
-// TODO
-type AllocaInst interface {
-}
-
-type Globals struct {
-	Var map[string]*llirTypes.LLIRAlloca
+type Program struct {
+	Declares   *Node
+	FuncCalls  *Node
+	GlobalVar  map[string]*llirTypes.LLIRAlloca
+	BuiltinLib *BuiltinLibProp
 }
 
 type Node struct {
@@ -240,4 +220,18 @@ func (node *Node) DebugNode(depth int) {
 	if node.Next != nil && node.Kind != ND_INT {
 		node.Next.DebugNode(depth)
 	}
+}
+
+// Built-in Library
+type BuiltinLibProp struct {
+	GlobalVar *BuiltinGlobalVarsProp
+	Printf    *BuiltinProp
+}
+
+type BuiltinProp struct {
+	FuncPtr *ir.Func
+}
+
+type BuiltinGlobalVarsProp struct {
+	FormatDigit *ir.Global
 }
