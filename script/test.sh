@@ -21,10 +21,10 @@ assert() {
   diff_result=$(diff <(echo "$expected") <(echo "$actual_output"))
   if [ "$actual_exit_code" -eq 0 ] && [ -z "$diff_result" ]; then
     ((passed_count++))
-    echo -e "\033[0;32m$input => OK\033[0m"
+    echo -e "$input => $actual_output \033[0;32mOK\033[0m"
   else
     ((failed_count++))
-    echo -e "\033[0;31m$input => $expected expected, but got $actual_output\033[0m"
+    echo -e "$input => \033[0;31m$expected expected, but got $actual_output\033[0m"
   fi
 }
 
