@@ -77,10 +77,10 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 	} else if node.IsNary() {
 		// nary takes more than 2 arguments
 		child := node.Child
-		fst := gen(mb, node.Child)
+		fst := gen(mb, child)
 
 		child = child.Next
-		snd := gen(mb, node.Child.Next)
+		snd := gen(mb, child)
 
 		nary := naryMap[node.Kind]
 		res := nary(mb, fst, snd)
@@ -95,10 +95,10 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 	} else if node.IsBinary() {
 		// binary takes exactly 2 arguments
 		child := node.Child
-		fst := gen(mb, node.Child)
+		fst := gen(mb, child)
 
 		child = child.Next
-		snd := gen(mb, node.Child.Next)
+		snd := gen(mb, child)
 
 		binary := binaryMap[node.Kind]
 		res := binary(mb, fst, snd)
