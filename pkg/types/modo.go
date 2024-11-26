@@ -164,7 +164,6 @@ const (
 type Program struct {
 	Declares   *Node
 	FuncCalls  *Node
-	GlobalVar  map[string]*llirTypes.LLIRAlloca
 	BuiltinLib *BuiltinLibProp
 }
 
