@@ -36,33 +36,21 @@ func matchedNodeKind(tok *types.Token) (types.NodeKind, bool) {
 	return types.ND_NIL, false
 }
 
-func expr(tok *types.Token, head *types.Node, kind types.NodeKind) (*types.Token, *types.Node) {
-	nextToken, argHead := program(tok.Next)
-	prevNode := argHead
-	for nextToken.IsNum() || nextToken.IsParenOpen() {
-		nextToken, prevNode.Next = program(nextToken)
-		prevNode = prevNode.Next
-	}
-	head = newNode(kind, argHead, "")
-	tok = nextToken
-	return tok, head
-}
-
-func funcCall(
-	tok *types.Token,
-	head *types.Node,
-	kind types.NodeKind,
-	val string,
+func expr(
+	rootToken *types.Token,
+	rootNode *types.Node,
+	exprKind types.NodeKind,
+	exprName string,
 ) (*types.Token, *types.Node) {
-	nextToken, argHead := program(tok.Next)
+	nextToken, argHead := program(rootToken.Next)
 	prevNode := argHead
 	for nextToken.IsNum() || nextToken.IsParenOpen() {
 		nextToken, prevNode.Next = program(nextToken)
 		prevNode = prevNode.Next
 	}
-	head = newNode(kind, argHead, val)
-	tok = nextToken
-	return tok, head
+	rootNode = newNode(exprKind, argHead, exprName)
+	rootToken = nextToken
+	return rootToken, rootNode
 }
 
 func program(tok *types.Token) (*types.Token, *types.Node) {
@@ -76,11 +64,11 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 	if tok.IsParenOpen() {
 		tok = tok.Next
 
-		if kind, isExprCall := matchedNodeKind(tok); isExprCall {
-			tok, head = expr(tok, head, kind)
+		if kind, isOperatorCall := matchedNodeKind(tok); isOperatorCall {
+			tok, head = expr(tok, head, kind, tok.Val)
 		} else if tok.IsLibrary() {
-			nextToken, nextNode := funcCall(tok, head, types.ND_LIB, tok.Val)
-			tok, head = nextToken, nextNode
+			// TODO: put together?
+			tok, head = expr(tok, head, types.ND_LIB, tok.Val)
 		}
 
 		if !tok.IsParenClose() {

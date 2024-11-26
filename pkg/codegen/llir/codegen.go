@@ -22,7 +22,8 @@ type assembler struct {
 
 var coreLibs *modoTypes.BuiltinLibProp
 
-var naryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
+var operatorMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
+	// nary
 	modoTypes.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewAdd(x, y)
 	},
@@ -32,8 +33,7 @@ var naryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) v
 	modoTypes.ND_MUL: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewMul(x, y)
 	},
-}
-var binaryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
+	// binary
 	modoTypes.ND_EQ: func(block *ir.Block, x, y value.Value) value.Value {
 		res := block.NewICmp(enum.IPredEQ, x, y)
 		return block.NewZExt(res, types.I32)
@@ -82,7 +82,7 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 		child = child.Next
 		snd := gen(mb, child)
 
-		nary := naryMap[node.Kind]
+		nary := operatorMap[node.Kind]
 		res := nary(mb, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
@@ -100,7 +100,7 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 		child = child.Next
 		snd := gen(mb, child)
 
-		binary := binaryMap[node.Kind]
+		binary := operatorMap[node.Kind]
 		res := binary(mb, fst, snd)
 
 		return res
