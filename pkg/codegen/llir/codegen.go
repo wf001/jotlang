@@ -17,7 +17,7 @@ import (
 )
 
 type assembler struct {
-	node *modoTypes.Node
+	node *modoTypes.Program
 }
 
 var coreLibs *modoTypes.BuiltinLibProp
@@ -131,14 +131,14 @@ func codegen(node *modoTypes.Node) *ir.Module {
 	return module
 }
 
-func Construct(node *modoTypes.Node) *assembler {
+func Construct(program *modoTypes.Program) *assembler {
 	return &assembler{
-		node: node,
+		node: program,
 	}
 }
 
 func (a assembler) Assemble(llName string, asmName string) {
-	ir := codegen(a.node)
+	ir := codegen(a.node.FuncCalls)
 
 	log.DebugMessage("code generated")
 	log.Debug("IR = \n %s\n", ir.String())

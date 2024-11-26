@@ -90,9 +90,10 @@ func Construct(token *types.Token) *parser {
 }
 
 // take Token object, return Node object
-func (p parser) Parse() *types.Node {
-	_, node := program(p.token)
-	node.DebugNode(0)
+func (p parser) Parse() *types.Program {
+	prog := &types.Program{}
+	_, prog.FuncCalls = program(p.token)
+	prog.Debug(0)
 
-	return node
+	return prog
 }

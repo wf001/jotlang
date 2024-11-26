@@ -191,7 +191,7 @@ func (node *Node) IsLibrary() bool {
 	return node.Kind == ND_LIB
 }
 
-func (node *Node) DebugNode(depth int) {
+func (node *Node) Debug(depth int) {
 	if node == nil {
 		return
 	}
@@ -208,16 +208,31 @@ func (node *Node) DebugNode(depth int) {
 
 	switch node.Kind {
 	case ND_INT:
-		node.Next.DebugNode(depth)
+		node.Next.Debug(depth)
 	case ND_ADD:
-		node.Child.DebugNode(depth + 1)
+		node.Child.Debug(depth + 1)
 	case ND_EQ:
-		node.Child.DebugNode(depth + 1)
+		node.Child.Debug(depth + 1)
 	case ND_LIB:
-		node.Child.DebugNode(depth + 1)
+		node.Child.Debug(depth + 1)
 	}
 	if node.Next != nil && node.Kind != ND_INT {
-		node.Next.DebugNode(depth)
+		node.Next.Debug(depth)
+	}
+}
+func (prog *Program) Debug(depth int) {
+	if prog.Declares != nil {
+		log.DebugMessage("[Declares]")
+		prog.Declares.Debug(0)
+	}
+
+	if prog.FuncCalls != nil {
+		log.DebugMessage("[FuncCalls]")
+		prog.FuncCalls.Debug(0)
+	}
+
+	if prog.BuiltinLib != nil {
+		log.DebugMessage("[BuiltinLib]")
 	}
 }
 
