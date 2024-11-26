@@ -39,6 +39,11 @@ var binaryMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value)
 		return block.NewZExt(res, types.I32)
 	},
 }
+var libraryMap = map[string]func(*ir.Block, *modoTypes.BuiltinLibProp, value.Value){
+	"prn": func(block *ir.Block, libs *modoTypes.BuiltinLibProp, arg value.Value) {
+		block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatDigit, arg)
+	},
+}
 
 func newI32(s string) *constant.Int {
 
@@ -102,7 +107,8 @@ func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
 	} else if node.IsLibrary() {
 		// means calling standard library
 		arg := gen(mb, node.Child)
-		mb.NewCall(coreLibs.Printf.FuncPtr, coreLibs.GlobalVar.FormatDigit, arg)
+		libFunc := libraryMap[node.Val]
+		libFunc(mb, coreLibs, arg)
 
 		return newI32("0")
 	}

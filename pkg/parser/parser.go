@@ -11,18 +11,16 @@ type parser struct {
 	token *types.Token
 }
 
-func newNode(kind types.NodeKind, child *types.Node) *types.Node {
+func newNode(kind types.NodeKind, child *types.Node, val string) *types.Node {
 	return &types.Node{
 		Kind:  kind,
 		Child: child,
+		Val:   val,
 	}
 }
 
 func newNodeInt(tok *types.Token) *types.Node {
-	return &types.Node{
-		Kind: types.ND_INT,
-		Val:  tok.Val,
-	}
+	return newNode(types.ND_INT, nil, tok.Val)
 }
 
 func matchedNodeKind(tok *types.Token) (types.NodeKind, bool) {
@@ -45,7 +43,24 @@ func expr(tok *types.Token, head *types.Node, kind types.NodeKind) (*types.Token
 		nextToken, prevNode.Next = program(nextToken)
 		prevNode = prevNode.Next
 	}
-	head = newNode(kind, argHead)
+	head = newNode(kind, argHead, "")
+	tok = nextToken
+	return tok, head
+}
+
+func funcCall(
+	tok *types.Token,
+	head *types.Node,
+	kind types.NodeKind,
+	val string,
+) (*types.Token, *types.Node) {
+	nextToken, argHead := program(tok.Next)
+	prevNode := argHead
+	for nextToken.IsNum() || nextToken.IsParenOpen() {
+		nextToken, prevNode.Next = program(nextToken)
+		prevNode = prevNode.Next
+	}
+	head = newNode(kind, argHead, val)
 	tok = nextToken
 	return tok, head
 }
@@ -64,7 +79,7 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 		if kind, isExprCall := matchedNodeKind(tok); isExprCall {
 			tok, head = expr(tok, head, kind)
 		} else if tok.IsLibrary() {
-			nextToken, nextNode := expr(tok, head, types.ND_LIB)
+			nextToken, nextNode := funcCall(tok, head, types.ND_LIB, tok.Val)
 			tok, head = nextToken, nextNode
 		}
 
