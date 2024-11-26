@@ -17,10 +17,8 @@ import (
 )
 
 type assembler struct {
-	node *modoTypes.Program
+	program *modoTypes.Program
 }
-
-var coreLibs *modoTypes.BuiltinLibProp
 
 var operatorMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
 	// nary
@@ -69,56 +67,56 @@ func doAsemble(llFile string, asmFile string) {
 	log.Debug("written asm: %s", asmFile)
 }
 
-func gen(mb *ir.Block, node *modoTypes.Node) value.Value {
+func gen(mb *ir.Block, funcCallNode *modoTypes.Node, libs *modoTypes.BuiltinLibProp) value.Value {
 
-	if node.IsInteger() {
-		return newI32(node.Val)
+	if funcCallNode.IsInteger() {
+		return newI32(funcCallNode.Val)
 
-	} else if node.IsNary() {
+	} else if funcCallNode.IsNary() {
 		// nary takes more than 2 arguments
-		child := node.Child
-		fst := gen(mb, child)
+		child := funcCallNode.Child
+		fst := gen(mb, child, libs)
 
 		child = child.Next
-		snd := gen(mb, child)
+		snd := gen(mb, child, libs)
 
-		nary := operatorMap[node.Kind]
+		nary := operatorMap[funcCallNode.Kind]
 		res := nary(mb, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
-			snd = gen(mb, child)
+			snd = gen(mb, child, libs)
 			res = nary(mb, fst, snd)
 		}
 		return res
 
-	} else if node.IsBinary() {
+	} else if funcCallNode.IsBinary() {
 		// binary takes exactly 2 arguments
-		child := node.Child
-		fst := gen(mb, child)
+		child := funcCallNode.Child
+		fst := gen(mb, child, libs)
 
 		child = child.Next
-		snd := gen(mb, child)
+		snd := gen(mb, child, libs)
 
-		binary := operatorMap[node.Kind]
+		binary := operatorMap[funcCallNode.Kind]
 		res := binary(mb, fst, snd)
 
 		return res
-	} else if node.IsLibrary() {
+	} else if funcCallNode.IsLibrary() {
 		// means calling standard library
-		arg := gen(mb, node.Child)
-		libFunc := libraryMap[node.Val]
-		libFunc(mb, coreLibs, arg)
+		arg := gen(mb, funcCallNode.Child, libs)
+		libFunc := libraryMap[funcCallNode.Val]
+		libFunc(mb, libs, arg)
 
 		return newI32("0")
 	}
 	return nil
 }
 
-func codegen(node *modoTypes.Node) *ir.Module {
+func codegen(prog *modoTypes.Program) *ir.Module {
 	module := ir.NewModule()
-	coreLibs = &modoTypes.BuiltinLibProp{}
-	lib.DeclareBuiltin(module, coreLibs)
+	prog.BuiltinLibs = &modoTypes.BuiltinLibProp{}
+	lib.DeclareBuiltin(module, prog.BuiltinLibs)
 
 	funcMain := module.NewFunc(
 		"main",
@@ -126,22 +124,22 @@ func codegen(node *modoTypes.Node) *ir.Module {
 	)
 	llBlock := funcMain.NewBlock("")
 
-	res := gen(llBlock, node)
+	res := gen(llBlock, prog.FuncCalls, prog.BuiltinLibs)
 	llBlock.NewRet(res)
 	return module
 }
 
 func Construct(program *modoTypes.Program) *assembler {
 	return &assembler{
-		node: program,
+		program: program,
 	}
 }
 
 func (a assembler) Assemble(llName string, asmName string) {
-	ir := codegen(a.node.FuncCalls)
+	ir := codegen(a.program)
 
 	log.DebugMessage("code generated")
-	log.Debug("IR = \n %s\n", ir.String())
+	log.Debug("[IR]  \n%s\n", ir.String())
 
 	err := os.WriteFile(llName, []byte(ir.String()), 0600)
 	if err != nil {
