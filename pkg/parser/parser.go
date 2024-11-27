@@ -4,44 +4,44 @@ import (
 	"fmt"
 
 	"github.com/wf001/modo/pkg/log"
-	"github.com/wf001/modo/pkg/types"
+	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 type parser struct {
-	token *types.Token
+	token *mTypes.Token
 }
 
-func newNode(kind types.NodeKind, child *types.Node, val string) *types.Node {
-	return &types.Node{
+func newNode(kind mTypes.NodeKind, child *mTypes.Node, val string) *mTypes.Node {
+	return &mTypes.Node{
 		Kind:  kind,
 		Child: child,
 		Val:   val,
 	}
 }
 
-func newNodeInt(tok *types.Token) *types.Node {
-	return newNode(types.ND_INT, nil, tok.Val)
+func newNodeInt(tok *mTypes.Token) *mTypes.Node {
+	return newNode(mTypes.ND_INT, nil, tok.Val)
 }
 
-func matchedNodeKind(tok *types.Token) (types.NodeKind, bool) {
-	if tok.Kind != types.TK_OPERATOR {
-		return types.ND_NIL, false
+func matchedNodeKind(tok *mTypes.Token) (mTypes.NodeKind, bool) {
+	if tok.Kind != mTypes.TK_OPERATOR {
+		return mTypes.ND_NIL, false
 	}
 	switch tok.Val {
-	case types.NARY_OPERATOR_ADD:
-		return types.ND_ADD, true
-	case types.BINARY_OPERATOR_EQ:
-		return types.ND_EQ, true
+	case mTypes.NARY_OPERATOR_ADD:
+		return mTypes.ND_ADD, true
+	case mTypes.BINARY_OPERATOR_EQ:
+		return mTypes.ND_EQ, true
 	}
-	return types.ND_NIL, false
+	return mTypes.ND_NIL, false
 }
 
 func expr(
-	rootToken *types.Token,
-	rootNode *types.Node,
-	exprKind types.NodeKind,
+	rootToken *mTypes.Token,
+	rootNode *mTypes.Node,
+	exprKind mTypes.NodeKind,
 	exprName string,
-) (*types.Token, *types.Node) {
+) (*mTypes.Token, *mTypes.Node) {
 	nextToken, argHead := program(rootToken.Next)
 	prevNode := argHead
 	for nextToken.IsNum() || nextToken.IsParenOpen() {
@@ -53,11 +53,11 @@ func expr(
 	return rootToken, rootNode
 }
 
-func program(tok *types.Token) (*types.Token, *types.Node) {
+func program(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
-	head := &types.Node{}
+	head := &mTypes.Node{}
 
-	if tok.Kind == types.TK_EOL {
+	if tok.Kind == mTypes.TK_EOL {
 		return tok, nil
 	}
 
@@ -68,7 +68,7 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 			tok, head = expr(tok, head, kind, tok.Val)
 		} else if tok.IsLibrary() {
 			// TODO: put together?
-			tok, head = expr(tok, head, types.ND_LIB, tok.Val)
+			tok, head = expr(tok, head, mTypes.ND_LIB, tok.Val)
 		}
 
 		if !tok.IsParenClose() {
@@ -76,22 +76,22 @@ func program(tok *types.Token) (*types.Token, *types.Node) {
 		}
 		return tok.Next, head
 
-	} else if tok.Kind == types.TK_NUM {
+	} else if tok.Kind == mTypes.TK_NUM {
 		return tok.Next, newNodeInt(tok)
 
 	}
 	return tok, head
 }
 
-func Construct(token *types.Token) *parser {
+func Construct(token *mTypes.Token) *parser {
 	return &parser{
 		token: token,
 	}
 }
 
 // take Token object, return Node object
-func (p parser) Parse() *types.Program {
-	prog := &types.Program{}
+func (p parser) Parse() *mTypes.Program {
+	prog := &mTypes.Program{}
 	_, prog.FuncCalls = program(p.token)
 	prog.Debug(0)
 

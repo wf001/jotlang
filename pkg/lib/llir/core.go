@@ -3,12 +3,12 @@ package core
 import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/types"
-	modoTypes "github.com/wf001/modo/pkg/types"
+	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 func declarePrintf(
 	module *ir.Module,
-	libs *modoTypes.BuiltinLibProp,
+	libs *mTypes.BuiltinLibProp,
 ) {
 	printfFunc := module.NewFunc(
 		"printf",
@@ -17,11 +17,11 @@ func declarePrintf(
 	)
 	printfFunc.Sig.Variadic = true
 
-	libs.Printf = &modoTypes.BuiltinProp{}
+	libs.Printf = &mTypes.BuiltinProp{}
 	libs.Printf.FuncPtr = printfFunc
 
 }
 
-func Declare(ir *ir.Module, libs *modoTypes.BuiltinLibProp) {
+func Declare(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	declarePrintf(ir, libs)
 }

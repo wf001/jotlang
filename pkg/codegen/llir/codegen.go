@@ -13,32 +13,32 @@ import (
 
 	"github.com/wf001/modo/pkg/lib"
 	"github.com/wf001/modo/pkg/log"
-	modoTypes "github.com/wf001/modo/pkg/types"
+	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 type assembler struct {
-	program *modoTypes.Program
+	program *mTypes.Program
 }
 
-var operatorMap = map[modoTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
+var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
 	// nary
-	modoTypes.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
+	mTypes.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewAdd(x, y)
 	},
-	modoTypes.ND_SUB: func(block *ir.Block, x, y value.Value) value.Value {
+	mTypes.ND_SUB: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewSub(x, y)
 	},
-	modoTypes.ND_MUL: func(block *ir.Block, x, y value.Value) value.Value {
+	mTypes.ND_MUL: func(block *ir.Block, x, y value.Value) value.Value {
 		return block.NewMul(x, y)
 	},
 	// binary
-	modoTypes.ND_EQ: func(block *ir.Block, x, y value.Value) value.Value {
+	mTypes.ND_EQ: func(block *ir.Block, x, y value.Value) value.Value {
 		res := block.NewICmp(enum.IPredEQ, x, y)
 		return block.NewZExt(res, types.I32)
 	},
 }
-var libraryMap = map[string]func(*ir.Block, *modoTypes.BuiltinLibProp, value.Value){
-	"prn": func(block *ir.Block, libs *modoTypes.BuiltinLibProp, arg value.Value) {
+var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
+	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value) {
 		block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatDigit, arg)
 	},
 }
@@ -67,7 +67,7 @@ func doAsemble(llFile string, asmFile string) {
 	log.Debug("written asm: %s", asmFile)
 }
 
-func gen(mb *ir.Block, funcCallNode *modoTypes.Node, libs *modoTypes.BuiltinLibProp) value.Value {
+func gen(mb *ir.Block, funcCallNode *mTypes.Node, libs *mTypes.BuiltinLibProp) value.Value {
 
 	if funcCallNode.IsInteger() {
 		return newI32(funcCallNode.Val)
@@ -113,9 +113,9 @@ func gen(mb *ir.Block, funcCallNode *modoTypes.Node, libs *modoTypes.BuiltinLibP
 	return nil
 }
 
-func codegen(prog *modoTypes.Program) *ir.Module {
+func codegen(prog *mTypes.Program) *ir.Module {
 	module := ir.NewModule()
-	prog.BuiltinLibs = &modoTypes.BuiltinLibProp{}
+	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
 
 	funcMain := module.NewFunc(
@@ -129,7 +129,7 @@ func codegen(prog *modoTypes.Program) *ir.Module {
 	return module
 }
 
-func Construct(program *modoTypes.Program) *assembler {
+func Construct(program *mTypes.Program) *assembler {
 	return &assembler{
 		program: program,
 	}
@@ -139,7 +139,7 @@ func (a assembler) Assemble(llName string, asmName string) {
 	ir := codegen(a.program)
 
 	log.DebugMessage("code generated")
-	log.Debug("[IR]  \n%s\n", ir.String())
+	log.Debug("[IR]\n%s\n", ir.String())
 
 	err := os.WriteFile(llName, []byte(ir.String()), 0600)
 	if err != nil {

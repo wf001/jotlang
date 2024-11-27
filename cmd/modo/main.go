@@ -12,7 +12,7 @@ import (
 	"github.com/wf001/modo/pkg/lexer"
 	"github.com/wf001/modo/pkg/log"
 	"github.com/wf001/modo/pkg/parser"
-	"github.com/wf001/modo/pkg/types"
+	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 const (
@@ -37,7 +37,7 @@ var (
 )
 
 type IParser interface {
-	Parse() *types.Node
+	Parse() *mTypes.Node
 }
 
 func Parse(p IParser) {

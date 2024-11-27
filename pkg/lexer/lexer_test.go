@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wf001/modo/pkg/types"
+	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 func TestSplitProgram(t *testing.T) {
@@ -65,28 +65,28 @@ func TestSplitProgram(t *testing.T) {
 		},
 		splitProgram("(= 1 1)"),
 	)
-	t.Log(types.ALL_REG_EXP)
+	t.Log(mTypes.ALL_REG_EXP)
 }
 
 func TestLexOneInteger(t *testing.T) {
-	assert.Equal(t, &types.Token{Kind: types.TK_NUM, Val: "1"}, Lex("1"))
+	assert.Equal(t, &mTypes.Token{Kind: mTypes.TK_NUM, Val: "1"}, Lex("1"))
 }
 
 func TestLexOperationAdd(t *testing.T) {
-	want := &types.Token{
-		Kind: types.TK_PAREN,
+	want := &mTypes.Token{
+		Kind: mTypes.TK_PAREN,
 		Val:  "(",
-		Next: &types.Token{
-			Kind: types.TK_OPERATOR,
+		Next: &mTypes.Token{
+			Kind: mTypes.TK_OPERATOR,
 			Val:  "+",
-			Next: &types.Token{
-				Kind: types.TK_NUM,
+			Next: &mTypes.Token{
+				Kind: mTypes.TK_NUM,
 				Val:  "1",
-				Next: &types.Token{
-					Kind: types.TK_NUM,
+				Next: &mTypes.Token{
+					Kind: mTypes.TK_NUM,
 					Val:  "2",
-					Next: &types.Token{
-						Kind: types.TK_PAREN,
+					Next: &mTypes.Token{
+						Kind: mTypes.TK_PAREN,
 						Val:  ")",
 					},
 				},
@@ -98,44 +98,44 @@ func TestLexOperationAdd(t *testing.T) {
 }
 
 func TestLexOperationAddTakingAdd(t *testing.T) {
-	want := &types.Token{
-		Kind: types.TK_PAREN,
+	want := &mTypes.Token{
+		Kind: mTypes.TK_PAREN,
 		Val:  "(",
-		Next: &types.Token{
-			Kind: types.TK_OPERATOR,
+		Next: &mTypes.Token{
+			Kind: mTypes.TK_OPERATOR,
 			Val:  "+",
-			Next: &types.Token{
-				Kind: types.TK_PAREN,
+			Next: &mTypes.Token{
+				Kind: mTypes.TK_PAREN,
 				Val:  "(",
-				Next: &types.Token{
-					Kind: types.TK_OPERATOR,
+				Next: &mTypes.Token{
+					Kind: mTypes.TK_OPERATOR,
 					Val:  "+",
-					Next: &types.Token{
-						Kind: types.TK_NUM,
+					Next: &mTypes.Token{
+						Kind: mTypes.TK_NUM,
 						Val:  "1",
-						Next: &types.Token{
-							Kind: types.TK_NUM,
+						Next: &mTypes.Token{
+							Kind: mTypes.TK_NUM,
 							Val:  "2",
-							Next: &types.Token{
-								Kind: types.TK_PAREN,
+							Next: &mTypes.Token{
+								Kind: mTypes.TK_PAREN,
 								Val:  ")",
-								Next: &types.Token{
-									Kind: types.TK_PAREN,
+								Next: &mTypes.Token{
+									Kind: mTypes.TK_PAREN,
 									Val:  "(",
-									Next: &types.Token{
-										Kind: types.TK_OPERATOR,
+									Next: &mTypes.Token{
+										Kind: mTypes.TK_OPERATOR,
 										Val:  "+",
-										Next: &types.Token{
-											Kind: types.TK_NUM,
+										Next: &mTypes.Token{
+											Kind: mTypes.TK_NUM,
 											Val:  "3",
-											Next: &types.Token{
-												Kind: types.TK_NUM,
+											Next: &mTypes.Token{
+												Kind: mTypes.TK_NUM,
 												Val:  "4",
-												Next: &types.Token{
-													Kind: types.TK_PAREN,
+												Next: &mTypes.Token{
+													Kind: mTypes.TK_PAREN,
 													Val:  ")",
-													Next: &types.Token{
-														Kind: types.TK_PAREN,
+													Next: &mTypes.Token{
+														Kind: mTypes.TK_PAREN,
 														Val:  ")",
 													},
 												},

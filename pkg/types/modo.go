@@ -6,7 +6,7 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/wf001/modo/pkg/log"
-	llirTypes "github.com/wf001/modo/pkg/types/llir"
+	mTypes "github.com/wf001/modo/pkg/types/llir"
 )
 
 // ########
@@ -164,7 +164,7 @@ const (
 type Program struct {
 	Declares    *Node
 	FuncCalls   *Node
-	GlobalVars  *llirTypes.LLIRAlloca
+	GlobalVars  *mTypes.LLIRAlloca
 	BuiltinLibs *BuiltinLibProp
 }
 
@@ -176,7 +176,7 @@ type Node struct {
 	Then      *Node
 	Else      *Node
 	Val       string
-	LocalVars *llirTypes.LLIRAlloca
+	LocalVars *mTypes.LLIRAlloca
 }
 
 func (node *Node) IsInteger() bool {

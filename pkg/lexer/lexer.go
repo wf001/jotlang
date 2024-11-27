@@ -4,30 +4,30 @@ import (
 	"regexp"
 
 	"github.com/wf001/modo/pkg/log"
-	"github.com/wf001/modo/pkg/types"
+	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 func isInteger(s string) bool {
-	re := regexp.MustCompile(types.INTEGER_REG_EXP)
+	re := regexp.MustCompile(mTypes.INTEGER_REG_EXP)
 	return re.MatchString(s)
 }
 
 func isParen(s string) bool {
-	re := regexp.MustCompile(types.BRACKETS_REG_EXP)
+	re := regexp.MustCompile(mTypes.BRACKETS_REG_EXP)
 	return re.MatchString(s)
 }
 
 func isBinaryOperator(s string) bool {
-	re := regexp.MustCompile(types.OPERATORS_REG_EXP)
+	re := regexp.MustCompile(mTypes.OPERATORS_REG_EXP)
 	return re.MatchString(s)
 }
 func isLibCore(s string) bool {
-	re := regexp.MustCompile(types.LIB_CORE_REG_EXP)
+	re := regexp.MustCompile(mTypes.LIB_CORE_REG_EXP)
 	return re.MatchString(s)
 }
 
-func newToken(kind types.TokenKind, cur *types.Token, val string) *types.Token {
-	tok := &types.Token{
+func newToken(kind mTypes.TokenKind, cur *mTypes.Token, val string) *mTypes.Token {
+	tok := &mTypes.Token{
 		Kind: kind,
 		Val:  val,
 	}
@@ -36,29 +36,29 @@ func newToken(kind types.TokenKind, cur *types.Token, val string) *types.Token {
 }
 
 func splitProgram(expr string) []string {
-	re := regexp.MustCompile(types.ALL_REG_EXP)
+	re := regexp.MustCompile(mTypes.ALL_REG_EXP)
 	res := re.FindAllString(expr, -1)
 	log.Debug(log.YELLOW("splitted program: %#+v"), res)
 	return res
 }
 
-func doLexicalAnalyse(splittedProgram []string) *types.Token {
-	cur := new(types.Token)
+func doLexicalAnalyse(splittedProgram []string) *mTypes.Token {
+	cur := new(mTypes.Token)
 	head := cur
-	next := new(types.Token)
+	next := new(mTypes.Token)
 
 	for _, p := range splittedProgram {
 		if isInteger(p) {
-			next = newToken(types.TK_NUM, cur, p)
+			next = newToken(mTypes.TK_NUM, cur, p)
 			cur = next
 		} else if isBinaryOperator(p) {
-			next = newToken(types.TK_OPERATOR, cur, p)
+			next = newToken(mTypes.TK_OPERATOR, cur, p)
 			cur = next
 		} else if isParen(p) {
-			next = newToken(types.TK_PAREN, cur, p)
+			next = newToken(mTypes.TK_PAREN, cur, p)
 			cur = next
 		} else if isLibCore(p) {
-			next = newToken(types.TK_LIB, cur, p)
+			next = newToken(mTypes.TK_LIB, cur, p)
 			cur = next
 		} else {
 			log.Panic("include invalid signature: have '%+v'", p)
@@ -70,7 +70,7 @@ func doLexicalAnalyse(splittedProgram []string) *types.Token {
 }
 
 // take string, return Token object
-func Lex(s string) *types.Token {
+func Lex(s string) *mTypes.Token {
 	log.Debug(log.YELLOW("original source: '%s'"), s)
 	arr := splitProgram(s)
 	return doLexicalAnalyse(arr)
