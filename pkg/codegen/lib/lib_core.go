@@ -17,11 +17,12 @@ func declarePrintf(
 	)
 	printfFunc.Sig.Variadic = true
 
-	libs.Printf = &mTypes.BuiltinProp{}
-	libs.Printf.FuncPtr = printfFunc
+	libs.Printf = &mTypes.BuiltinProp{
+		FuncPtr: printfFunc,
+	}
 
 }
 
-func Declare(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
+func declareCore(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	declarePrintf(ir, libs)
 }
