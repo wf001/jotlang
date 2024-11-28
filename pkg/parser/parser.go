@@ -83,16 +83,10 @@ func program(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	return tok, head
 }
 
-func Construct(token *mTypes.Token) *parser {
-	return &parser{
-		token: token,
-	}
-}
-
 // take Token object, return Node object
-func (p parser) Parse() *mTypes.Program {
+func Parse(token *mTypes.Token) *mTypes.Program {
 	prog := &mTypes.Program{}
-	_, prog.FuncCalls = program(p.token)
+	_, prog.FuncCalls = program(token)
 	prog.Debug(0)
 
 	return prog

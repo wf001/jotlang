@@ -12,7 +12,6 @@ import (
 	"github.com/wf001/modo/pkg/lexer"
 	"github.com/wf001/modo/pkg/log"
 	"github.com/wf001/modo/pkg/parser"
-	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 const (
@@ -35,14 +34,6 @@ var (
 	runExec   = runCmd.Flag("exec", "evaluate <EXEC>").String()
 	inputFile = runCmd.Arg("file", "source file").String()
 )
-
-type IParser interface {
-	Parse() *mTypes.Node
-}
-
-func Parse(p IParser) {
-	p.Parse()
-}
 
 type IAssebler interface {
 	Assemble()
@@ -105,7 +96,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	log.DebugMessage("code lexed ")
 
 	// Token -> Node
-	node := parser.Construct(token).Parse()
+	node := parser.Parse(token)
 	log.DebugMessage("code parsed")
 
 	llName, asmName, executableName := io.PrepareWorkingFile(workingDirPrefix, currentTime)
