@@ -4,3 +4,4 @@ generated
 sample/
 .clj-kondo
 .lsp
+.DS_Store
