@@ -1,4 +1,4 @@
-package core
+package lib
 
 import (
 	"github.com/llir/llvm/ir"

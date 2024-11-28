@@ -3,7 +3,6 @@ package lib
 import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
-	"github.com/wf001/modo/pkg/lib/llir"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -20,6 +19,6 @@ func declareGlobalFormatDigit(
 
 func DeclareBuiltin(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	declareGlobalFormatDigit(ir, libs)
-	core.Declare(ir, libs)
+	Declare(ir, libs)
 	log.DebugMessage("built-in library declared")
 }

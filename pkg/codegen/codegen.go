@@ -11,7 +11,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"github.com/wf001/modo/pkg/lib"
+	"github.com/wf001/modo/pkg/codegen/lib"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )

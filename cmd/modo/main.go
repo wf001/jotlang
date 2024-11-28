@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
-	llirCodegen "github.com/wf001/modo/pkg/codegen/llir"
+	"github.com/wf001/modo/pkg/codegen"
 	"github.com/wf001/modo/pkg/io"
 	"github.com/wf001/modo/pkg/lexer"
 	"github.com/wf001/modo/pkg/log"
@@ -111,7 +111,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	llName, asmName, executableName := io.PrepareWorkingFile(workingDirPrefix, currentTime)
 
 	// Node -> AST -> write assembly
-	llirCodegen.Construct(node).Assemble(llName, asmName)
+	codegen.Construct(node).Assemble(llName, asmName)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)
