@@ -29,4 +29,4 @@ test-compiler:
 	./script/test.sh
 
 test-go:
-	go test -v ./...
+	go test -v ./... | tc
