@@ -5,3 +5,4 @@ sample/
 .clj-kondo
 .lsp
 .DS_Store
+__debug*
