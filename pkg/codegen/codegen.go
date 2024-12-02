@@ -124,8 +124,10 @@ func codegen(prog *mTypes.Program) *ir.Module {
 	)
 	llBlock := funcMain.NewBlock("")
 
-	res := gen(llBlock, prog.FuncCalls, prog.BuiltinLibs)
-	llBlock.NewRet(res)
+	for calls := prog.FuncCalls; calls != nil; calls = calls.Next {
+		gen(llBlock, calls, prog.BuiltinLibs)
+	}
+	llBlock.NewRet(newI32("0"))
 	return module
 }
 
