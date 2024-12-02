@@ -42,10 +42,10 @@ func expr(
 	exprKind mTypes.NodeKind,
 	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
-	nextToken, argHead := program(rootToken.Next)
+	nextToken, argHead := parseFuncCall(rootToken.Next)
 	prevNode := argHead
 	for nextToken.IsNum() || nextToken.IsParenOpen() {
-		nextToken, prevNode.Next = program(nextToken)
+		nextToken, prevNode.Next = parseFuncCall(nextToken)
 		prevNode = prevNode.Next
 	}
 	rootNode = newNode(exprKind, argHead, exprName)
@@ -53,7 +53,8 @@ func expr(
 	return rootToken, rootNode
 }
 
-func program(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
+// TODO: rename
+func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
@@ -64,10 +65,13 @@ func program(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	if tok.IsParenOpen() {
 		tok = tok.Next
 
+		// TODO: rename to matchedOperator
 		if kind, isOperatorCall := matchedNodeKind(tok); isOperatorCall {
+			log.Debug("is Operator :have %+v", tok)
 			tok, head = expr(tok, head, kind, tok.Val)
 		} else if tok.IsLibrary() {
 			// TODO: put together?
+			log.Debug("is Library :have %+v", tok)
 			tok, head = expr(tok, head, mTypes.ND_LIB, tok.Val)
 		}
 
@@ -81,12 +85,45 @@ func program(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 
 	}
 	return tok, head
+
+}
+
+// TODO: rename to parseProgram
+func program(tok *mTypes.Token) *mTypes.Program {
+	p := &mTypes.Program{}
+	prevDeclare := p.Declares
+	prevFuncCall := p.FuncCalls
+
+	for tok != nil && tok.IsParenOpen() {
+
+		if tok.Next.IsReserved() {
+			// declare
+			if prevDeclare == nil {
+				tok, p.Declares = parseFuncCall(tok)
+				prevDeclare = p.Declares
+			} else {
+				tok, prevDeclare = parseFuncCall(tok)
+				prevDeclare = prevDeclare.Next
+			}
+
+		} else {
+			// funcCall
+			if prevFuncCall == nil {
+				tok, p.FuncCalls = parseFuncCall(tok)
+				prevFuncCall = p.FuncCalls
+			} else {
+				tok, prevFuncCall = parseFuncCall(tok)
+				prevFuncCall = prevFuncCall.Next
+			}
+		}
+	}
+	return p
 }
 
 // take Token object, return Node object
 func Parse(token *mTypes.Token) *mTypes.Program {
 	prog := &mTypes.Program{}
-	_, prog.FuncCalls = program(token)
+	prog = program(token)
 	prog.Debug(0)
 
 	return prog

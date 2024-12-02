@@ -13,6 +13,7 @@ const (
 	TK_NUM      = TokenKind("TK_NUM")
 	TK_OPERATOR = TokenKind("TK_OPERATOR")
 	TK_PAREN    = TokenKind("TK_PAREN")
+	TK_RESERVED = TokenKind("TK_RESERVED")
 	TK_LIB      = TokenKind("TK_LIB")
 	TK_EOL      = TokenKind("TK_EOL")
 )
@@ -75,10 +76,15 @@ var (
 	EXPR_LET           = "let"
 	DEFINITION_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s)\\b", EXPR_DEF, EXPR_DEFN, EXPR_LET)
 
-	RESERVED_REG_EXP = strings.Join(
+	SIGNATURE_REG_EXP = strings.Join(
 		[]string{
 			THREADING_REG_EXP,
 			BRANCH_REG_EXP,
+		},
+		"|",
+	)
+	RESERVED_REG_EXP = strings.Join(
+		[]string{
 			DEFINITION_REG_EXP,
 		},
 		"|",
@@ -94,6 +100,7 @@ var (
 			[]string{
 				FRACTIONAL_REG_EXP,
 				INTEGER_REG_EXP,
+				SIGNATURE_REG_EXP,
 				RESERVED_REG_EXP,
 				OPERATORS_REG_EXP,
 				BRACKETS_REG_EXP,
@@ -123,6 +130,9 @@ func (tok *Token) IsNum() bool {
 
 func (tok *Token) IsLibrary() bool {
 	return tok.Kind == TK_LIB
+}
+func (tok *Token) IsReserved() bool {
+	return tok.Kind == TK_RESERVED
 }
 
 func (tok *Token) DebugTokens() {

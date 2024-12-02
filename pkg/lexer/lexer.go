@@ -25,6 +25,10 @@ func isLibCore(s string) bool {
 	re := regexp.MustCompile(mTypes.LIB_CORE_REG_EXP)
 	return re.MatchString(s)
 }
+func isReserved(s string) bool {
+	re := regexp.MustCompile(mTypes.RESERVED_REG_EXP)
+	return re.MatchString(s)
+}
 
 func newToken(kind mTypes.TokenKind, cur *mTypes.Token, val string) *mTypes.Token {
 	tok := &mTypes.Token{
@@ -60,8 +64,11 @@ func doLexicalAnalyse(splittedProgram []string) *mTypes.Token {
 		} else if isLibCore(p) {
 			next = newToken(mTypes.TK_LIB, cur, p)
 			cur = next
+		} else if isReserved(p) {
+			next = newToken(mTypes.TK_RESERVED, cur, p)
+			cur = next
 		} else {
-			log.Panic("include invalid signature: have '%+v'", p)
+			log.Debug("use '%+v' as user defined variable", p)
 		}
 	}
 	head = head.Next
