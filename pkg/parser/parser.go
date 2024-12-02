@@ -112,7 +112,7 @@ func program(tok *mTypes.Token) *mTypes.Program {
 				tok, p.FuncCalls = parseFuncCall(tok)
 				prevFuncCall = p.FuncCalls
 			} else {
-				tok, prevFuncCall = parseFuncCall(tok)
+				tok, prevFuncCall.Next = parseFuncCall(tok)
 				prevFuncCall = prevFuncCall.Next
 			}
 		}
