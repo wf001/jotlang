@@ -38,7 +38,6 @@ const (
 type Program struct {
 	Declares    *Node
 	FuncCalls   *Node
-	GlobalVars  *ir.Global
 	BuiltinLibs *BuiltinLibProp
 }
 
@@ -58,14 +57,15 @@ type BuiltinGlobalVarsProp struct {
 }
 
 type Node struct {
-	Kind      NodeKind
-	Next      *Node
-	Child     *Node
-	Cond      *Node
-	Then      *Node
-	Else      *Node
-	Val       string
-	LocalVars *ir.InstAlloca
+	Kind       NodeKind
+	Next       *Node
+	Child      *Node
+	Cond       *Node
+	Then       *Node
+	Else       *Node
+	Val        string
+	GlobalVars *ir.Global
+	LocalVars  *ir.InstAlloca
 }
 
 func (node *Node) IsInteger() bool {
@@ -114,10 +114,6 @@ func (prog *Program) Debug(depth int) {
 	if prog.Declares != nil {
 		log.DebugMessage("[Declares]")
 		prog.Declares.Debug(0)
-	}
-
-	if prog.GlobalVars != nil {
-		log.DebugMessage("[GlobalVars]")
 	}
 
 	if prog.FuncCalls != nil {
