@@ -1,17 +1,29 @@
 #!/bin/bash
 
 dir="generated/test/$(date +%s)"
+testdatadir="./testdata/modo"
 msg="\033[0;32mOK\033[0m"
 code=0
 total_tests=0
 passed_count=0
 failed_count=0
 
-assert() {
+assertexec() {
   expected="$1"
   input="$2"
+  assert "$expected" "$input"
+}
 
+assertfile() {
+  expected=$(cat "$testdatadir/$1")
+  input="$2"
+  assert "$expected" "$input"
+}
+
+assert() {
   # 実行結果を変数に格納
+  expected="$1"
+  input="$2"
   actual_output=$(./generated/test/modo run -o "$dir/out" --exec "$input")
   actual_exit_code="$?"
 
@@ -25,7 +37,9 @@ assert() {
   else
     ((failed_count++))
     echo -e "$input => \033[0;31m$expected expected, but got $actual_output\033[0m"
+    msg="\033[0;31mNG\033[0m"
   fi
+
 }
 
 build-compiler(){
@@ -40,22 +54,26 @@ summary(){
   echo -e "------------------------"
 }
 
-testit(){
-  assert 17 '(prn 17)'
-  assert 17 '(prn (+ 4 13))'
-  assert 6 '(prn (+ 1 2 3))'
-  assert 20 '(prn (+ 1 2 3 4 10))'
-  assert 35 '(prn (+ 1 2 3 4 5 20))'
-  assert 10 '(prn (+ 1 2 (+ 3 4)))'
-  assert 10 '(prn (+ (+ 1 2) (+ 3 4)))'
-  assert 21 '(prn (+ (+ 1 2) (+ (+ 9 5) 4)))'
-  assert 39 '(prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))'
-  assert 1 '(prn (= 5 (+ 3 2)))'
-  assert 0 '(prn (= (+ 4 3) (+ 3 2)))'
+testexec(){
+  assertexec 17 '(prn 17)'
+  assertexec 17 '(prn (+ 4 13))'
+  assertexec 6 '(prn (+ 1 2 3))'
+  assertexec 20 '(prn (+ 1 2 3 4 10))'
+  assertexec 35 '(prn (+ 1 2 3 4 5 20))'
+  assertexec 10 '(prn (+ 1 2 (+ 3 4)))'
+  assertexec 10 '(prn (+ (+ 1 2) (+ 3 4)))'
+  assertexec 21 '(prn (+ (+ 1 2) (+ (+ 9 5) 4)))'
+  assertexec 39 '(prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))'
+  assertexec 1 '(prn (= 5 (+ 3 2)))'
+  assertexec 0 '(prn (= (+ 4 3) (+ 3 2)))'
+}
+testfile(){
+  assertfile 'SimpleSequentialOutput1' '(prn (+ 1 2)) (prn (+ 3 4))'
 }
 
 build-compiler
-testit
+testexec
+testfile
 summary
 
 exit $code
