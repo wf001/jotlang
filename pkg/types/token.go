@@ -73,9 +73,10 @@ var (
 	BRANCH_REG_EXP = fmt.Sprintf("\\b(%s|%s)\\b", EXPR_IF, EXPR_COND)
 
 	EXPR_DEF           = "def"
+	EXPR_FN            = "fn"
 	EXPR_DEFN          = "defn"
 	EXPR_LET           = "let"
-	DEFINITION_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s)\\b", EXPR_DEF, EXPR_DEFN, EXPR_LET)
+	DEFINITION_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s|%s)\\b", EXPR_DEF, EXPR_DEFN, EXPR_LET, EXPR_FN)
 
 	SIGNATURE_REG_EXP = strings.Join(
 		[]string{
@@ -113,12 +114,20 @@ var (
 	)
 )
 
+// TODO: define isKindAndVal
 func (tok *Token) IsParenOpen() bool {
 	return tok.Kind == TK_PAREN && tok.Val == PARREN_OPEN
 }
 
 func (tok *Token) IsParenClose() bool {
 	return tok.Kind == TK_PAREN && tok.Val == PARREN_CLOSE
+}
+func (tok *Token) IsBracketOpen() bool {
+	return tok.Kind == TK_PAREN && tok.Val == BRACKET_OPEN
+}
+
+func (tok *Token) IsBracketClose() bool {
+	return tok.Kind == TK_PAREN && tok.Val == BRACKET_CLOSE
 }
 
 func (tok *Token) IsOperationAdd() bool {

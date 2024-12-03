@@ -57,7 +57,8 @@ func newArray(length uint64) *types.ArrayType {
 }
 
 func doAsemble(llFile string, asmFile string) {
-	out, err := exec.Command("llc", llFile, "-o", asmFile).CombinedOutput()
+	// TODO: show error message send to stderr
+	out, err := exec.Command("llc", llFile, "-o", asmFile).Output()
 	if err != nil {
 		log.Panic(
 			"fail to asemble: %+v",
@@ -67,7 +68,12 @@ func doAsemble(llFile string, asmFile string) {
 	log.Debug("written asm: %s", asmFile)
 }
 
-func gen(mb *ir.Block, funcCallNode *mTypes.Node, libs *mTypes.BuiltinLibProp) value.Value {
+func gen(
+	mod *ir.Module,
+	bl *ir.Block,
+	funcCallNode *mTypes.Node,
+	libs *mTypes.BuiltinLibProp,
+) value.Value {
 
 	if funcCallNode.IsInteger() {
 		return newI32(funcCallNode.Val)
@@ -75,46 +81,84 @@ func gen(mb *ir.Block, funcCallNode *mTypes.Node, libs *mTypes.BuiltinLibProp) v
 	} else if funcCallNode.IsNary() {
 		// nary takes more than 2 arguments
 		child := funcCallNode.Child
-		fst := gen(mb, child, libs)
+		fst := gen(mod, bl, child, libs)
 
 		child = child.Next
-		snd := gen(mb, child, libs)
+		snd := gen(mod, bl, child, libs)
 
 		nary := operatorMap[funcCallNode.Kind]
-		res := nary(mb, fst, snd)
+		res := nary(bl, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
-			snd = gen(mb, child, libs)
-			res = nary(mb, fst, snd)
+			snd = gen(mod, bl, child, libs)
+			res = nary(bl, fst, snd)
 		}
 		return res
 
 	} else if funcCallNode.IsBinary() {
 		// binary takes exactly 2 arguments
 		child := funcCallNode.Child
-		fst := gen(mb, child, libs)
+		fst := gen(mod, bl, child, libs)
 
 		child = child.Next
-		snd := gen(mb, child, libs)
+		snd := gen(mod, bl, child, libs)
 
 		binary := operatorMap[funcCallNode.Kind]
-		res := binary(mb, fst, snd)
+		res := binary(bl, fst, snd)
 
 		return res
 	} else if funcCallNode.IsLibrary() {
 		// means calling standard library
-		arg := gen(mb, funcCallNode.Child, libs)
+		arg := gen(mod, bl, funcCallNode.Child, libs)
 		libFunc := libraryMap[funcCallNode.Val]
-		libFunc(mb, libs, arg)
+		libFunc(bl, libs, arg)
 
 		return newI32("0")
+	} else if funcCallNode.IsVar() {
+		// means declaring global variable or function
+		child := gen(mod, bl, funcCallNode.Child, libs)
+		variable := bl.NewAlloca(types.I32)
+
+		if funcCallNode.Child.Kind == mTypes.ND_DECLARE {
+			bl.NewCall(child)
+		} else {
+			bl.NewStore(child, variable)
+		}
+		funcCallNode.Child.VarPtr = variable
+		return child
+
+	} else if funcCallNode.Val == "fn" {
+		// TODO: validate
+		funcFn := mod.NewFunc(
+			"fn-xxxx",
+			types.I32,
+		)
+		llBlock := funcFn.NewBlock("")
+		res := gen(mod, llBlock, funcCallNode.Child, libs)
+		llBlock.NewRet(res)
+		return funcFn
+	} else if funcCallNode.IsDeclare() {
+		// means declaring global variable or function
+
+		// TODO: validate
+
+		funcName := funcCallNode.Child.Val
+		function := mod.NewFunc(
+			funcName,
+			types.I32,
+		)
+		llBlock := function.NewBlock("")
+		res := gen(mod, llBlock, funcCallNode.Child, libs)
+
+		if funcName == "main" {
+			llBlock.NewRet(newI32("0"))
+		} else {
+			funcCallNode.Child.FuncPtr = function
+			llBlock.NewRet(res)
+		}
 	}
 	return nil
-}
-
-func defFunc() {
-
 }
 
 func codegen(prog *mTypes.Program) *ir.Module {
@@ -122,16 +166,13 @@ func codegen(prog *mTypes.Program) *ir.Module {
 	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
 
-	funcMain := module.NewFunc(
-		"main",
-		types.I32,
-	)
-	llBlock := funcMain.NewBlock("")
+	for calls := prog.Declares; calls != nil; calls = calls.Next {
+		gen(module, nil, calls, prog.BuiltinLibs)
+	}
 
 	for calls := prog.FuncCalls; calls != nil; calls = calls.Next {
-		gen(llBlock, calls, prog.BuiltinLibs)
+		gen(module, nil, calls, prog.BuiltinLibs)
 	}
-	llBlock.NewRet(newI32("0"))
 	return module
 }
 

@@ -53,6 +53,18 @@ func expr(
 	return rootToken, rootNode
 }
 
+func declare(
+	rootToken *mTypes.Token,
+	rootNode *mTypes.Node,
+	exprName string,
+) (*mTypes.Token, *mTypes.Node) {
+	nextToken, argHead := parseFuncCall(rootToken.Next)
+
+	rootNode = newNode(mTypes.ND_DECLARE, argHead, exprName)
+	rootToken = nextToken
+	return rootToken, rootNode
+}
+
 // TODO: rename
 func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
@@ -76,13 +88,17 @@ func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 			tok, head = expr(tok, head, mTypes.ND_LIB, tok.Val)
 
 		} else if tok.IsReserved() {
-			tok, head = expr(tok, head, mTypes.ND_DECLARE, tok.Val)
-
+			tok, head = declare(tok, head, tok.Val)
 		}
+
 		if !tok.IsParenClose() {
 			log.Panic("must be ) :have %+v", tok)
 		}
 		return tok.Next, head
+
+	} else if tok.IsBracketOpen() {
+		// skip
+		return parseFuncCall(tok.Next.Next)
 
 	} else if tok.Kind == mTypes.TK_NUM {
 		return tok.Next, newNodeInt(tok)
@@ -110,7 +126,7 @@ func program(tok *mTypes.Token) *mTypes.Program {
 				tok, p.Declares = parseFuncCall(tok)
 				prevDeclare = p.Declares
 			} else {
-				tok, prevDeclare = parseFuncCall(tok)
+				tok, prevDeclare.Next = parseFuncCall(tok)
 				prevDeclare = prevDeclare.Next
 			}
 

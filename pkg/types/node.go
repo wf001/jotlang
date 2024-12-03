@@ -61,15 +61,15 @@ type BuiltinGlobalVarsProp struct {
 }
 
 type Node struct {
-	Kind       NodeKind
-	Next       *Node
-	Child      *Node
-	Cond       *Node
-	Then       *Node
-	Else       *Node
-	Val        string
-	GlobalVars *ir.Global
-	LocalVars  *ir.InstAlloca
+	Kind    NodeKind
+	Next    *Node
+	Child   *Node
+	Cond    *Node
+	Then    *Node
+	Else    *Node
+	Val     string
+	VarPtr  *ir.InstAlloca // global and local variable
+	FuncPtr *ir.Func
 }
 
 func (node *Node) IsInteger() bool {
@@ -84,6 +84,12 @@ func (node *Node) IsBinary() bool {
 func (node *Node) IsLibrary() bool {
 	return node.Kind == ND_LIB
 }
+func (node *Node) IsDeclare() bool {
+	return node.Kind == ND_DECLARE
+}
+func (node *Node) IsVar() bool {
+	return node.Kind == ND_VAR
+}
 
 func (node *Node) Debug(depth int) {
 	if node == nil {
@@ -93,7 +99,7 @@ func (node *Node) Debug(depth int) {
 		log.BLUE(
 			fmt.Sprintf(
 				"%s %p %#+v %#+v",
-				strings.Repeat("\t", depth),
+				strings.Repeat("  ", depth),
 				node,
 				node.Kind,
 				node.Val),
