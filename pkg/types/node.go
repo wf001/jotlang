@@ -33,6 +33,10 @@ const (
 	ND_INT = NodeKind("ND_INT") // 0-9
 	// lib
 	ND_LIB = NodeKind("ND_LIB") // standard library
+	// func
+	ND_FUNC    = NodeKind("ND_FUNC")
+	ND_VAR     = NodeKind("ND_VAR")
+	ND_DECLARE = NodeKind("ND_DECLARE")
 )
 
 type Program struct {
@@ -104,6 +108,10 @@ func (node *Node) Debug(depth int) {
 	case ND_EQ:
 		node.Child.Debug(depth + 1)
 	case ND_LIB:
+		node.Child.Debug(depth + 1)
+	case ND_DECLARE:
+		node.Child.Debug(depth + 1)
+	case ND_VAR:
 		node.Child.Debug(depth + 1)
 	}
 	if node.Next != nil && node.Kind != ND_INT {

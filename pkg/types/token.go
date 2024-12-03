@@ -16,6 +16,7 @@ const (
 	TK_RESERVED = TokenKind("TK_RESERVED")
 	TK_LIB      = TokenKind("TK_LIB")
 	TK_EOL      = TokenKind("TK_EOL")
+	TK_VARIABLE = TokenKind("TK_VARIABLE")
 )
 
 type Token struct {

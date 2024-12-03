@@ -113,6 +113,10 @@ func gen(mb *ir.Block, funcCallNode *mTypes.Node, libs *mTypes.BuiltinLibProp) v
 	return nil
 }
 
+func defFunc() {
+
+}
+
 func codegen(prog *mTypes.Program) *ir.Module {
 	module := ir.NewModule()
 	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}

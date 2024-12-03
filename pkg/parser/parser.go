@@ -69,12 +69,16 @@ func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		if kind, isOperatorCall := matchedNodeKind(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
 			tok, head = expr(tok, head, kind, tok.Val)
+
 		} else if tok.IsLibrary() {
 			// TODO: put together?
 			log.Debug("is Library :have %+v", tok)
 			tok, head = expr(tok, head, mTypes.ND_LIB, tok.Val)
-		}
 
+		} else if tok.IsReserved() {
+			tok, head = expr(tok, head, mTypes.ND_DECLARE, tok.Val)
+
+		}
 		if !tok.IsParenClose() {
 			log.Panic("must be ) :have %+v", tok)
 		}
@@ -83,7 +87,11 @@ func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	} else if tok.Kind == mTypes.TK_NUM {
 		return tok.Next, newNodeInt(tok)
 
+	} else {
+		tok, head = expr(tok, head, mTypes.ND_VAR, tok.Val)
+		log.Debug("is Variable :have %+v", tok)
 	}
+
 	return tok, head
 
 }

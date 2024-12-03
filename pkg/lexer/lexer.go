@@ -69,6 +69,8 @@ func doLexicalAnalyse(splittedProgram []string) *mTypes.Token {
 			cur = next
 		} else {
 			log.Debug("use '%+v' as user defined variable", p)
+			next = newToken(mTypes.TK_VARIABLE, cur, p)
+			cur = next
 		}
 	}
 	head = head.Next
