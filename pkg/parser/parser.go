@@ -104,8 +104,8 @@ func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		return tok.Next, newNodeInt(tok)
 
 	} else {
-		tok, head = expr(tok, head, mTypes.ND_VAR, tok.Val)
 		log.Debug("is Variable :have %+v", tok)
+		tok, head = expr(tok, head, mTypes.ND_VAR, tok.Val)
 	}
 
 	return tok, head
