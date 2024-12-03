@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -131,7 +132,7 @@ func gen(
 	} else if funcCallNode.Val == "fn" {
 		// TODO: validate
 		funcFn := mod.NewFunc(
-			"fn-xxxx",
+			fmt.Sprintf("fn-%p", funcCallNode),
 			types.I32,
 		)
 		llBlock := funcFn.NewBlock("")
@@ -142,21 +143,27 @@ func gen(
 		// means declaring global variable or function
 
 		// TODO: validate
-
 		funcName := funcCallNode.Child.Val
+		retType := types.I32
+
+		if funcName != "main" {
+			retType = types.I32
+		}
+
 		function := mod.NewFunc(
 			funcName,
-			types.I32,
+			retType,
 		)
 		llBlock := function.NewBlock("")
-		res := gen(mod, llBlock, funcCallNode.Child, libs)
 
-		if funcName == "main" {
-			llBlock.NewRet(newI32("0"))
-		} else {
-			funcCallNode.Child.FuncPtr = function
+		if funcName != "main" {
+			res := gen(mod, llBlock, funcCallNode.Child, libs)
 			llBlock.NewRet(res)
+		} else {
+			gen(mod, llBlock, funcCallNode.Child, libs)
+			llBlock.NewRet(newI32("0"))
 		}
+
 	}
 	return nil
 }
