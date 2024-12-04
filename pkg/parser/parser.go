@@ -42,10 +42,10 @@ func expr(
 	exprKind mTypes.NodeKind,
 	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
-	nextToken, argHead := parseFuncCall(rootToken.Next)
+	nextToken, argHead := parseDeclare(rootToken.Next)
 	prevNode := argHead
 	for nextToken.IsNum() || nextToken.IsParenOpen() {
-		nextToken, prevNode.Next = parseFuncCall(nextToken)
+		nextToken, prevNode.Next = parseDeclare(nextToken)
 		prevNode = prevNode.Next
 	}
 	rootNode = newNode(exprKind, argHead, exprName)
@@ -58,7 +58,7 @@ func declare(
 	rootNode *mTypes.Node,
 	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
-	nextToken, argHead := parseFuncCall(rootToken.Next)
+	nextToken, argHead := parseDeclare(rootToken.Next)
 
 	rootNode = newNode(mTypes.ND_DECLARE, argHead, exprName)
 	rootToken = nextToken
@@ -66,7 +66,7 @@ func declare(
 }
 
 // TODO: rename
-func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
+func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
@@ -98,7 +98,7 @@ func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 
 	} else if tok.IsBracketOpen() {
 		// skip
-		return parseFuncCall(tok.Next.Next)
+		return parseDeclare(tok.Next.Next)
 
 	} else if tok.Kind == mTypes.TK_NUM {
 		return tok.Next, newNodeInt(tok)
@@ -116,28 +116,17 @@ func parseFuncCall(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 func program(tok *mTypes.Token) *mTypes.Program {
 	p := &mTypes.Program{}
 	prevDeclare := p.Declares
-	prevFuncCall := p.FuncCalls
 
 	for tok != nil && tok.IsParenOpen() {
 
 		if tok.Next.IsReserved() {
 			// declare
 			if prevDeclare == nil {
-				tok, p.Declares = parseFuncCall(tok)
+				tok, p.Declares = parseDeclare(tok)
 				prevDeclare = p.Declares
 			} else {
-				tok, prevDeclare.Next = parseFuncCall(tok)
+				tok, prevDeclare.Next = parseDeclare(tok)
 				prevDeclare = prevDeclare.Next
-			}
-
-		} else {
-			// funcCall
-			if prevFuncCall == nil {
-				tok, p.FuncCalls = parseFuncCall(tok)
-				prevFuncCall = p.FuncCalls
-			} else {
-				tok, prevFuncCall.Next = parseFuncCall(tok)
-				prevFuncCall = prevFuncCall.Next
 			}
 		}
 	}
