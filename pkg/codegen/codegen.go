@@ -178,9 +178,6 @@ func codegen(prog *mTypes.Program) *ir.Module {
 		gen(module, nil, calls, prog.BuiltinLibs)
 	}
 
-	for calls := prog.FuncCalls; calls != nil; calls = calls.Next {
-		gen(module, nil, calls, prog.BuiltinLibs)
-	}
 	return module
 }
 

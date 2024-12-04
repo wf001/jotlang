@@ -41,7 +41,6 @@ const (
 
 type Program struct {
 	Declares    *Node
-	FuncCalls   *Node // is unused?
 	GlobalVars  *Node
 	BuiltinLibs *BuiltinLibProp
 }
@@ -129,11 +128,6 @@ func (prog *Program) Debug(depth int) {
 	if prog.Declares != nil {
 		log.DebugMessage("[Declares]")
 		prog.Declares.Debug(0)
-	}
-
-	if prog.FuncCalls != nil {
-		log.DebugMessage("[FuncCalls]")
-		prog.FuncCalls.Debug(0)
 	}
 
 	if prog.BuiltinLibs != nil {
