@@ -25,18 +25,24 @@ const (
 	ND_DIV = NodeKind("ND_DIV") // /
 	ND_MOD = NodeKind("ND_MOD") // mod
 	ND_EQ  = NodeKind("ND_EQ")  // =
+
 	// Logical
 	ND_AND = NodeKind("ND_AND") // and
 	ND_OR  = NodeKind("ND_OR")  // or
+
 	// type
 	ND_NIL = NodeKind("ND_NIL") // nil
 	ND_INT = NodeKind("ND_INT") // 0-9
-	// lib
-	ND_LIB = NodeKind("ND_LIB") // standard library
+
 	// func
-	ND_FUNC    = NodeKind("ND_FUNC")
-	ND_VAR     = NodeKind("ND_VAR")
-	ND_DECLARE = NodeKind("ND_DECLARE")
+
+	ND_VAR      = NodeKind("ND_VAR")     // variables and functions
+	ND_DECLARE  = NodeKind("ND_DECLARE") // defn
+	ND_LAMBDA   = NodeKind("ND_LAMBDA")  // fn
+	ND_EXPR     = NodeKind("ND_EXPR")    // set of operator and user-defined function invoking
+	ND_FUNCCALL = NodeKind("ND_FUNCCALL")
+	ND_BIND     = NodeKind("ND_BIND") // let
+	ND_LIBCALL  = NodeKind("ND_LIBCALL")
 )
 
 type Program struct {
@@ -81,11 +87,11 @@ func (node *Node) IsNary() bool {
 func (node *Node) IsBinary() bool {
 	return node.Kind == ND_EQ
 }
-func (node *Node) IsLibrary() bool {
-	return node.Kind == ND_LIB
+func (node *Node) IsLibCall() bool {
+	return node.Kind == ND_LIBCALL
 }
-func (node *Node) IsDeclare() bool {
-	return node.Kind == ND_DECLARE
+func (node *Node) IsLambda() bool {
+	return node.Kind == ND_LAMBDA
 }
 func (node *Node) IsVar() bool {
 	return node.Kind == ND_VAR
@@ -113,7 +119,9 @@ func (node *Node) Debug(depth int) {
 		node.Child.Debug(depth + 1)
 	case ND_EQ:
 		node.Child.Debug(depth + 1)
-	case ND_LIB:
+	case ND_LIBCALL:
+		node.Child.Debug(depth + 1)
+	case ND_LAMBDA:
 		node.Child.Debug(depth + 1)
 	case ND_DECLARE:
 		node.Child.Debug(depth + 1)

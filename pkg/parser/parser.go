@@ -60,7 +60,7 @@ func declare(
 ) (*mTypes.Token, *mTypes.Node) {
 	nextToken, argHead := parseDeclare(rootToken.Next)
 
-	rootNode = newNode(mTypes.ND_DECLARE, argHead, exprName)
+	rootNode = newNode(mTypes.ND_LAMBDA, argHead, exprName)
 	rootToken = nextToken
 	return rootToken, rootNode
 }
@@ -85,7 +85,7 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		} else if tok.IsLibrary() {
 			// TODO: put together?
 			log.Debug("is Library :have %+v", tok)
-			tok, head = expr(tok, head, mTypes.ND_LIB, tok.Val)
+			tok, head = expr(tok, head, mTypes.ND_LIBCALL, tok.Val)
 
 		} else if tok.IsReserved() {
 			tok, head = declare(tok, head, tok.Val)
@@ -119,15 +119,16 @@ func program(tok *mTypes.Token) *mTypes.Program {
 
 	for tok != nil && tok.IsParenOpen() {
 
-		if tok.Next.IsReserved() {
-			// declare
-			if prevDeclare == nil {
-				tok, p.Declares = parseDeclare(tok)
-				prevDeclare = p.Declares
-			} else {
-				tok, prevDeclare.Next = parseDeclare(tok)
-				prevDeclare = prevDeclare.Next
-			}
+		if !tok.Next.IsReserved() {
+			log.Panic("must be reserved token: have %+v", tok.Next)
+		}
+
+		if prevDeclare == nil {
+			tok, p.Declares = parseDeclare(tok)
+			prevDeclare = p.Declares
+		} else {
+			tok, prevDeclare.Next = parseDeclare(tok)
+			prevDeclare = prevDeclare.Next
 		}
 	}
 	return p

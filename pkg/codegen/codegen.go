@@ -109,7 +109,7 @@ func gen(
 		res := binary(bl, fst, snd)
 
 		return res
-	} else if funcCallNode.IsLibrary() {
+	} else if funcCallNode.IsLibCall() {
 		// means calling standard library
 		arg := gen(mod, bl, funcCallNode.Child, libs)
 		libFunc := libraryMap[funcCallNode.Val]
@@ -121,7 +121,7 @@ func gen(
 		child := gen(mod, bl, funcCallNode.Child, libs)
 		variable := bl.NewAlloca(types.I32)
 
-		if funcCallNode.Child.Kind == mTypes.ND_DECLARE {
+		if funcCallNode.Child.Kind == mTypes.ND_LAMBDA {
 			bl.NewCall(child)
 		} else {
 			bl.NewStore(child, variable)
@@ -140,7 +140,7 @@ func gen(
 		llBlock.NewRet(res)
 		return funcFn
 
-	} else if funcCallNode.IsDeclare() {
+	} else if funcCallNode.IsLambda() {
 		// means declaring global variable or function
 
 		// TODO: validate
