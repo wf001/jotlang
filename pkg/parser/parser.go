@@ -77,6 +77,7 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 
 		} else if tok.IsDeclare() {
 			tok, head = parseDeclare(tok.Next)
+
 		} else if tok.IsLambda() {
 			tok, head = parseDeclare(tok.Next)
 			head = newNode(
@@ -105,6 +106,7 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	} else {
 		log.Debug("is Variable :have %+v", tok)
 		tok, head = expr(tok, head, mTypes.ND_VAR, tok.Val)
+		head = newNode(mTypes.ND_DECLARE, head, "")
 	}
 
 	return tok, head

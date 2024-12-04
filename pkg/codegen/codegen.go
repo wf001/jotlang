@@ -156,6 +156,8 @@ func gen(
 			llBlock.NewCall(res)
 			llBlock.NewRet(newI32("0"))
 		}
+	} else if funcCallNode.IsDeclare() {
+		return gen(mod, bl, funcCallNode.Child, libs)
 
 	} else {
 		log.Panic("not matched any Nodekind: have %+v", funcCallNode)
