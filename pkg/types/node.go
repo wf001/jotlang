@@ -93,6 +93,12 @@ func (node *Node) IsLibCall() bool {
 func (node *Node) IsLambda() bool {
 	return node.Kind == ND_LAMBDA
 }
+func (node *Node) IsDeclare() bool {
+	return node.Kind == ND_DECLARE
+}
+func (node *Node) IsExpr() bool {
+	return node.Kind == ND_EXPR
+}
 func (node *Node) IsVar() bool {
 	return node.Kind == ND_VAR
 }
@@ -127,6 +133,10 @@ func (node *Node) Debug(depth int) {
 		node.Child.Debug(depth + 1)
 	case ND_VAR:
 		node.Child.Debug(depth + 1)
+	case ND_EXPR:
+		node.Child.Debug(depth + 1)
+	default:
+		log.Panic("not matched any Nodekind: have %+v", node)
 	}
 	if node.Next != nil && node.Kind != ND_INT {
 		node.Next.Debug(depth)

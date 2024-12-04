@@ -7,6 +7,8 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+// TODO: add matched function, then remove below
+// matched(s, mTypes.Integer_REG_EXP)
 func isInteger(s string) bool {
 	re := regexp.MustCompile(mTypes.INTEGER_REG_EXP)
 	return re.MatchString(s)
@@ -27,6 +29,14 @@ func isLibCore(s string) bool {
 }
 func isReserved(s string) bool {
 	re := regexp.MustCompile(mTypes.RESERVED_REG_EXP)
+	return re.MatchString(s)
+}
+func isDeclare(s string) bool {
+	re := regexp.MustCompile(mTypes.EXPR_DEF)
+	return re.MatchString(s)
+}
+func isLambda(s string) bool {
+	re := regexp.MustCompile(mTypes.EXPR_FN)
 	return re.MatchString(s)
 }
 
@@ -63,6 +73,12 @@ func doLexicalAnalyse(splittedProgram []string) *mTypes.Token {
 			cur = next
 		} else if isLibCore(p) {
 			next = newToken(mTypes.TK_LIB, cur, p)
+			cur = next
+		} else if isLambda(p) {
+			next = newToken(mTypes.TK_LAMBDA, cur, p)
+			cur = next
+		} else if isDeclare(p) {
+			next = newToken(mTypes.TK_DECLARE, cur, p)
 			cur = next
 		} else if isReserved(p) {
 			next = newToken(mTypes.TK_RESERVED, cur, p)

@@ -13,10 +13,13 @@ const (
 	TK_NUM      = TokenKind("TK_NUM")
 	TK_OPERATOR = TokenKind("TK_OPERATOR")
 	TK_PAREN    = TokenKind("TK_PAREN")
-	TK_RESERVED = TokenKind("TK_RESERVED")
 	TK_LIB      = TokenKind("TK_LIB")
 	TK_EOL      = TokenKind("TK_EOL")
 	TK_VARIABLE = TokenKind("TK_VARIABLE")
+
+	TK_RESERVED = TokenKind("TK_RESERVED")
+	TK_DECLARE  = TokenKind("TK_DECLARE")
+	TK_LAMBDA   = TokenKind("TK_LAMBDA")
 )
 
 type Token struct {
@@ -143,6 +146,12 @@ func (tok *Token) IsLibrary() bool {
 }
 func (tok *Token) IsReserved() bool {
 	return tok.Kind == TK_RESERVED
+}
+func (tok *Token) IsDeclare() bool {
+	return tok.Kind == TK_DECLARE
+}
+func (tok *Token) IsLambda() bool {
+	return tok.Kind == TK_LAMBDA
 }
 
 func (tok *Token) DebugTokens() {

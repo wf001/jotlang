@@ -116,20 +116,20 @@ func gen(
 		libFunc(bl, libs, arg)
 
 		return newI32("0")
-	} else if funcCallNode.IsVar() {
-		// means declaring global variable or function
-		child := gen(mod, bl, funcCallNode.Child, libs)
-		variable := bl.NewAlloca(types.I32)
+		//} else if funcCallNode.IsVar() {
+		//	// means declaring global variable or function
+		//	child := gen(mod, bl, funcCallNode.Child, libs)
+		//	variable := bl.NewAlloca(types.I32)
 
-		if funcCallNode.Child.Kind == mTypes.ND_LAMBDA {
-			bl.NewCall(child)
-		} else {
-			bl.NewStore(child, variable)
-			funcCallNode.Child.VarPtr = variable
-		}
-		return child
+		//	if funcCallNode.Child.Kind == mTypes.ND_LAMBDA {
+		//		bl.NewCall(child)
+		//	} else {
+		//		bl.NewStore(child, variable)
+		//		funcCallNode.Child.VarPtr = variable
+		//	}
+		//	return child
 
-	} else if funcCallNode.Val == "fn" {
+	} else if funcCallNode.IsLambda() {
 		// TODO: validate
 		funcFn := mod.NewFunc(
 			fmt.Sprintf("fn-%p", funcCallNode),
@@ -140,11 +140,14 @@ func gen(
 		llBlock.NewRet(res)
 		return funcFn
 
-	} else if funcCallNode.IsLambda() {
+	} else if funcCallNode.IsExpr() {
+		return gen(mod, bl, funcCallNode.Child, libs)
+
+	} else if funcCallNode.IsVar() {
 		// means declaring global variable or function
 
 		// TODO: validate
-		funcName := funcCallNode.Child.Val
+		funcName := funcCallNode.Val
 		retType := types.I32
 
 		if funcName != "main" {
@@ -161,10 +164,13 @@ func gen(
 			res := gen(mod, llBlock, funcCallNode.Child, libs)
 			llBlock.NewRet(res)
 		} else {
-			gen(mod, llBlock, funcCallNode.Child, libs)
+			res := gen(mod, llBlock, funcCallNode.Child, libs)
+			llBlock.NewCall(res)
 			llBlock.NewRet(newI32("0"))
 		}
 
+	} else {
+		log.Panic("not matched any Nodekind: have %+v", funcCallNode)
 	}
 	return nil
 }
