@@ -79,8 +79,15 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 			tok, head = parseDeclare(tok.Next)
 		} else if tok.IsLambda() {
 			tok, head = parseDeclare(tok.Next)
-			head = newNode(mTypes.ND_EXPR, head, "")
-			head = newNode(mTypes.ND_LAMBDA, head, "")
+			head = newNode(
+				mTypes.ND_LAMBDA,
+				newNode(
+					mTypes.ND_EXPR,
+					head,
+					"",
+				),
+				"",
+			)
 		}
 
 		if !tok.IsParenClose() {

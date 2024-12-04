@@ -114,20 +114,7 @@ func gen(
 		arg := gen(mod, bl, funcCallNode.Child, libs)
 		libFunc := libraryMap[funcCallNode.Val]
 		libFunc(bl, libs, arg)
-
 		return newI32("0")
-		//} else if funcCallNode.IsVar() {
-		//	// means declaring global variable or function
-		//	child := gen(mod, bl, funcCallNode.Child, libs)
-		//	variable := bl.NewAlloca(types.I32)
-
-		//	if funcCallNode.Child.Kind == mTypes.ND_LAMBDA {
-		//		bl.NewCall(child)
-		//	} else {
-		//		bl.NewStore(child, variable)
-		//		funcCallNode.Child.VarPtr = variable
-		//	}
-		//	return child
 
 	} else if funcCallNode.IsLambda() {
 		// TODO: validate
@@ -152,6 +139,7 @@ func gen(
 
 		if funcName != "main" {
 			retType = types.I32
+			funcName = fmt.Sprintf("var-%s", funcName)
 		}
 
 		function := mod.NewFunc(
