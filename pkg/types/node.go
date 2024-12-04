@@ -41,7 +41,8 @@ const (
 
 type Program struct {
 	Declares    *Node
-	FuncCalls   *Node
+	FuncCalls   *Node // is unused?
+	GlobalVars  *Node
 	BuiltinLibs *BuiltinLibProp
 }
 

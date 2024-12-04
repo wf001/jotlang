@@ -125,8 +125,8 @@ func gen(
 			bl.NewCall(child)
 		} else {
 			bl.NewStore(child, variable)
+			funcCallNode.Child.VarPtr = variable
 		}
-		funcCallNode.Child.VarPtr = variable
 		return child
 
 	} else if funcCallNode.Val == "fn" {
@@ -139,6 +139,7 @@ func gen(
 		res := gen(mod, llBlock, funcCallNode.Child, libs)
 		llBlock.NewRet(res)
 		return funcFn
+
 	} else if funcCallNode.IsDeclare() {
 		// means declaring global variable or function
 
