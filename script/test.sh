@@ -74,9 +74,9 @@ testfile(){
 }
 
 build-compiler
-testexec
+#testexec
 # not work
-# testfile
+testfile
 summary
 
 exit $code

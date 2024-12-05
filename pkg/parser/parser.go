@@ -60,18 +60,9 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		tok = tok.Next
 
-		if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
-			log.Debug("is Operator :have %+v", tok)
-			tok, head = parseExpr(tok, head, kind, tok.Val)
-
-		} else if tok.IsLibrary() {
-			log.Debug("is Library :have %+v", tok)
-			tok, head = parseExpr(tok, head, mTypes.ND_LIBCALL, tok.Val)
-
-		} else if tok.IsDeclare() {
+		if tok.IsDeclare() {
 			tok, head = parseDeclare(tok.Next)
 			head = newNode(mTypes.ND_DECLARE, head, "")
-
 		} else if tok.IsLambda() {
 			tok, head = parseDeclare(tok.Next)
 			head = newNode(
@@ -83,6 +74,14 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 				),
 				"",
 			)
+
+		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
+			log.Debug("is Operator :have %+v", tok)
+			tok, head = parseExpr(tok, head, kind, tok.Val)
+
+		} else if tok.IsLibrary() {
+			log.Debug("is Library :have %+v", tok)
+			tok, head = parseExpr(tok, head, mTypes.ND_LIBCALL, tok.Val)
 		}
 
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_CLOSE) {
