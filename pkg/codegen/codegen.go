@@ -148,11 +148,10 @@ func gen(
 		)
 		llBlock := function.NewBlock("")
 
+		res := gen(mod, llBlock, funcCallNode.Child, libs)
 		if funcName != "main" {
-			res := gen(mod, llBlock, funcCallNode.Child, libs)
 			llBlock.NewRet(res)
 		} else {
-			res := gen(mod, llBlock, funcCallNode.Child, libs)
 			llBlock.NewCall(res)
 			llBlock.NewRet(newI32("0"))
 		}

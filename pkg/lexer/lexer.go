@@ -34,6 +34,7 @@ func doLexicalAnalyse(splittedProgram []string) *mTypes.Token {
 	next := new(mTypes.Token)
 
 	for _, p := range splittedProgram {
+		// NOTE: should implement as map refer?
 		if matched(p, mTypes.INTEGER_REG_EXP) {
 			next = newToken(mTypes.TK_NUM, cur, p)
 			cur = next
