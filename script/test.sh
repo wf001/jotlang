@@ -9,21 +9,21 @@ passed_count=0
 failed_count=0
 
 assertexec() {
-  expected="$1"
-  input="$2"
-  assert "$expected" "$input"
+  input="$1"
+  expected="$2"
+  assert "$input" "$expected" 
 }
 
 assertfile() {
-  expected=$(cat "$testdatadir/$1")
-  input="$2"
-  assert "$expected" "$input"
+  input="$1"
+  expected=$(cat "$testdatadir/$2")
+  assert "$input" "$expected" 
 }
 
 assert() {
   # 実行結果を変数に格納
-  expected="$1"
-  input="$2"
+  input="$1"
+  expected="$2"
   actual_output=$(./generated/test/modo run -o "$dir/out" --exec "$input")
   actual_exit_code="$?"
 
@@ -55,21 +55,21 @@ summary(){
 }
 
 testexec(){
-  assertexec 17 '(def main (fn [] (prn 17)))'
-  assertexec 17 '(def main (fn [] (prn (+ 4 13))))'
-  assertexec 6 '(def main (fn [] (prn (+ 1 2 3))))'
-  assertexec 20 '(def main (fn [] (prn (+ 1 2 3 4 10))))'
-  assertexec 35 '(def main (fn [] (prn (+ 1 2 3 4 5 20))))'
-  assertexec 10 '(def main (fn [] (prn (+ 1 2 (+ 3 4)))))'
-  assertexec 10 '(def main (fn [] (prn (+ (+ 1 2) (+ 3 4)))))'
-  assertexec 21 '(def main (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))'
-  assertexec 39 '(def main (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))'
-  assertexec 1 '(def main (fn [] (prn (= 5 (+ 3 2)))))'
-  assertexec 0 '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))'
-  assertexec 3 '(def x 1) (def main (fn [] (prn (+ x 2))))'
+  assertexec '(def main (fn [] (prn 17)))' 17
+  assertexec '(def main (fn [] (prn (+ 4 13))))' 17
+  assertexec '(def main (fn [] (prn (+ 1 2 3))))' 6
+  assertexec '(def main (fn [] (prn (+ 1 2 3 4 10))))' 20
+  assertexec '(def main (fn [] (prn (+ 1 2 3 4 5 20))))' 35
+  assertexec '(def main (fn [] (prn (+ 1 2 (+ 3 4)))))' 10
+  assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ 3 4)))))' 10
+  assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))' 21
+  assertexec '(def main (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))' 39
+  assertexec '(def main (fn [] (prn (= 5 (+ 3 2)))))' 1
+  assertexec '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))' 0
+  assertexec '(def x 1) (def main (fn [] (prn (+ x 2))))' 3
 }
 testfile(){
-  assertfile 'SimpleSequentialOutput1' '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 
+  assertfile '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 'SimpleSequentialOutput1' 
 }
 
 build-compiler
