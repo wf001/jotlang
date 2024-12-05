@@ -130,7 +130,7 @@ func gen(
 	} else if funcCallNode.IsExpr() {
 		return gen(mod, block, funcCallNode.Child, prog)
 
-	} else if funcCallNode.IsVar() && funcCallNode.Val == "main" {
+	} else if funcCallNode.IsVarDeclare() && funcCallNode.Val == "main" {
 		// means declaring main function regarded as entrypoint
 
 		function := mod.NewFunc(
@@ -143,7 +143,7 @@ func gen(
 		llBlock.NewCall(res)
 		llBlock.NewRet(newI32("0"))
 
-	} else if funcCallNode.IsVar() {
+	} else if funcCallNode.IsVarDeclare() {
 		// means declaring global variable or function named except main
 
 		retType := types.I32 // to be changable

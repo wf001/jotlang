@@ -36,10 +36,13 @@ const (
 
 	// func
 
-	ND_VAR      = NodeKind("ND_VAR")     // variables and functions
-	ND_DECLARE  = NodeKind("ND_DECLARE") // defn
-	ND_LAMBDA   = NodeKind("ND_LAMBDA")  // fn
-	ND_EXPR     = NodeKind("ND_EXPR")    // set of operator and user-defined function invoking
+	ND_VAR_DECLARE   = NodeKind("ND_VAR_DECLARE")   // variables and functions
+	ND_VAR_REFERENCE = NodeKind("ND_VAR_REFERENCE") // variables and functions
+	ND_DECLARE       = NodeKind("ND_DECLARE")       // defn
+	ND_LAMBDA        = NodeKind("ND_LAMBDA")        // fn
+	ND_EXPR          = NodeKind(
+		"ND_EXPR",
+	) // set of operator and user-defined function invoking
 	ND_FUNCCALL = NodeKind("ND_FUNCCALL")
 	ND_BIND     = NodeKind("ND_BIND") // let
 	ND_LIBCALL  = NodeKind("ND_LIBCALL")
@@ -98,8 +101,11 @@ func (node *Node) IsDeclare() bool {
 func (node *Node) IsExpr() bool {
 	return node.Kind == ND_EXPR
 }
-func (node *Node) IsVar() bool {
-	return node.Kind == ND_VAR
+func (node *Node) IsVarDeclare() bool {
+	return node.Kind == ND_VAR_DECLARE
+}
+func (node *Node) IsVarReference() bool {
+	return node.Kind == ND_VAR_REFERENCE
 }
 
 func (node *Node) Debug(depth int) {
@@ -130,7 +136,9 @@ func (node *Node) Debug(depth int) {
 		node.Child.Debug(depth + 1)
 	case ND_DECLARE:
 		node.Child.Debug(depth + 1)
-	case ND_VAR:
+	case ND_VAR_DECLARE:
+		node.Child.Debug(depth + 1)
+	case ND_VAR_REFERENCE:
 		node.Child.Debug(depth + 1)
 	case ND_EXPR:
 		node.Child.Debug(depth + 1)
