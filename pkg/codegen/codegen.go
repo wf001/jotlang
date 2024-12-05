@@ -147,7 +147,7 @@ func gen(
 		// means declaring global variable or function named except main
 
 		retType := types.I32 // to be changable
-		funcName := fmt.Sprintf("var-%s", funcCallNode.Val)
+		funcName := getFuncName(funcCallNode.Val)
 
 		function := mod.NewFunc(
 			funcName,
@@ -156,6 +156,8 @@ func gen(
 		llBlock := function.NewBlock("")
 
 		res := gen(mod, llBlock, funcCallNode.Child, prog)
+		funcCallNode.FuncPtr = function
+
 		llBlock.NewRet(res)
 
 	} else if funcCallNode.IsDeclare() {
@@ -177,6 +179,10 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 	}
 
 	return module
+}
+
+func getFuncName(v string) string {
+	return fmt.Sprintf("fn-%s", v)
 }
 
 func Construct(program *mTypes.Program) *assembler {
