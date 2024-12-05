@@ -63,15 +63,12 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		if tok.IsDeclare() {
 			tok, head = parseDeclare(tok.Next)
 			head = newNode(mTypes.ND_DECLARE, head, "")
+
 		} else if tok.IsLambda() {
 			tok, head = parseDeclare(tok.Next)
 			head = newNode(
 				mTypes.ND_LAMBDA,
-				newNode(
-					mTypes.ND_EXPR,
-					head,
-					"",
-				),
+				head,
 				"",
 			)
 
@@ -91,7 +88,7 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
 		// skip
-		return parseDeclare(tok.Next.Next)
+		return parseExpr(tok.Next, head, mTypes.ND_EXPR, "")
 
 	} else if tok.Kind == mTypes.TK_NUM {
 		return tok.Next, newNodeInt(tok)
