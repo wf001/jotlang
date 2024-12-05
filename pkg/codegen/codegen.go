@@ -128,7 +128,11 @@ func gen(
 		return funcFn
 
 	} else if funcCallNode.IsExpr() {
-		return gen(mod, block, funcCallNode.Child, prog)
+		var res value.Value
+		for child := funcCallNode.Child; child != nil; child = child.Next {
+			res = gen(mod, block, child, prog)
+		}
+		return res
 
 	} else if funcCallNode.IsVarDeclare() && funcCallNode.Val == "main" {
 		// means declaring main function regarded as entrypoint

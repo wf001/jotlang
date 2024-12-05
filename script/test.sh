@@ -74,7 +74,7 @@ testfile(){
 }
 
 build-compiler
-#testexec
+testexec
 # not work
 testfile
 summary
