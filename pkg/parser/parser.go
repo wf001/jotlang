@@ -70,7 +70,6 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 
 		} else if tok.IsDeclare() {
 			tok, head = parseDeclare(tok.Next)
-			head.Kind = mTypes.ND_VAR_DECLARE
 			head = newNode(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsLambda() {
@@ -98,9 +97,16 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	} else if tok.Kind == mTypes.TK_NUM {
 		return tok.Next, newNodeInt(tok)
 
-	} else {
+	} else if tok.Kind == mTypes.TK_VAR_DECLARE {
+		log.Debug("is Variable declaration :have %+v", tok)
+		tok, head = parseExpr(tok, head, mTypes.ND_VAR_DECLARE, tok.Val)
+
+	} else if tok.Kind == mTypes.TK_VAR_REFERENCE {
 		log.Debug("is Variable reference :have %+v", tok)
-		tok, head = parseExpr(tok, head, mTypes.ND_VAR_REFERENCE, tok.Val)
+		return tok.Next, newNode(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+
+	} else {
+		log.Panic("undefined token :have %+v", tok)
 	}
 
 	return tok, head

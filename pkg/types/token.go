@@ -10,11 +10,12 @@ import (
 type TokenKind = string
 
 const (
-	TK_NUM      = TokenKind("TK_NUM")
-	TK_OPERATOR = TokenKind("TK_OPERATOR")
-	TK_PAREN    = TokenKind("TK_PAREN")
-	TK_LIB      = TokenKind("TK_LIB")
-	TK_VARIABLE = TokenKind("TK_VARIABLE")
+	TK_NUM           = TokenKind("TK_NUM")
+	TK_OPERATOR      = TokenKind("TK_OPERATOR")
+	TK_PAREN         = TokenKind("TK_PAREN")
+	TK_LIB           = TokenKind("TK_LIB")
+	TK_VAR_DECLARE   = TokenKind("TK_VAR_DECLARE")
+	TK_VAR_REFERENCE = TokenKind("TK_VAR_REFERENCE")
 
 	TK_RESERVED = TokenKind("TK_RESERVED")
 	TK_DECLARE  = TokenKind("TK_DECLARE")

@@ -146,7 +146,7 @@ func gen(
 	} else if funcCallNode.IsVarDeclare() {
 		// means declaring global variable or function named except main
 
-		retType := types.I32 // to be changable
+		retType := types.I32 // TODO: to be changable
 		funcName := getFuncName(funcCallNode.Val)
 
 		function := mod.NewFunc(
@@ -159,6 +159,8 @@ func gen(
 		funcCallNode.FuncPtr = function
 
 		llBlock.NewRet(res)
+	} else if funcCallNode.IsVarReference() {
+		return block.NewCall(prog.Declares.Child.FuncPtr)
 
 	} else if funcCallNode.IsDeclare() {
 		return gen(mod, block, funcCallNode.Child, prog)

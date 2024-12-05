@@ -123,15 +123,18 @@ func main() {
 	setLogLevel()
 	showOpts(cmd)
 
-	arg := io.ReadFile(inputFile)
-
 	switch cmd {
 
 	case runCmd.FullCommand():
 		if *runExec != "" {
 			os.Exit(doRun(*appOutput, *runExec))
 		} else {
-			os.Exit(doRun(*appOutput, arg))
+			if inputFile != nil {
+				arg := io.ReadFile(inputFile)
+				os.Exit(doRun(*appOutput, arg))
+			} else {
+				log.Panic("fail to run, input must be specified")
+			}
 		}
 	}
 }

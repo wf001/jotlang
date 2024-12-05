@@ -66,6 +66,7 @@ testexec(){
   assertexec 39 '(def main (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))'
   assertexec 1 '(def main (fn [] (prn (= 5 (+ 3 2)))))'
   assertexec 0 '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))'
+  assertexec 3 '(def x 1) (def main (fn [] (prn (+ x 2))))'
 }
 testfile(){
   assertfile 'SimpleSequentialOutput1' '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 
