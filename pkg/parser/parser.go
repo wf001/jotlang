@@ -23,7 +23,7 @@ func newNodeInt(tok *mTypes.Token) *mTypes.Node {
 	return newNode(mTypes.ND_INT, nil, tok.Val)
 }
 
-func matchedNodeKind(tok *mTypes.Token) (mTypes.NodeKind, bool) {
+func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 	if tok.Kind != mTypes.TK_OPERATOR {
 		return mTypes.ND_NIL, false
 	}
@@ -36,7 +36,7 @@ func matchedNodeKind(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 	return mTypes.ND_NIL, false
 }
 
-func expr(
+func parseExpr(
 	rootToken *mTypes.Token,
 	rootNode *mTypes.Node,
 	exprKind mTypes.NodeKind,
@@ -44,7 +44,7 @@ func expr(
 ) (*mTypes.Token, *mTypes.Node) {
 	nextToken, argHead := parseDeclare(rootToken.Next)
 	prevNode := argHead
-	for nextToken.IsNum() || nextToken.IsParenOpen() {
+	for nextToken.IsNum() || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		nextToken, prevNode.Next = parseDeclare(nextToken)
 		prevNode = prevNode.Next
 	}
@@ -53,27 +53,20 @@ func expr(
 	return rootToken, rootNode
 }
 
-// TODO: rename
 func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
-	if tok.Kind == mTypes.TK_EOL {
-		return tok, nil
-	}
-
-	if tok.IsParenOpen() {
+	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		tok = tok.Next
 
-		// TODO: rename to matchedOperator
-		if kind, isOperatorCall := matchedNodeKind(tok); isOperatorCall {
+		if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
-			tok, head = expr(tok, head, kind, tok.Val)
+			tok, head = parseExpr(tok, head, kind, tok.Val)
 
 		} else if tok.IsLibrary() {
-			// TODO: put together?
 			log.Debug("is Library :have %+v", tok)
-			tok, head = expr(tok, head, mTypes.ND_LIBCALL, tok.Val)
+			tok, head = parseExpr(tok, head, mTypes.ND_LIBCALL, tok.Val)
 
 		} else if tok.IsDeclare() {
 			tok, head = parseDeclare(tok.Next)
@@ -91,12 +84,12 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 			)
 		}
 
-		if !tok.IsParenClose() {
+		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_CLOSE) {
 			log.Panic("must be ) :have %+v", tok)
 		}
 		return tok.Next, head
 
-	} else if tok.IsBracketOpen() {
+	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
 		// skip
 		return parseDeclare(tok.Next.Next)
 
@@ -105,7 +98,7 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 
 	} else {
 		log.Debug("is Variable :have %+v", tok)
-		tok, head = expr(tok, head, mTypes.ND_VAR, tok.Val)
+		tok, head = parseExpr(tok, head, mTypes.ND_VAR, tok.Val)
 		head = newNode(mTypes.ND_DECLARE, head, "")
 	}
 
@@ -113,12 +106,11 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 
 }
 
-// TODO: rename to parseProgram
-func program(tok *mTypes.Token) *mTypes.Program {
+func parseProgram(tok *mTypes.Token) *mTypes.Program {
 	p := &mTypes.Program{}
 	prevDeclare := p.Declares
 
-	for tok != nil && tok.IsParenOpen() {
+	for tok != nil && tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 
 		if !tok.Next.IsDeclare() {
 			log.Panic("must be declare token: have %+v", tok.Next)
@@ -135,10 +127,12 @@ func program(tok *mTypes.Token) *mTypes.Program {
 	return p
 }
 
-// take Token object, return Node object
+// take Token object, return Program object
 func Parse(token *mTypes.Token) *mTypes.Program {
+	log.DebugMessage("code parsing")
 	prog := &mTypes.Program{}
-	prog = program(token)
+	prog = parseProgram(token)
+	log.DebugMessage("code parsed")
 	prog.Debug(0)
 
 	return prog

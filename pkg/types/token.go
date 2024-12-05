@@ -14,7 +14,6 @@ const (
 	TK_OPERATOR = TokenKind("TK_OPERATOR")
 	TK_PAREN    = TokenKind("TK_PAREN")
 	TK_LIB      = TokenKind("TK_LIB")
-	TK_EOL      = TokenKind("TK_EOL")
 	TK_VARIABLE = TokenKind("TK_VARIABLE")
 
 	TK_RESERVED = TokenKind("TK_RESERVED")
@@ -67,37 +66,23 @@ var (
 		BINARY_OPERATOR_GT,
 	)
 
-	THREADING_FIRST   = "->"
-	THREADING_LAST    = "->>"
-	THREADING_REG_EXP = fmt.Sprintf("%s|%s", THREADING_FIRST, THREADING_LAST)
+	SYMBOL_THREADING_FIRST = "->"
+	SYMBOL_THREADING_LAST  = "->>"
+	THREADING_REG_EXP      = fmt.Sprintf("%s|%s", SYMBOL_THREADING_FIRST, SYMBOL_THREADING_LAST)
 
-	EXPR_IF        = "if"
-	EXPR_COND      = "cond"
-	BRANCH_REG_EXP = fmt.Sprintf("\\b(%s|%s)\\b", EXPR_IF, EXPR_COND)
+	SYMBOL_IF      = "if"
+	SYMBOL_COND    = "cond"
+	BRANCH_REG_EXP = fmt.Sprintf("\\b(%s|%s)\\b", SYMBOL_IF, SYMBOL_COND)
 
-	EXPR_DEF           = "def"
-	EXPR_FN            = "fn"
-	EXPR_DEFN          = "defn"
-	EXPR_LET           = "let"
-	DEFINITION_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s|%s)\\b", EXPR_DEF, EXPR_DEFN, EXPR_LET, EXPR_FN)
+	SYMBOL_DEF      = "def" // NOTE: is core library in clojure
+	SYMBOL_FN       = "fn"
+	SYMBOL_LET      = "let"
+	DECLARE_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s)\\b", SYMBOL_DEF, SYMBOL_LET, SYMBOL_FN)
 
-	SIGNATURE_REG_EXP = strings.Join(
-		[]string{
-			THREADING_REG_EXP,
-			BRANCH_REG_EXP,
-		},
-		"|",
-	)
-	RESERVED_REG_EXP = strings.Join(
-		[]string{
-			DEFINITION_REG_EXP,
-		},
-		"|",
-	)
 	LIB_CORE_PRN     = "prn"
 	LIB_CORE_REG_EXP = fmt.Sprintf("\\b(%s)\\b", LIB_CORE_PRN)
 
-	USER_DEFINED_REG_EXP = `\w+`
+	SYMBOL_USER_DEFINED_REG_EXP = `\w+`
 
 	ALL_REG_EXP = fmt.Sprintf(
 		"%s",
@@ -105,36 +90,20 @@ var (
 			[]string{
 				FRACTIONAL_REG_EXP,
 				INTEGER_REG_EXP,
-				SIGNATURE_REG_EXP,
-				RESERVED_REG_EXP,
+				THREADING_REG_EXP,
+				BRANCH_REG_EXP,
 				OPERATORS_REG_EXP,
 				BRACKETS_REG_EXP,
 				LIB_CORE_PRN,
-				USER_DEFINED_REG_EXP,
+				SYMBOL_USER_DEFINED_REG_EXP,
 			},
 			"|",
 		),
 	)
 )
 
-// TODO: define isKindAndVal
-func (tok *Token) IsParenOpen() bool {
-	return tok.Kind == TK_PAREN && tok.Val == PARREN_OPEN
-}
-
-func (tok *Token) IsParenClose() bool {
-	return tok.Kind == TK_PAREN && tok.Val == PARREN_CLOSE
-}
-func (tok *Token) IsBracketOpen() bool {
-	return tok.Kind == TK_PAREN && tok.Val == BRACKET_OPEN
-}
-
-func (tok *Token) IsBracketClose() bool {
-	return tok.Kind == TK_PAREN && tok.Val == BRACKET_CLOSE
-}
-
-func (tok *Token) IsOperationAdd() bool {
-	return tok.Kind == TK_OPERATOR && tok.Val == NARY_OPERATOR_ADD
+func (tok *Token) IsKindAndVal(kind string, val string) bool {
+	return tok.Kind == kind && tok.Val == val
 }
 
 func (tok *Token) IsNum() bool {

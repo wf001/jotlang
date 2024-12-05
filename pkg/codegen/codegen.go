@@ -71,7 +71,7 @@ func doAsemble(llFile string, asmFile string) {
 
 func gen(
 	mod *ir.Module,
-	bl *ir.Block,
+	block *ir.Block,
 	funcCallNode *mTypes.Node,
 	libs *mTypes.BuiltinLibProp,
 ) value.Value {
@@ -82,38 +82,38 @@ func gen(
 	} else if funcCallNode.IsNary() {
 		// nary takes more than 2 arguments
 		child := funcCallNode.Child
-		fst := gen(mod, bl, child, libs)
+		fst := gen(mod, block, child, libs)
 
 		child = child.Next
-		snd := gen(mod, bl, child, libs)
+		snd := gen(mod, block, child, libs)
 
 		nary := operatorMap[funcCallNode.Kind]
-		res := nary(bl, fst, snd)
+		res := nary(block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
-			snd = gen(mod, bl, child, libs)
-			res = nary(bl, fst, snd)
+			snd = gen(mod, block, child, libs)
+			res = nary(block, fst, snd)
 		}
 		return res
 
 	} else if funcCallNode.IsBinary() {
 		// binary takes exactly 2 arguments
 		child := funcCallNode.Child
-		fst := gen(mod, bl, child, libs)
+		fst := gen(mod, block, child, libs)
 
 		child = child.Next
-		snd := gen(mod, bl, child, libs)
+		snd := gen(mod, block, child, libs)
 
 		binary := operatorMap[funcCallNode.Kind]
-		res := binary(bl, fst, snd)
+		res := binary(block, fst, snd)
 
 		return res
 	} else if funcCallNode.IsLibCall() {
 		// means calling standard library
-		arg := gen(mod, bl, funcCallNode.Child, libs)
+		arg := gen(mod, block, funcCallNode.Child, libs)
 		libFunc := libraryMap[funcCallNode.Val]
-		libFunc(bl, libs, arg)
+		libFunc(block, libs, arg)
 		return newI32("0")
 
 	} else if funcCallNode.IsLambda() {
@@ -128,7 +128,7 @@ func gen(
 		return funcFn
 
 	} else if funcCallNode.IsExpr() {
-		return gen(mod, bl, funcCallNode.Child, libs)
+		return gen(mod, block, funcCallNode.Child, libs)
 
 	} else if funcCallNode.IsVar() {
 		// means declaring global variable or function
@@ -157,7 +157,7 @@ func gen(
 			llBlock.NewRet(newI32("0"))
 		}
 	} else if funcCallNode.IsDeclare() {
-		return gen(mod, bl, funcCallNode.Child, libs)
+		return gen(mod, block, funcCallNode.Child, libs)
 
 	} else {
 		log.Panic("not matched any Nodekind: have %+v", funcCallNode)
@@ -165,7 +165,7 @@ func gen(
 	return nil
 }
 
-func codegen(prog *mTypes.Program) *ir.Module {
+func constructModule(prog *mTypes.Program) *ir.Module {
 	module := ir.NewModule()
 	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
@@ -184,12 +184,12 @@ func Construct(program *mTypes.Program) *assembler {
 }
 
 func (a assembler) Assemble(llName string, asmName string) {
-	ir := codegen(a.program)
+	log.DebugMessage("ir module constructing")
+	module := constructModule(a.program)
+	log.DebugMessage("ir module constructed")
+	log.Debug("[IR]\n%s\n", module.String())
 
-	log.DebugMessage("code generated")
-	log.Debug("[IR]\n%s\n", ir.String())
-
-	err := os.WriteFile(llName, []byte(ir.String()), 0600)
+	err := os.WriteFile(llName, []byte(module.String()), 0600)
 	if err != nil {
 		log.Panic("fail to write ll: %+v", map[string]interface{}{"err": err, "llName": llName})
 	}

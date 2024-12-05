@@ -93,11 +93,9 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	currentTime := time.Now().Unix()
 	// string -> Token
 	token := lexer.Lex(evaluatee)
-	log.DebugMessage("code lexed ")
 
 	// Token -> Node
 	node := parser.Parse(token)
-	log.DebugMessage("code parsed")
 
 	llName, asmName, executableName := io.PrepareWorkingFile(workingDirPrefix, currentTime)
 

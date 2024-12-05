@@ -47,7 +47,6 @@ const (
 
 type Program struct {
 	Declares    *Node
-	GlobalVars  *Node
 	BuiltinLibs *BuiltinLibProp
 }
 
@@ -148,6 +147,8 @@ func (prog *Program) Debug(depth int) {
 		prog.Declares.Debug(0)
 	}
 
+	// TODO: implement
+	// NOTE: is type of BuiltinLibs Node?
 	if prog.BuiltinLibs != nil {
 		log.DebugMessage("[BuiltinLib]")
 	}
