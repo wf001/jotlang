@@ -73,7 +73,7 @@ func gen(
 	mod *ir.Module,
 	block *ir.Block,
 	funcCallNode *mTypes.Node,
-	libs *mTypes.BuiltinLibProp,
+	prog *mTypes.Program,
 ) value.Value {
 
 	if funcCallNode.IsInteger() {
@@ -82,17 +82,17 @@ func gen(
 	} else if funcCallNode.IsNary() {
 		// nary takes more than 2 arguments
 		child := funcCallNode.Child
-		fst := gen(mod, block, child, libs)
+		fst := gen(mod, block, child, prog)
 
 		child = child.Next
-		snd := gen(mod, block, child, libs)
+		snd := gen(mod, block, child, prog)
 
 		nary := operatorMap[funcCallNode.Kind]
 		res := nary(block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
-			snd = gen(mod, block, child, libs)
+			snd = gen(mod, block, child, prog)
 			res = nary(block, fst, snd)
 		}
 		return res
@@ -100,10 +100,10 @@ func gen(
 	} else if funcCallNode.IsBinary() {
 		// binary takes exactly 2 arguments
 		child := funcCallNode.Child
-		fst := gen(mod, block, child, libs)
+		fst := gen(mod, block, child, prog)
 
 		child = child.Next
-		snd := gen(mod, block, child, libs)
+		snd := gen(mod, block, child, prog)
 
 		binary := operatorMap[funcCallNode.Kind]
 		res := binary(block, fst, snd)
@@ -111,9 +111,9 @@ func gen(
 		return res
 	} else if funcCallNode.IsLibCall() {
 		// means calling standard library
-		arg := gen(mod, block, funcCallNode.Child, libs)
+		arg := gen(mod, block, funcCallNode.Child, prog)
 		libFunc := libraryMap[funcCallNode.Val]
-		libFunc(block, libs, arg)
+		libFunc(block, prog.BuiltinLibs, arg)
 		return newI32("0")
 
 	} else if funcCallNode.IsLambda() {
@@ -123,12 +123,12 @@ func gen(
 			types.I32,
 		)
 		llBlock := funcFn.NewBlock("")
-		res := gen(mod, llBlock, funcCallNode.Child, libs)
+		res := gen(mod, llBlock, funcCallNode.Child, prog)
 		llBlock.NewRet(res)
 		return funcFn
 
 	} else if funcCallNode.IsExpr() {
-		return gen(mod, block, funcCallNode.Child, libs)
+		return gen(mod, block, funcCallNode.Child, prog)
 
 	} else if funcCallNode.IsVar() && funcCallNode.Val == "main" {
 		// means declaring main function regarded as entrypoint
@@ -139,7 +139,7 @@ func gen(
 		)
 		llBlock := function.NewBlock("")
 
-		res := gen(mod, llBlock, funcCallNode.Child, libs)
+		res := gen(mod, llBlock, funcCallNode.Child, prog)
 		llBlock.NewCall(res)
 		llBlock.NewRet(newI32("0"))
 
@@ -155,11 +155,11 @@ func gen(
 		)
 		llBlock := function.NewBlock("")
 
-		res := gen(mod, llBlock, funcCallNode.Child, libs)
+		res := gen(mod, llBlock, funcCallNode.Child, prog)
 		llBlock.NewRet(res)
 
 	} else if funcCallNode.IsDeclare() {
-		return gen(mod, block, funcCallNode.Child, libs)
+		return gen(mod, block, funcCallNode.Child, prog)
 
 	} else {
 		log.Panic("not matched any Nodekind: have %+v", funcCallNode)
@@ -173,7 +173,7 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
 
 	for calls := prog.Declares; calls != nil; calls = calls.Next {
-		gen(module, nil, calls, prog.BuiltinLibs)
+		gen(module, nil, calls, prog)
 	}
 
 	return module
