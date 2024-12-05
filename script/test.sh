@@ -21,7 +21,6 @@ assertfile() {
 }
 
 assert() {
-  # 実行結果を変数に格納
   input="$1"
   expected="$2"
   actual_output=$(./generated/test/modo run -o "$dir/out" --exec "$input")
@@ -29,7 +28,6 @@ assert() {
 
   ((total_tests++))
 
-  # 実行結果をdiffで比較
   diff_result=$(diff <(echo "$expected") <(echo "$actual_output"))
   if [ "$actual_exit_code" -eq 0 ] && [ -z "$diff_result" ]; then
     ((passed_count++))
@@ -55,6 +53,7 @@ summary(){
 }
 
 testexec(){
+  # operator
   assertexec '(def main (fn [] (prn 17)))' 17
   assertexec '(def main (fn [] (prn (+ 4 13))))' 17
   assertexec '(def main (fn [] (prn (+ 1 2 3))))' 6
@@ -66,6 +65,8 @@ testexec(){
   assertexec '(def main (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))' 39
   assertexec '(def main (fn [] (prn (= 5 (+ 3 2)))))' 1
   assertexec '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))' 0
+
+  # variable
   assertexec '(def x 1) (def main (fn [] (prn (+ x 2))))' 3
 }
 testfile(){
