@@ -35,8 +35,11 @@ func PrepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 }
 
 func ReadFile(inputFile *string) string {
-	data, _ := os.Open(*inputFile)
+	data, err := os.Open(*inputFile)
 	defer data.Close()
+	if err != nil {
+		log.Panic("file not found: have %s", *inputFile)
+	}
 
 	scanner := bufio.NewScanner(data)
 	var input_arr = ""
