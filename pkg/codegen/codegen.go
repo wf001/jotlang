@@ -130,17 +130,24 @@ func gen(
 	} else if funcCallNode.IsExpr() {
 		return gen(mod, block, funcCallNode.Child, libs)
 
+	} else if funcCallNode.IsVar() && funcCallNode.Val == "main" {
+		// means declaring main function regarded as entrypoint
+
+		function := mod.NewFunc(
+			"main",
+			types.I32,
+		)
+		llBlock := function.NewBlock("")
+
+		res := gen(mod, llBlock, funcCallNode.Child, libs)
+		llBlock.NewCall(res)
+		llBlock.NewRet(newI32("0"))
+
 	} else if funcCallNode.IsVar() {
-		// means declaring global variable or function
+		// means declaring global variable or function named except main
 
-		// TODO: validate
-		funcName := funcCallNode.Val
-		retType := types.I32
-
-		if funcName != "main" {
-			retType = types.I32
-			funcName = fmt.Sprintf("var-%s", funcName)
-		}
+		retType := types.I32 // to be changable
+		funcName := fmt.Sprintf("var-%s", funcCallNode.Val)
 
 		function := mod.NewFunc(
 			funcName,
@@ -149,12 +156,8 @@ func gen(
 		llBlock := function.NewBlock("")
 
 		res := gen(mod, llBlock, funcCallNode.Child, libs)
-		if funcName != "main" {
-			llBlock.NewRet(res)
-		} else {
-			llBlock.NewCall(res)
-			llBlock.NewRet(newI32("0"))
-		}
+		llBlock.NewRet(res)
+
 	} else if funcCallNode.IsDeclare() {
 		return gen(mod, block, funcCallNode.Child, libs)
 
