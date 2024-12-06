@@ -32,6 +32,8 @@ func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 		return mTypes.ND_ADD, true
 	case mTypes.BINARY_OPERATOR_EQ:
 		return mTypes.ND_EQ, true
+	default:
+		log.Error("undefined token :have %+v", tok)
 	}
 	return mTypes.ND_NIL, false
 }
@@ -87,13 +89,6 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		}
 		return tok.Next, head
 
-	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
-		// skip
-		return parseExpr(tok.Next, head, mTypes.ND_EXPR, "")
-
-	} else if tok.Kind == mTypes.TK_NUM {
-		return tok.Next, newNodeInt(tok)
-
 	} else if tok.Kind == mTypes.TK_VAR_DECLARE {
 		log.Debug("is Variable declaration :have %+v", tok)
 		tok, head = parseExpr(tok, head, mTypes.ND_VAR_DECLARE, tok.Val)
@@ -101,6 +96,13 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 	} else if tok.Kind == mTypes.TK_VAR_REFERENCE {
 		log.Debug("is Variable reference :have %+v", tok)
 		return tok.Next, newNode(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+
+	} else if tok.Kind == mTypes.TK_NUM {
+		return tok.Next, newNodeInt(tok)
+
+	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
+		// skip
+		return parseExpr(tok.Next, head, mTypes.ND_EXPR, "")
 
 	} else {
 		log.Panic("undefined token :have %+v", tok)
