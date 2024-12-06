@@ -72,7 +72,7 @@ func doAsemble(llFile string, asmFile string) {
 func gen(
 	mod *ir.Module,
 	block *ir.Block,
-	funcCallNode *mTypes.Node,
+	funcCallNode *mTypes.Node, //TODO: rename
 	prog *mTypes.Program,
 ) value.Value {
 
@@ -164,7 +164,13 @@ func gen(
 
 		llBlock.NewRet(res)
 	} else if funcCallNode.IsVarReference() {
-		return block.NewCall(prog.Declares.Child.FuncPtr)
+		// PERFORMANCE: too redundant
+		for declare := prog.Declares; declare != nil; declare = declare.Next {
+			if declare.Child.Val == funcCallNode.Val {
+				return block.NewCall(declare.Child.FuncPtr)
+			}
+		}
+		log.Panic("'%s' not found", funcCallNode.Val)
 
 	} else if funcCallNode.IsDeclare() {
 		return gen(mod, block, funcCallNode.Child, prog)

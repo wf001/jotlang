@@ -44,7 +44,8 @@ func parseExpr(
 ) (*mTypes.Token, *mTypes.Node) {
 	nextToken, argHead := parseDeclare(rootToken.Next)
 	prevNode := argHead
-	for nextToken.IsNum() || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
+	// NOTE: what means?
+	for nextToken.IsNum() || nextToken.IsVarReference() || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		nextToken, prevNode.Next = parseDeclare(nextToken)
 		prevNode = prevNode.Next
 	}

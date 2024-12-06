@@ -123,6 +123,9 @@ func (tok *Token) IsDeclare() bool {
 func (tok *Token) IsLambda() bool {
 	return tok.Kind == TK_LAMBDA
 }
+func (tok *Token) IsVarReference() bool {
+	return tok.Kind == TK_VAR_REFERENCE
+}
 
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))
