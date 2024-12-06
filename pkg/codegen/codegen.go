@@ -170,13 +170,13 @@ func gen(
 				return block.NewCall(declare.Child.FuncPtr)
 			}
 		}
-		log.Panic("'%s' not found", funcCallNode.Val)
+		log.Panic("unresolved symbol: '%s'", funcCallNode.Val)
 
 	} else if funcCallNode.IsDeclare() {
 		return gen(mod, block, funcCallNode.Child, prog)
 
 	} else {
-		log.Panic("not matched any Nodekind: have %+v", funcCallNode)
+		log.Panic("unresolved Nodekind: have %+v", funcCallNode)
 	}
 	return nil
 }

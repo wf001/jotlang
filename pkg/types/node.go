@@ -9,16 +9,12 @@ import (
 )
 
 // ########
-// Token
-// ########
-
-// ########
 // Node
 // ########
 type NodeKind string
 
 const (
-	// Arithmetic ND_CORE
+	// Arithmetic
 	ND_ADD = NodeKind("ND_ADD") // +
 	ND_SUB = NodeKind("ND_SUB") // -
 	ND_MUL = NodeKind("ND_MUL") // *
@@ -143,7 +139,7 @@ func (node *Node) Debug(depth int) {
 	case ND_EXPR:
 		node.Child.Debug(depth + 1)
 	default:
-		log.Panic("not matched any Nodekind: have %+v", node)
+		log.Panic("unresolved Nodekind: have %+v", node)
 	}
 	if node.Next != nil && node.Kind != ND_INT {
 		node.Next.Debug(depth)

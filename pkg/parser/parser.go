@@ -33,7 +33,7 @@ func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 	case mTypes.BINARY_OPERATOR_EQ:
 		return mTypes.ND_EQ, true
 	default:
-		log.Error("undefined token :have %+v", tok)
+		log.Error("unresolved token :have %+v", tok)
 	}
 	return mTypes.ND_NIL, false
 }
@@ -105,7 +105,7 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		return parseExpr(tok.Next, head, mTypes.ND_EXPR, "")
 
 	} else {
-		log.Panic("undefined token :have %+v", tok)
+		log.Panic("unresolved token :have %+v", tok)
 	}
 
 	return tok, head
