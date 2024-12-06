@@ -54,6 +54,7 @@ summary(){
 
 testexec(){
   # operator
+  echo "== operation ==="
   assertexec '(def main (fn [] (prn 17)))' 17
   assertexec '(def main (fn [] (prn (+ 4 13))))' 17
   assertexec '(def main (fn [] (prn (+ 1 2 3))))' 6
@@ -67,7 +68,17 @@ testexec(){
   assertexec '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))' 0
 
   # variable
+  echo "== variable ==="
   assertexec '(def x 1) (def main (fn [] (prn (+ x 2))))' 3
+  assertexec '(def x 1) (def main (fn [] (prn (+ 2 x))))' 3
+  assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3)))))' 6
+  assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3) 4))))' 10
+  assertexec '(def x 1) (def y 2) (def main (fn [] (prn (+ x y))))' 3
+  assertexec '(def x 1) (def main (fn [] (prn (+ x x))))' 2
+
+  assertexec '(def x 1) (def main (fn [] (prn (= x 2))))' 0
+  assertexec '(def x 1) (def main (fn [] (prn (= x 1))))' 1
+  assertexec '(def x 1) (def y 2) (def main (fn [] (prn (= x y))))' 0
 }
 testfile(){
   assertfile '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 'SimpleSequentialOutput1' 
