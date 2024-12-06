@@ -72,22 +72,22 @@ func doAsemble(llFile string, asmFile string) {
 func gen(
 	mod *ir.Module,
 	block *ir.Block,
-	funcCallNode *mTypes.Node, //TODO: rename
+	node *mTypes.Node,
 	prog *mTypes.Program,
 ) value.Value {
 
-	if funcCallNode.IsInteger() {
-		return newI32(funcCallNode.Val)
+	if node.IsInteger() {
+		return newI32(node.Val)
 
-	} else if funcCallNode.IsNary() {
+	} else if node.IsNary() {
 		// nary takes more than 2 arguments
-		child := funcCallNode.Child
+		child := node.Child
 		fst := gen(mod, block, child, prog)
 
 		child = child.Next
 		snd := gen(mod, block, child, prog)
 
-		nary := operatorMap[funcCallNode.Kind]
+		nary := operatorMap[node.Kind]
 		res := nary(block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
@@ -97,44 +97,44 @@ func gen(
 		}
 		return res
 
-	} else if funcCallNode.IsBinary() {
+	} else if node.IsBinary() {
 		// binary takes exactly 2 arguments
-		child := funcCallNode.Child
+		child := node.Child
 		fst := gen(mod, block, child, prog)
 
 		child = child.Next
 		snd := gen(mod, block, child, prog)
 
-		binary := operatorMap[funcCallNode.Kind]
+		binary := operatorMap[node.Kind]
 		res := binary(block, fst, snd)
-
 		return res
-	} else if funcCallNode.IsLibCall() {
+
+	} else if node.IsLibCall() {
 		// means calling standard library
-		arg := gen(mod, block, funcCallNode.Child, prog)
-		libFunc := libraryMap[funcCallNode.Val]
+		arg := gen(mod, block, node.Child, prog)
+		libFunc := libraryMap[node.Val]
 		libFunc(block, prog.BuiltinLibs, arg)
 		return newI32("0")
 
-	} else if funcCallNode.IsLambda() {
+	} else if node.IsLambda() {
 		// TODO: validate
 		funcFn := mod.NewFunc(
-			fmt.Sprintf("fn-%p", funcCallNode),
+			fmt.Sprintf("fn-%p", node),
 			types.I32,
 		)
 		llBlock := funcFn.NewBlock("")
-		res := gen(mod, llBlock, funcCallNode.Child, prog)
+		res := gen(mod, llBlock, node.Child, prog)
 		llBlock.NewRet(res)
 		return funcFn
 
-	} else if funcCallNode.IsExpr() {
+	} else if node.IsExpr() {
 		var res value.Value
-		for child := funcCallNode.Child; child != nil; child = child.Next {
+		for child := node.Child; child != nil; child = child.Next {
 			res = gen(mod, block, child, prog)
 		}
 		return res
 
-	} else if funcCallNode.IsVarDeclare() && funcCallNode.Val == "main" {
+	} else if node.IsVarDeclare() && node.Val == "main" {
 		// means declaring main function regarded as entrypoint
 
 		function := mod.NewFunc(
@@ -143,15 +143,15 @@ func gen(
 		)
 		llBlock := function.NewBlock("")
 
-		res := gen(mod, llBlock, funcCallNode.Child, prog)
+		res := gen(mod, llBlock, node.Child, prog)
 		llBlock.NewCall(res)
 		llBlock.NewRet(newI32("0"))
 
-	} else if funcCallNode.IsVarDeclare() {
+	} else if node.IsVarDeclare() {
 		// means declaring global variable or function named except main
 
 		retType := types.I32 // TODO: to be changable
-		funcName := getFuncName(funcCallNode.Val)
+		funcName := getFuncName(node.Val)
 
 		function := mod.NewFunc(
 			funcName,
@@ -159,24 +159,24 @@ func gen(
 		)
 		llBlock := function.NewBlock("")
 
-		res := gen(mod, llBlock, funcCallNode.Child, prog)
-		funcCallNode.FuncPtr = function
-
+		res := gen(mod, llBlock, node.Child, prog)
+		node.FuncPtr = function
 		llBlock.NewRet(res)
-	} else if funcCallNode.IsVarReference() {
+
+	} else if node.IsVarReference() {
 		// PERFORMANCE: too redundant
 		for declare := prog.Declares; declare != nil; declare = declare.Next {
-			if declare.Child.Val == funcCallNode.Val {
+			if declare.Child.Val == node.Val {
 				return block.NewCall(declare.Child.FuncPtr)
 			}
 		}
-		log.Panic("unresolved symbol: '%s'", funcCallNode.Val)
+		log.Panic("unresolved symbol: '%s'", node.Val)
 
-	} else if funcCallNode.IsDeclare() {
-		return gen(mod, block, funcCallNode.Child, prog)
+	} else if node.IsDeclare() {
+		return gen(mod, block, node.Child, prog)
 
 	} else {
-		log.Panic("unresolved Nodekind: have %+v", funcCallNode)
+		log.Panic("unresolved Nodekind: have %+v", node)
 	}
 	return nil
 }
@@ -186,8 +186,8 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
 
-	for calls := prog.Declares; calls != nil; calls = calls.Next {
-		gen(module, nil, calls, prog)
+	for declare := prog.Declares; declare != nil; declare = declare.Next {
+		gen(module, nil, declare, prog)
 	}
 
 	return module
