@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
@@ -66,27 +65,38 @@ func setLogLevel() {
 }
 
 func compile(asmFile string, executableFile string) {
-	out, err := exec.Command("clang", asmFile, "-o", executableFile).CombinedOutput()
+	_, err, errMsg := io.RunCommand("clang", asmFile, "-o", executableFile)
 	if err != nil {
+		log.Debug("artifactDir: %s", executableFile)
 		log.Panic(
-			"fail to compile: %+v",
-			map[string]interface{}{"err": err, "out": out, "artifactDir": executableFile},
+			"fail to compile: %v",
+			map[string]interface{}{
+				"err":     err,
+				"message": errMsg,
+			},
 		)
 	}
 	log.Debug("written executable: %s", executableFile)
 }
 
 func run(executableFile string) int {
-	cmd := exec.Command(executableFile)
+	out, err, errMsg := io.RunCommand(executableFile)
 	// TODO: it works, but correctly?
-	out, err := cmd.Output()
 	log.Debug("executed: %s", executableFile)
 	if err != nil {
-		log.Error("fail to run: %s", err)
+		log.Debug("artifactDir: %s", executableFile)
+		log.Error(
+			"fail to run: %+v",
+			map[string]interface{}{
+				"err":     err,
+				"message": errMsg,
+			},
+		)
+		return 1
 	}
-	fmt.Println(string(out))
+	fmt.Println(out)
 
-	return cmd.ProcessState.ExitCode()
+	return 0
 }
 
 func doBuild(workingDirPrefix string, evaluatee string) (error, string) {

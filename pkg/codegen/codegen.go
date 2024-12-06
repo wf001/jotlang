@@ -3,7 +3,6 @@ package codegen
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
 
 	"github.com/llir/llvm/ir"
@@ -13,6 +12,7 @@ import (
 	"github.com/llir/llvm/ir/value"
 
 	"github.com/wf001/modo/pkg/codegen/lib"
+	"github.com/wf001/modo/pkg/io"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -58,12 +58,18 @@ func newArray(length uint64) *types.ArrayType {
 }
 
 func doAsemble(llFile string, asmFile string) {
-	// TODO: show error message send to stderr
-	out, err := exec.Command("llc", llFile, "-o", asmFile).Output()
+	// TODO: work it?
+	out, err, errMsg := io.RunCommand("llc", llFile, "-o", asmFile)
 	if err != nil {
+		log.Debug("llFile: %s, asmFile: %s", llFile, asmFile)
+		// TODO: move to utility
 		log.Panic(
 			"fail to asemble: %+v",
-			map[string]interface{}{"err": err, "out": out, "llFile": llFile, "asmFile": asmFile},
+			map[string]interface{}{
+				"out":    out,
+				"err":    err,
+				"errMsg": errMsg,
+			},
 		)
 	}
 	log.Debug("written asm: %s", asmFile)
