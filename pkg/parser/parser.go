@@ -56,7 +56,7 @@ func parseExpr(
 	return rootToken, rootNode
 }
 
-func parseDeclare(tok *mTypes.Token, parnetKind mTypes.NodeKind) (*mTypes.Token, *mTypes.Node) {
+func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
@@ -90,7 +90,7 @@ func parseDeclare(tok *mTypes.Token, parnetKind mTypes.NodeKind) (*mTypes.Token,
 		return tok.Next, head
 
 	} else if tok.IsVar() {
-		if parnetKind == mTypes.ND_DECLARE {
+		if parentKind == mTypes.ND_DECLARE {
 			log.Debug("is Variable declaration :have %+v", tok)
 			tok, head = parseExpr(tok, head, mTypes.ND_VAR_DECLARE, tok.Val)
 
