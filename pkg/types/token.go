@@ -10,12 +10,11 @@ import (
 type TokenKind = string
 
 const (
-	TK_NUM           = TokenKind("TK_NUM")
-	TK_OPERATOR      = TokenKind("TK_OPERATOR")
-	TK_PAREN         = TokenKind("TK_PAREN")
-	TK_LIB           = TokenKind("TK_LIB")
-	TK_VAR_DECLARE   = TokenKind("TK_VAR_DECLARE")
-	TK_VAR_REFERENCE = TokenKind("TK_VAR_REFERENCE")
+	TK_NUM      = TokenKind("TK_NUM")
+	TK_OPERATOR = TokenKind("TK_OPERATOR")
+	TK_PAREN    = TokenKind("TK_PAREN")
+	TK_LIB      = TokenKind("TK_LIB")
+	TK_VAR      = TokenKind("TK_VAR")
 
 	TK_RESERVED = TokenKind("TK_RESERVED")
 	TK_DECLARE  = TokenKind("TK_DECLARE")
@@ -123,9 +122,6 @@ func (tok *Token) IsDeclare() bool {
 }
 func (tok *Token) IsLambda() bool {
 	return tok.Kind == TK_LAMBDA
-}
-func (tok *Token) IsVarReference() bool {
-	return tok.Kind == TK_VAR_REFERENCE
 }
 
 func (tok *Token) DebugTokens() {

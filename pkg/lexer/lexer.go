@@ -31,45 +31,33 @@ func splitString(expr string) []string {
 func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	prev := &mTypes.Token{}
 	head := prev
-	size := len(splittedString)
-	pos := 0
 
-	for {
-		p := splittedString[pos]
+	for _, p := range splittedString {
 		// NOTE: should implement as map refer?
 		if matched(p, mTypes.INTEGER_REG_EXP) {
 			prev = newToken(mTypes.TK_NUM, prev, p)
-			pos += 1
+
 		} else if matched(p, mTypes.OPERATORS_REG_EXP) {
 			prev = newToken(mTypes.TK_OPERATOR, prev, p)
-			pos += 1
+
 		} else if matched(p, mTypes.BRACKETS_REG_EXP) {
 			prev = newToken(mTypes.TK_PAREN, prev, p)
-			pos += 1
+
 		} else if matched(p, mTypes.LIB_CORE_REG_EXP) {
 			prev = newToken(mTypes.TK_LIB, prev, p)
-			pos += 1
+
 		} else if matched(p, mTypes.SYMBOL_FN) {
 			prev = newToken(mTypes.TK_LAMBDA, prev, p)
-			pos += 1
+
 		} else if matched(p, mTypes.SYMBOL_DEF) {
 			prev = newToken(mTypes.TK_DECLARE, prev, p)
-			pos += 1
+
 		} else if matched(p, mTypes.SYMBOL_LET) {
 			prev = newToken(mTypes.TK_BIND, prev, p)
-			pos += 1
+
 		} else {
-			if prev.Kind == mTypes.TK_DECLARE {
-				log.Debug("regard '%+v' as variable declaration symbol", p)
-				prev = newToken(mTypes.TK_VAR_DECLARE, prev, p)
-			} else {
-				log.Debug("regard '%+v' as variable reference symbol", p)
-				prev = newToken(mTypes.TK_VAR_REFERENCE, prev, p)
-			}
-			pos += 1
-		}
-		if pos >= size {
-			break
+			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
+			prev = newToken(mTypes.TK_VAR, prev, p)
 		}
 	}
 

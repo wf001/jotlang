@@ -44,11 +44,11 @@ func parseExpr(
 	exprKind mTypes.NodeKind,
 	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
-	nextToken, argHead := parseDeclare(rootToken.Next)
+	nextToken, argHead := parseDeclare(rootToken.Next, exprKind)
 	prevNode := argHead
 	// NOTE: what means?
-	for nextToken.IsNum() || nextToken.IsVarReference() || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
-		nextToken, prevNode.Next = parseDeclare(nextToken)
+	for nextToken.IsNum() || nextToken.Kind == mTypes.TK_VAR || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
+		nextToken, prevNode.Next = parseDeclare(nextToken, exprKind)
 		prevNode = prevNode.Next
 	}
 	rootNode = newNode(exprKind, argHead, exprName)
@@ -56,7 +56,7 @@ func parseExpr(
 	return rootToken, rootNode
 }
 
-func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
+func parseDeclare(tok *mTypes.Token, parnetKind mTypes.NodeKind) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
@@ -64,11 +64,11 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		tok = tok.Next
 
 		if tok.IsDeclare() {
-			tok, head = parseDeclare(tok.Next)
+			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
 			head = newNode(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsLambda() {
-			tok, head = parseDeclare(tok.Next)
+			tok, head = parseDeclare(tok.Next, mTypes.ND_LAMBDA)
 			head = newNode(
 				mTypes.ND_LAMBDA,
 				head,
@@ -89,14 +89,18 @@ func parseDeclare(tok *mTypes.Token) (*mTypes.Token, *mTypes.Node) {
 		}
 		return tok.Next, head
 
-	} else if tok.Kind == mTypes.TK_VAR_DECLARE {
-		log.Debug("is Variable declaration :have %+v", tok)
-		tok, head = parseExpr(tok, head, mTypes.ND_VAR_DECLARE, tok.Val)
+	} else if tok.Kind == mTypes.TK_VAR {
+		if parnetKind == mTypes.ND_DECLARE {
+			log.Debug("is Variable declaration :have %+v", tok)
+			tok, head = parseExpr(tok, head, mTypes.ND_VAR_DECLARE, tok.Val)
 
-	} else if tok.Kind == mTypes.TK_VAR_REFERENCE {
-		log.Debug("is Variable reference :have %+v", tok)
-		return tok.Next, newNode(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+		} else {
 
+			log.Debug("is Variable reference :have %+v", tok)
+			return tok.Next, newNode(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+		}
+
+		// TODO: remain definition of utility?
 	} else if tok.Kind == mTypes.TK_NUM {
 		return tok.Next, newNodeInt(tok)
 
@@ -123,10 +127,10 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 		}
 
 		if prevDeclare == nil {
-			tok, p.Declares = parseDeclare(tok)
+			tok, p.Declares = parseDeclare(tok, mTypes.ND_PROGRAM_ROOT)
 			prevDeclare = p.Declares
 		} else {
-			tok, prevDeclare.Next = parseDeclare(tok)
+			tok, prevDeclare.Next = parseDeclare(tok, mTypes.ND_PROGRAM_ROOT)
 			prevDeclare = prevDeclare.Next
 		}
 	}

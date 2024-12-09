@@ -39,9 +39,10 @@ const (
 	ND_EXPR          = NodeKind(
 		"ND_EXPR",
 	) // set of operator and user-defined function invoking
-	ND_FUNCCALL = NodeKind("ND_FUNCCALL")
-	ND_BIND     = NodeKind("ND_BIND") // let
-	ND_LIBCALL  = NodeKind("ND_LIBCALL")
+	ND_FUNCCALL     = NodeKind("ND_FUNCCALL")
+	ND_BIND         = NodeKind("ND_BIND") // let
+	ND_LIBCALL      = NodeKind("ND_LIBCALL")
+	ND_PROGRAM_ROOT = NodeKind("ND_PROGRAM_ROOT")
 )
 
 type Program struct {
