@@ -73,6 +73,7 @@ type Node struct {
 	Then    *Node
 	Else    *Node
 	Val     string
+	Bind    *Node
 	VarPtr  *ir.InstAlloca // global and local variable
 	FuncPtr *ir.Func
 }
@@ -138,6 +139,9 @@ func (node *Node) Debug(depth int) {
 	case ND_VAR_REFERENCE:
 		node.Child.Debug(depth + 1)
 	case ND_EXPR:
+		node.Bind.Debug(depth + 1)
+		node.Child.Debug(depth + 1)
+	case ND_BIND:
 		node.Child.Debug(depth + 1)
 	default:
 		log.Panic("unresolved Nodekind: have %+v", node)

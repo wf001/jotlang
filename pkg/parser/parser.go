@@ -68,13 +68,50 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head = newNode(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsLambda() {
-			tok, head = parseDeclare(tok.Next, mTypes.ND_LAMBDA)
+			tok, head = parseDeclare(tok.Next.Next.Next, mTypes.ND_LAMBDA)
 			head = newNode(
 				mTypes.ND_LAMBDA,
 				head,
 				"",
 			)
+		} else if tok.IsBind() {
+			tok = tok.Next
 
+			if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
+				log.Panic("must be [ :have %+v", tok)
+			}
+
+			prev := &mTypes.Node{}
+			varHead := &mTypes.Node{}
+
+			for {
+				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) ||
+					tok.Next.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
+					log.Panic("bindings require even number of forms")
+				}
+				tok = tok.Next
+
+				tok, prev = parseDeclare(tok, mTypes.ND_DECLARE)
+
+				if varHead.Child == nil {
+					varHead.Child = prev
+				} else {
+					prev.Next = prev
+					prev = prev.Next
+				}
+
+				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
+					tok = tok.Next
+					nextToken, expr := parseDeclare(tok, mTypes.ND_EXPR)
+					res := newNode(mTypes.ND_EXPR, expr, "")
+					res.Bind = newNode(mTypes.ND_BIND, varHead.Child, "")
+					tok = nextToken
+					return nextToken, res
+				}
+				if tok == nil {
+					log.Panic("must be closed with ]")
+				}
+			}
 		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
 			tok, head = parseExpr(tok, head, kind, tok.Val)
@@ -102,10 +139,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 	} else if tok.IsNum() {
 		return tok.Next, newNodeInt(tok)
-
-	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
-		// skip
-		return parseExpr(tok.Next, head, mTypes.ND_EXPR, "")
 
 	} else {
 		log.Panic("unresolved token :have %+v", tok)

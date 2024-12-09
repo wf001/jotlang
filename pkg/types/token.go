@@ -126,6 +126,9 @@ func (tok *Token) IsLambda() bool {
 func (tok *Token) IsVar() bool {
 	return tok.Kind == TK_VAR
 }
+func (tok *Token) IsBind() bool {
+	return tok.Kind == TK_BIND
+}
 
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))
