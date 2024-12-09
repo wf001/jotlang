@@ -20,6 +20,7 @@ const (
 	TK_RESERVED = TokenKind("TK_RESERVED")
 	TK_DECLARE  = TokenKind("TK_DECLARE")
 	TK_LAMBDA   = TokenKind("TK_LAMBDA")
+	TK_BIND     = TokenKind("TK_BIND")
 )
 
 type Token struct {
