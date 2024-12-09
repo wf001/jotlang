@@ -47,7 +47,7 @@ func parseExpr(
 	nextToken, argHead := parseDeclare(rootToken.Next, exprKind)
 	prevNode := argHead
 	// NOTE: what means?
-	for nextToken.IsNum() || nextToken.Kind == mTypes.TK_VAR || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
+	for nextToken.IsNum() || nextToken.IsVar() || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		nextToken, prevNode.Next = parseDeclare(nextToken, exprKind)
 		prevNode = prevNode.Next
 	}
@@ -89,7 +89,7 @@ func parseDeclare(tok *mTypes.Token, parnetKind mTypes.NodeKind) (*mTypes.Token,
 		}
 		return tok.Next, head
 
-	} else if tok.Kind == mTypes.TK_VAR {
+	} else if tok.IsVar() {
 		if parnetKind == mTypes.ND_DECLARE {
 			log.Debug("is Variable declaration :have %+v", tok)
 			tok, head = parseExpr(tok, head, mTypes.ND_VAR_DECLARE, tok.Val)
@@ -100,8 +100,7 @@ func parseDeclare(tok *mTypes.Token, parnetKind mTypes.NodeKind) (*mTypes.Token,
 			return tok.Next, newNode(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
 		}
 
-		// TODO: remain definition of utility?
-	} else if tok.Kind == mTypes.TK_NUM {
+	} else if tok.IsNum() {
 		return tok.Next, newNodeInt(tok)
 
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
