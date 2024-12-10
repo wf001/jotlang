@@ -68,7 +68,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head = newNode(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsLambda() {
-			tok, head = parseDeclare(tok.Next.Next.Next, mTypes.ND_LAMBDA)
+			tok, head = parseExpr(tok.Next.Next, head, mTypes.ND_EXPR, "")
 			head = newNode(
 				mTypes.ND_LAMBDA,
 				head,
@@ -134,7 +134,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	} else if tok.IsVar() {
 		if parentKind == mTypes.ND_DECLARE {
 			log.Debug("is Variable declaration :have %+v", tok)
-			// fix here
 			v := tok.Val
 			tok, head = parseDeclare(tok.Next, mTypes.ND_VAR_DECLARE)
 			head = newNode(mTypes.ND_VAR_DECLARE, head, v)
