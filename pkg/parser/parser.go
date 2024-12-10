@@ -84,34 +84,39 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			prev := &mTypes.Node{}
 			varHead := &mTypes.Node{}
 
+			if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) ||
+				tok.Next.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
+				log.Panic("bindings require even number of forms")
+			}
+			tok = tok.Next
 			for {
-				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) ||
-					tok.Next.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
-					log.Panic("bindings require even number of forms")
-				}
-				tok = tok.Next
 
-				tok, prev = parseDeclare(tok, mTypes.ND_DECLARE)
+				nextToken, res := parseDeclare(tok, mTypes.ND_DECLARE)
+				tok = nextToken
 
 				if varHead.Child == nil {
-					varHead.Child = prev
+					varHead.Child = res
+					prev = res
 				} else {
-					prev.Next = prev
+					prev.Next = res
 					prev = prev.Next
 				}
 
 				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
-					tok = tok.Next
-					nextToken, expr := parseDeclare(tok, mTypes.ND_EXPR)
-					res := newNode(mTypes.ND_EXPR, expr, "")
-					res.Bind = newNode(mTypes.ND_BIND, varHead.Child, "")
-					tok = nextToken
-					return nextToken, res
+					break
 				}
 				if tok == nil {
 					log.Panic("must be closed with ]")
 				}
 			}
+
+			tok = tok.Next
+			nextToken, expr := parseDeclare(tok, mTypes.ND_EXPR)
+			res := newNode(mTypes.ND_EXPR, expr, "")
+			res.Bind = newNode(mTypes.ND_BIND, varHead.Child, "")
+			tok = nextToken
+			return nextToken, res
+
 		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
 			tok, head = parseExpr(tok, head, kind, tok.Val)
@@ -129,7 +134,10 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	} else if tok.IsVar() {
 		if parentKind == mTypes.ND_DECLARE {
 			log.Debug("is Variable declaration :have %+v", tok)
-			tok, head = parseExpr(tok, head, mTypes.ND_VAR_DECLARE, tok.Val)
+			// fix here
+			v := tok.Val
+			tok, head = parseDeclare(tok.Next, mTypes.ND_VAR_DECLARE)
+			head = newNode(mTypes.ND_VAR_DECLARE, head, v)
 
 		} else {
 
