@@ -38,10 +38,11 @@ func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 	return mTypes.ND_NIL, false
 }
 
-func parseBody(
+func parseExprs(
 	rootToken *mTypes.Token,
 	exprKind mTypes.NodeKind,
 ) (*mTypes.Token, *mTypes.Node) {
+
 	nextToken, argHead := parseDeclare(rootToken.Next, exprKind)
 	prevNode := argHead
 	// NOTE: what means?
@@ -53,13 +54,15 @@ func parseBody(
 	return rootToken, argHead
 }
 
-func parseExpr(
+// NOTE: is correct?
+func parseBody(
 	rootToken *mTypes.Token,
 	rootNode *mTypes.Node,
 	exprKind mTypes.NodeKind,
 	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
-	nextToken, argHead := parseBody(rootToken, exprKind)
+
+	nextToken, argHead := parseExprs(rootToken, exprKind)
 	rootNode = newNode(exprKind, argHead, exprName)
 	rootToken = nextToken
 	return rootToken, rootNode
@@ -77,7 +80,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head = newNode(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsLambda() {
-			tok, head = parseExpr(tok.Next.Next, head, mTypes.ND_EXPR, "")
+			tok, head = parseBody(tok.Next.Next, head, mTypes.ND_EXPR, "")
 			head = newNode(
 				mTypes.ND_LAMBDA,
 				head,
@@ -86,30 +89,21 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		} else if tok.IsBind() {
 			tok = tok.Next
 
-			if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
-				log.Panic("must be [ :have %+v", tok)
+			if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
+				log.Panic("let bindings require even number of forms")
 			}
 
 			prev := &mTypes.Node{}
-			varHead := &mTypes.Node{}
+			varHead := prev
 
-			if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) ||
-				tok.Next.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
-				log.Panic("bindings require even number of forms")
-			}
 			tok = tok.Next
 			for {
 
-				nextToken, res := parseDeclare(tok, mTypes.ND_DECLARE)
+				nextToken, nodeVar := parseDeclare(tok, mTypes.ND_DECLARE)
 				tok = nextToken
 
-				if varHead.Child == nil {
-					varHead.Child = res
-					prev = res
-				} else {
-					prev.Next = res
-					prev = prev.Next
-				}
+				prev.Next = nodeVar
+				prev = prev.Next
 
 				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
 					break
@@ -119,19 +113,19 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				}
 			}
 
-			nextToken, expr := parseExpr(tok, head, mTypes.ND_EXPR, "")
-			bind := newNode(mTypes.ND_BIND, expr, "")
-			bind.Bind = varHead.Child
-			tok = nextToken
+			nextToken, body := parseBody(tok, head, mTypes.ND_EXPR, "")
+			bind := newNode(mTypes.ND_BIND, body, "")
+			bind.Bind = varHead.Next
+
 			return nextToken, bind
 
 		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
-			tok, head = parseExpr(tok, head, kind, tok.Val)
+			tok, head = parseBody(tok, head, kind, tok.Val)
 
 		} else if tok.IsLibrary() {
 			log.Debug("is Library :have %+v", tok)
-			tok, head = parseExpr(tok, head, mTypes.ND_LIBCALL, tok.Val)
+			tok, head = parseBody(tok, head, mTypes.ND_LIBCALL, tok.Val)
 		}
 
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_CLOSE) {
