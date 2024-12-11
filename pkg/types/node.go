@@ -151,9 +151,6 @@ func (node *Node) Debug(depth int) {
 	case ND_VAR_REFERENCE:
 		node.Child.Debug(depth + 1)
 	case ND_EXPR:
-		indicate("bind", depth)
-		node.Bind.Debug(depth + 1)
-		indicate("child", depth)
 		node.Child.Debug(depth + 1)
 	case ND_BIND:
 		indicate("bind", depth)
