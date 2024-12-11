@@ -86,6 +86,7 @@ testexec(){
   assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' 9
 }
 testfile(){
+  echo "== multi line ==="
   assertfile '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 'SimpleSequentialOutput1' 
   assertfile '(def x 4) (def main (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' 'BindingSequentialOutput1'
 }

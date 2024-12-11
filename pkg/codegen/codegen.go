@@ -138,6 +138,19 @@ func gen(
 		llBlock.NewRet(res)
 		return funcFn
 
+	} else if node.IsBind() {
+		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
+			v := gen(mod, block, varDeclare.Child, prog, scope)
+			if scope.Child == nil {
+				scope = varDeclare
+			} else {
+				scope.Next = varDeclare
+			}
+			varDeclare.VarPtr = block.NewAlloca(types.I32)
+			block.NewStore(v, varDeclare.VarPtr)
+		}
+		return gen(mod, block, node.Child, prog, scope)
+
 	} else if node.IsExpr() {
 		var res value.Value
 		for child := node.Child; child != nil; child = child.Next {
@@ -174,32 +187,20 @@ func gen(
 		node.FuncPtr = function
 		llBlock.NewRet(res)
 
-	} else if node.IsBind() {
-		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
-			v := gen(mod, block, varDeclare.Child, prog, scope)
-			if scope.Child == nil {
-				scope = varDeclare
-			} else {
-				scope.Next = varDeclare
-			}
-			varDeclare.VarPtr = block.NewAlloca(types.I32)
-			block.NewStore(v, varDeclare.VarPtr)
-		}
-		return gen(mod, block, node.Child, prog, scope)
-
 	} else if node.IsVarReference() {
 		// PERFORMANCE: too redundant
+		for s := scope; s != nil; s = s.Next {
+			if s.Val == node.Val {
+				return block.NewLoad(types.I32, s.VarPtr)
+			}
+		}
+
 		for declare := prog.Declares; declare != nil; declare = declare.Next {
 			if declare.Child.Val == node.Val {
 				return block.NewCall(declare.Child.FuncPtr)
 			}
 		}
 
-		for s := scope; s != nil; s = s.Next {
-			if s.Val == node.Val {
-				return block.NewLoad(types.I32, s.VarPtr)
-			}
-		}
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
 	} else if node.IsDeclare() {
