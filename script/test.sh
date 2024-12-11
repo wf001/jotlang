@@ -79,9 +79,12 @@ testexec(){
   assertexec '(def x 1) (def main (fn [] (prn (= x 2))))' 0
   assertexec '(def x 1) (def main (fn [] (prn (= x 1))))' 1
   assertexec '(def x 1) (def y 2) (def main (fn [] (prn (= x y))))' 0
+  # assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' 6
+  # assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' 9
 }
 testfile(){
   assertfile '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 'SimpleSequentialOutput1' 
+  # assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)) (prn (+ x y)))))' 9
 }
 
 build-compiler
