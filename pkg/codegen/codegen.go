@@ -173,17 +173,17 @@ func gen(
 		res := gen(mod, llBlock, node.Child, prog, scope)
 		node.FuncPtr = function
 		llBlock.NewRet(res)
+
 	} else if node.IsBind() {
 		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
 			v := gen(mod, block, varDeclare.Child, prog, scope)
+			if scope.Child == nil {
+				scope = varDeclare
+			} else {
+				scope.Next = varDeclare
+			}
 			varDeclare.VarPtr = block.NewAlloca(types.I32)
 			block.NewStore(v, varDeclare.VarPtr)
-		}
-		if scope.Child == nil {
-			scope = node.Bind
-		} else {
-			scope.Next = node.Bind
-
 		}
 		return gen(mod, block, node.Child, prog, scope)
 

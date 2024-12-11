@@ -83,7 +83,7 @@ testexec(){
   # binding
   echo "== binding ==="
   assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' 6
-  # assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' 9
+  assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' 9
 }
 testfile(){
   assertfile '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 'SimpleSequentialOutput1' 
