@@ -106,6 +106,18 @@ func (node *Node) IsVarReference() bool {
 	return node.Kind == ND_VAR_REFERENCE
 }
 
+func indicate(s string, depth int) {
+	log.Debug(
+		log.YELLOW(
+			fmt.Sprintf(
+				"%s [%s]",
+				strings.Repeat("  ", depth+1),
+				s,
+			),
+		))
+
+}
+
 func (node *Node) Debug(depth int) {
 	if node == nil {
 		return
@@ -139,9 +151,14 @@ func (node *Node) Debug(depth int) {
 	case ND_VAR_REFERENCE:
 		node.Child.Debug(depth + 1)
 	case ND_EXPR:
+		indicate("bind", depth)
 		node.Bind.Debug(depth + 1)
+		indicate("child", depth)
 		node.Child.Debug(depth + 1)
 	case ND_BIND:
+		indicate("bind", depth)
+		node.Bind.Debug(depth + 1)
+		indicate("child", depth)
 		node.Child.Debug(depth + 1)
 	default:
 		log.Panic("unresolved Nodekind: have %+v", node)

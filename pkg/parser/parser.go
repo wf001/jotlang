@@ -38,11 +38,9 @@ func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 	return mTypes.ND_NIL, false
 }
 
-func parseExpr(
+func parseBody(
 	rootToken *mTypes.Token,
-	rootNode *mTypes.Node,
 	exprKind mTypes.NodeKind,
-	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
 	nextToken, argHead := parseDeclare(rootToken.Next, exprKind)
 	prevNode := argHead
@@ -51,6 +49,17 @@ func parseExpr(
 		nextToken, prevNode.Next = parseDeclare(nextToken, exprKind)
 		prevNode = prevNode.Next
 	}
+	rootToken = nextToken
+	return rootToken, argHead
+}
+
+func parseExpr(
+	rootToken *mTypes.Token,
+	rootNode *mTypes.Node,
+	exprKind mTypes.NodeKind,
+	exprName string,
+) (*mTypes.Token, *mTypes.Node) {
+	nextToken, argHead := parseBody(rootToken, exprKind)
 	rootNode = newNode(exprKind, argHead, exprName)
 	rootToken = nextToken
 	return rootToken, rootNode
@@ -110,12 +119,11 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				}
 			}
 
-			tok = tok.Next
-			nextToken, expr := parseDeclare(tok, mTypes.ND_EXPR)
-			res := newNode(mTypes.ND_EXPR, expr, "")
-			res.Bind = newNode(mTypes.ND_BIND, varHead.Child, "")
+			nextToken, expr := parseExpr(tok, head, mTypes.ND_EXPR, "")
+			bind := newNode(mTypes.ND_BIND, expr, "")
+			bind.Bind = varHead.Child
 			tok = nextToken
-			return nextToken, res
+			return nextToken, bind
 
 		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
