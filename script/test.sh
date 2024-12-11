@@ -87,7 +87,7 @@ testexec(){
 }
 testfile(){
   assertfile '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 'SimpleSequentialOutput1' 
-  # assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)) (prn (+ x y)))))' 9
+  assertfile '(def x 4) (def main (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' 'BindingSequentialOutput1'
 }
 
 build-compiler
