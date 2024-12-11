@@ -93,6 +93,9 @@ func (node *Node) IsLibCall() bool {
 func (node *Node) IsLambda() bool {
 	return node.Kind == ND_LAMBDA
 }
+func (node *Node) IsBind() bool {
+	return node.Kind == ND_BIND
+}
 func (node *Node) IsDeclare() bool {
 	return node.Kind == ND_DECLARE
 }
