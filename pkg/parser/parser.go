@@ -129,6 +129,20 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		} else if tok.IsLibrary() {
 			log.Debug("is Library :have %+v", tok)
 			tok, head = parseBody(tok, head, mTypes.ND_LIBCALL, tok.Val)
+
+		} else if tok.IsIf() {
+			log.Debug("is If :have %+v", tok)
+			head.Kind = mTypes.ND_IF
+
+			nextToken, cond := parseDeclare(tok.Next, mTypes.ND_IF)
+			head.Cond = cond
+
+			nextToken, then := parseExprs(nextToken, mTypes.ND_IF)
+			head.Then = newNode(mTypes.ND_EXPR, then, "")
+
+			nextToken, els := parseExprs(nextToken, mTypes.ND_IF)
+			head.Else = newNode(mTypes.ND_EXPR, els, "")
+			tok = nextToken
 		}
 
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_CLOSE) {

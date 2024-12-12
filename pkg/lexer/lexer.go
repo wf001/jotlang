@@ -36,6 +36,7 @@ var tokenMap = map[string]string{
 	mTypes.SYMBOL_FN:         mTypes.TK_LAMBDA,
 	mTypes.SYMBOL_DEF:        mTypes.TK_DECLARE,
 	mTypes.SYMBOL_LET:        mTypes.TK_BIND,
+	mTypes.SYMBOL_IF:         mTypes.TK_IF,
 }
 
 func doLexicalAnalyse(splittedString []string) *mTypes.Token {

@@ -20,6 +20,8 @@ const (
 	TK_LAMBDA   = TokenKind("TK_LAMBDA")
 	TK_BIND     = TokenKind("TK_BIND")
 
+	TK_IF = TokenKind("TK_IF")
+
 	TK_IDENT = TokenKind("TK_IDENT")
 )
 
@@ -129,6 +131,9 @@ func (tok *Token) IsVar() bool {
 }
 func (tok *Token) IsBind() bool {
 	return tok.Kind == TK_BIND
+}
+func (tok *Token) IsIf() bool {
+	return tok.Kind == TK_IF
 }
 
 func (tok *Token) DebugTokens() {

@@ -20,6 +20,7 @@ const (
 	ND_LAMBDA        = NodeKind("ND_LAMBDA")        // fn
 	ND_BIND          = NodeKind("ND_BIND")          // let
 	ND_EXPR          = NodeKind("ND_EXPR")          // set of functions
+	ND_IF            = NodeKind("ND_IF")            // if
 	ND_FUNCCALL      = NodeKind("ND_FUNCCALL")
 	ND_LIBCALL       = NodeKind("ND_LIBCALL")
 
@@ -138,10 +139,19 @@ func (node *Node) Debug(depth int) {
 
 		indicate("child", depth+1)
 		node.Child.Debug(depth + 1)
+	case ND_IF:
+		indicate("cond", depth+1)
+		node.Cond.Debug(depth + 1)
+
+		indicate("then", depth+1)
+		node.Then.Debug(depth + 1)
+
+		indicate("else", depth+1)
+		node.Else.Debug(depth + 1)
 	default:
 		node.Child.Debug(depth + 1)
 	}
-	if node.Next != nil && node.Kind != ND_INT {
+	if node.Next != nil {
 		node.Next.Debug(depth)
 	}
 }
