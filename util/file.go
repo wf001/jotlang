@@ -37,6 +37,7 @@ func PrepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 func ReadFile(inputFile *string) string {
 	data, err := os.Open(*inputFile)
 	defer data.Close()
+	// NOTE: Is it better to return err, not to do panic?
 	if err != nil {
 		log.Panic("file not found: have %s", *inputFile)
 	}
