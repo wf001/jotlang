@@ -12,9 +12,9 @@ import (
 	"github.com/llir/llvm/ir/value"
 
 	"github.com/wf001/modo/pkg/codegen/lib"
-	"github.com/wf001/modo/pkg/io"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
+	"github.com/wf001/modo/util"
 )
 
 type assembler struct {
@@ -63,7 +63,7 @@ func getFuncName(v string) string {
 
 func doAsemble(llFile string, asmFile string) {
 	// TODO: work it?
-	out, err, errMsg := io.RunCommand("llc", llFile, "-o", asmFile)
+	out, err, errMsg := util.RunCommand("llc", llFile, "-o", asmFile)
 	if err != nil {
 		log.Debug("llFile: %s, asmFile: %s", llFile, asmFile)
 		// TODO: move to utility

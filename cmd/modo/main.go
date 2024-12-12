@@ -7,10 +7,10 @@ import (
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/wf001/modo/pkg/codegen"
-	"github.com/wf001/modo/pkg/io"
 	"github.com/wf001/modo/pkg/lexer"
 	"github.com/wf001/modo/pkg/log"
 	"github.com/wf001/modo/pkg/parser"
+	"github.com/wf001/modo/util"
 )
 
 const (
@@ -65,7 +65,7 @@ func setLogLevel() {
 }
 
 func compile(asmFile string, executableFile string) {
-	_, err, errMsg := io.RunCommand("clang", asmFile, "-o", executableFile)
+	_, err, errMsg := util.RunCommand("clang", asmFile, "-o", executableFile)
 	if err != nil {
 		log.Debug("artifactDir: %s", executableFile)
 		log.Panic(
@@ -80,7 +80,7 @@ func compile(asmFile string, executableFile string) {
 }
 
 func run(executableFile string) int {
-	out, err, errMsg := io.RunCommand(executableFile)
+	out, err, errMsg := util.RunCommand(executableFile)
 	// TODO: it works, but correctly?
 	log.Debug("executed: %s", executableFile)
 	if err != nil {
@@ -107,7 +107,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	// Token -> Node
 	node := parser.Parse(token)
 
-	llName, asmName, executableName := io.PrepareWorkingFile(workingDirPrefix, currentTime)
+	llName, asmName, executableName := util.PrepareWorkingFile(workingDirPrefix, currentTime)
 
 	// Node -> AST -> write assembly
 	codegen.Construct(node).Assemble(llName, asmName)
@@ -140,7 +140,7 @@ func main() {
 			os.Exit(doRun(*appOutput, *runExec))
 		} else {
 			if inputFile != nil {
-				arg := io.ReadFile(inputFile)
+				arg := util.ReadFile(inputFile)
 				os.Exit(doRun(*appOutput, arg))
 			} else {
 				log.Panic("fail to run, input must be specified")
