@@ -137,7 +137,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			nextToken, cond := parseDeclare(tok.Next, mTypes.ND_IF)
 			head.Cond = cond
 
-			// FIXME: fail to parse (if (= 1 1) ((prn 2) (prn 3)) (prn 4))
 			nextToken, then := parseDeclare(nextToken, mTypes.ND_IF)
 			head.Then = newNode(mTypes.ND_EXPR, then, "")
 
