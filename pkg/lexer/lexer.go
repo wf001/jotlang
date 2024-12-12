@@ -7,7 +7,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func matched(s string, typ string) bool {
+func isMatched(s string, typ string) bool {
 	re := regexp.MustCompile(typ)
 	return re.MatchString(s)
 }
@@ -28,34 +28,31 @@ func splitString(expr string) []string {
 	return res
 }
 
+var tokenMap = map[string]string{
+	mTypes.INTEGER_REG_EXP:   mTypes.TK_NUM,
+	mTypes.OPERATORS_REG_EXP: mTypes.TK_OPERATOR,
+	mTypes.BRACKETS_REG_EXP:  mTypes.TK_PAREN,
+	mTypes.LIB_CORE_REG_EXP:  mTypes.TK_LIBCALL,
+	mTypes.SYMBOL_FN:         mTypes.TK_LAMBDA,
+	mTypes.SYMBOL_DEF:        mTypes.TK_DECLARE,
+	mTypes.SYMBOL_LET:        mTypes.TK_BIND,
+}
+
 func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	prev := &mTypes.Token{}
 	head := prev
 
 	for _, p := range splittedString {
-		// NOTE: should implement as map refer?
-		if matched(p, mTypes.INTEGER_REG_EXP) {
-			prev = newToken(mTypes.TK_NUM, prev, p)
+		matched := false
 
-		} else if matched(p, mTypes.OPERATORS_REG_EXP) {
-			prev = newToken(mTypes.TK_OPERATOR, prev, p)
-
-		} else if matched(p, mTypes.BRACKETS_REG_EXP) {
-			prev = newToken(mTypes.TK_PAREN, prev, p)
-
-		} else if matched(p, mTypes.LIB_CORE_REG_EXP) {
-			prev = newToken(mTypes.TK_LIBCALL, prev, p)
-
-		} else if matched(p, mTypes.SYMBOL_FN) {
-			prev = newToken(mTypes.TK_LAMBDA, prev, p)
-
-		} else if matched(p, mTypes.SYMBOL_DEF) {
-			prev = newToken(mTypes.TK_DECLARE, prev, p)
-
-		} else if matched(p, mTypes.SYMBOL_LET) {
-			prev = newToken(mTypes.TK_BIND, prev, p)
-
-		} else {
+		for pattern, tokenType := range tokenMap {
+			if isMatched(p, pattern) {
+				prev = newToken(tokenType, prev, p)
+				matched = true
+				break
+			}
+		}
+		if !matched {
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
 			prev = newToken(mTypes.TK_IDENT, prev, p)
 		}
