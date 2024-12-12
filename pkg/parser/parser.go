@@ -46,7 +46,10 @@ func parseExprs(
 	nextToken, argHead := parseDeclare(rootToken.Next, exprKind)
 	prevNode := argHead
 	// NOTE: what means?
-	for nextToken.IsNum() || nextToken.IsVar() || nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
+	for nextToken.IsNum() ||
+		nextToken.IsVar() ||
+		nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
+
 		nextToken, prevNode.Next = parseDeclare(nextToken, exprKind)
 		prevNode = prevNode.Next
 	}
@@ -54,7 +57,6 @@ func parseExprs(
 	return rootToken, argHead
 }
 
-// NOTE: is correct?
 func parseBody(
 	rootToken *mTypes.Token,
 	rootNode *mTypes.Node,
@@ -86,6 +88,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				head,
 				"",
 			)
+
 		} else if tok.IsBind() {
 			tok = tok.Next
 
@@ -138,12 +141,12 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			log.Debug("is Variable declaration :have %+v", tok)
 			v := tok.Val
 			tok, head = parseDeclare(tok.Next, mTypes.ND_VAR_DECLARE)
-			head = newNode(mTypes.ND_VAR_DECLARE, head, v)
+			return tok, newNode(mTypes.ND_VAR_DECLARE, head, v)
 
 		} else {
-
 			log.Debug("is Variable reference :have %+v", tok)
 			return tok.Next, newNode(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+
 		}
 
 	} else if tok.IsNum() {
@@ -181,9 +184,9 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 // take Token object, return Program object
 func Parse(token *mTypes.Token) *mTypes.Program {
 	log.DebugMessage("code parsing")
-	prog := &mTypes.Program{}
-	prog = parseProgram(token)
+	prog := parseProgram(token)
 	log.DebugMessage("code parsed")
+
 	prog.Debug(0)
 
 	return prog
