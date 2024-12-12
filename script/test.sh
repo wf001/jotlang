@@ -84,6 +84,12 @@ testexec(){
   echo "== binding ==="
   assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' 6
   assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' 9
+
+  # if
+  echo "== if ==="
+  assertexec '(def main (fn [] (if (= 1 1) (prn 11) (prn 12))))' 11
+  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (prn 12))))' 12
+
 }
 testfile(){
   echo "== multi line ==="

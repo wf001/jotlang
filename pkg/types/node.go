@@ -83,6 +83,9 @@ func (node *Node) IsLambda() bool {
 func (node *Node) IsBind() bool {
 	return node.Kind == ND_BIND
 }
+func (node *Node) IsIf() bool {
+	return node.Kind == ND_IF
+}
 func (node *Node) IsExpr() bool {
 	return node.Kind == ND_EXPR
 }

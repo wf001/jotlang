@@ -35,7 +35,7 @@ var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) 
 	// binary
 	mTypes.ND_EQ: func(block *ir.Block, x, y value.Value) value.Value {
 		res := block.NewICmp(enum.IPredEQ, x, y)
-		return block.NewZExt(res, types.I32)
+		return res
 	},
 }
 var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
@@ -135,9 +135,11 @@ func gen(
 			fmt.Sprintf("fn-%p", node),
 			types.I32,
 		)
-		llBlock := funcFn.NewBlock("")
-		res := gen(mod, llBlock, function, node.Child, prog, scope)
-		llBlock.NewRet(res)
+		llBlock := funcFn.NewBlock("fn-entry")
+		res := gen(mod, llBlock, funcFn, node.Child, prog, scope)
+		if res != nil {
+			llBlock.NewRet(res)
+		}
 		return funcFn
 
 	} else if node.IsBind() {
@@ -153,6 +155,24 @@ func gen(
 		}
 		return gen(mod, block, function, node.Child, prog, scope)
 	} else if node.IsIf() {
+		condBlock := function.NewBlock("cond")
+		block.NewBr(condBlock)
+
+		thenBlock := function.NewBlock("then")
+		elsBlock := function.NewBlock("else")
+		exitBlock := function.NewBlock("exit")
+
+		cond := gen(mod, condBlock, function, node.Cond, prog, scope)
+
+		exitBlock.NewRet(newI32("0"))
+
+		gen(mod, thenBlock, function, node.Then, prog, scope)
+		thenBlock.NewBr(exitBlock)
+
+		gen(mod, elsBlock, function, node.Else, prog, scope)
+		elsBlock.NewBr(exitBlock)
+
+		condBlock.NewCondBr(cond, thenBlock, elsBlock)
 
 	} else if node.IsExpr() {
 		var res value.Value
