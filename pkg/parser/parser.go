@@ -43,7 +43,7 @@ func parseExprs(
 	exprKind mTypes.NodeKind,
 ) (*mTypes.Token, *mTypes.Node) {
 
-	nextToken, argHead := parseDeclare(rootToken.Next, exprKind)
+	nextToken, argHead := parseDeclare(rootToken, exprKind)
 	prevNode := argHead
 	// NOTE: what means?
 	for nextToken.IsNum() ||
@@ -64,7 +64,7 @@ func parseBody(
 	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
 
-	nextToken, argHead := parseExprs(rootToken, exprKind)
+	nextToken, argHead := parseExprs(rootToken.Next, exprKind)
 	rootNode = newNode(exprKind, argHead, exprName)
 	rootToken = nextToken
 	return rootToken, rootNode
