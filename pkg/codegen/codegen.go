@@ -79,9 +79,11 @@ func doAsemble(llFile string, asmFile string) {
 	log.Debug("written asm: %s", asmFile)
 }
 
+// HACK: too many argument
 func gen(
 	mod *ir.Module,
 	block *ir.Block,
+	function *ir.Func,
 	node *mTypes.Node,
 	prog *mTypes.Program,
 	scope *mTypes.Node,
@@ -93,17 +95,17 @@ func gen(
 	} else if node.IsNary() {
 		// nary takes more than 2 arguments
 		child := node.Child
-		fst := gen(mod, block, child, prog, scope)
+		fst := gen(mod, block, function, child, prog, scope)
 
 		child = child.Next
-		snd := gen(mod, block, child, prog, scope)
+		snd := gen(mod, block, function, child, prog, scope)
 
 		nary := operatorMap[node.Kind]
 		res := nary(block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
-			snd = gen(mod, block, child, prog, scope)
+			snd = gen(mod, block, function, child, prog, scope)
 			res = nary(block, fst, snd)
 		}
 		return res
@@ -111,10 +113,10 @@ func gen(
 	} else if node.IsBinary() {
 		// binary takes exactly 2 arguments
 		child := node.Child
-		fst := gen(mod, block, child, prog, scope)
+		fst := gen(mod, block, function, child, prog, scope)
 
 		child = child.Next
-		snd := gen(mod, block, child, prog, scope)
+		snd := gen(mod, block, function, child, prog, scope)
 
 		binary := operatorMap[node.Kind]
 		res := binary(block, fst, snd)
@@ -122,7 +124,7 @@ func gen(
 
 	} else if node.IsLibCall() {
 		// means calling standard library
-		arg := gen(mod, block, node.Child, prog, scope)
+		arg := gen(mod, block, function, node.Child, prog, scope)
 		libFunc := libraryMap[node.Val]
 		libFunc(block, prog.BuiltinLibs, arg)
 		return newI32("0")
@@ -134,13 +136,13 @@ func gen(
 			types.I32,
 		)
 		llBlock := funcFn.NewBlock("")
-		res := gen(mod, llBlock, node.Child, prog, scope)
+		res := gen(mod, llBlock, function, node.Child, prog, scope)
 		llBlock.NewRet(res)
 		return funcFn
 
 	} else if node.IsBind() {
 		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
-			v := gen(mod, block, varDeclare.Child, prog, scope)
+			v := gen(mod, block, function, varDeclare.Child, prog, scope)
 			if scope.Child == nil {
 				scope = varDeclare
 			} else {
@@ -149,25 +151,26 @@ func gen(
 			varDeclare.VarPtr = block.NewAlloca(types.I32)
 			block.NewStore(v, varDeclare.VarPtr)
 		}
-		return gen(mod, block, node.Child, prog, scope)
+		return gen(mod, block, function, node.Child, prog, scope)
+	} else if node.IsIf() {
 
 	} else if node.IsExpr() {
 		var res value.Value
 		for child := node.Child; child != nil; child = child.Next {
-			res = gen(mod, block, child, prog, scope)
+			res = gen(mod, block, function, child, prog, scope)
 		}
 		return res
 
 	} else if node.IsVarDeclare() && node.Val == "main" {
 		// means declaring main function regarded as entrypoint
 
-		function := mod.NewFunc(
+		fnc := mod.NewFunc(
 			"main",
 			types.I32,
 		)
-		llBlock := function.NewBlock("")
+		llBlock := fnc.NewBlock("")
 
-		res := gen(mod, llBlock, node.Child, prog, scope)
+		res := gen(mod, llBlock, fnc, node.Child, prog, scope)
 		llBlock.NewCall(res)
 		llBlock.NewRet(newI32("0"))
 
@@ -177,14 +180,14 @@ func gen(
 		retType := types.I32 // TODO: to be changable
 		funcName := getFuncName(node.Val)
 
-		function := mod.NewFunc(
+		fnc := mod.NewFunc(
 			funcName,
 			retType,
 		)
-		llBlock := function.NewBlock("")
+		llBlock := fnc.NewBlock("")
 
-		res := gen(mod, llBlock, node.Child, prog, scope)
-		node.FuncPtr = function
+		res := gen(mod, llBlock, fnc, node.Child, prog, scope)
+		node.FuncPtr = fnc
 		llBlock.NewRet(res)
 
 	} else if node.IsVarReference() {
@@ -204,7 +207,7 @@ func gen(
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
 	} else if node.IsDeclare() {
-		return gen(mod, block, node.Child, prog, scope)
+		return gen(mod, block, function, node.Child, prog, scope)
 
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)
@@ -218,7 +221,7 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
-		gen(module, nil, declare, prog, &mTypes.Node{})
+		gen(module, nil, nil, declare, prog, &mTypes.Node{})
 	}
 
 	return module
