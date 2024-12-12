@@ -57,7 +57,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 
 		} else {
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
-			prev = newToken(mTypes.TK_VAR, prev, p)
+			prev = newToken(mTypes.TK_IDENT, prev, p)
 		}
 	}
 

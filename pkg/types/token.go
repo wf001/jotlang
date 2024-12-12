@@ -14,12 +14,13 @@ const (
 	TK_OPERATOR = TokenKind("TK_OPERATOR")
 	TK_PAREN    = TokenKind("TK_PAREN")
 	TK_LIBCALL  = TokenKind("TK_LIBCALL")
-	TK_VAR      = TokenKind("TK_VAR")
 
 	TK_RESERVED = TokenKind("TK_RESERVED")
 	TK_DECLARE  = TokenKind("TK_DECLARE")
 	TK_LAMBDA   = TokenKind("TK_LAMBDA")
 	TK_BIND     = TokenKind("TK_BIND")
+
+	TK_IDENT = TokenKind("TK_IDENT")
 )
 
 type Token struct {
@@ -124,7 +125,7 @@ func (tok *Token) IsLambda() bool {
 	return tok.Kind == TK_LAMBDA
 }
 func (tok *Token) IsVar() bool {
-	return tok.Kind == TK_VAR
+	return tok.Kind == TK_IDENT
 }
 func (tok *Token) IsBind() bool {
 	return tok.Kind == TK_BIND
