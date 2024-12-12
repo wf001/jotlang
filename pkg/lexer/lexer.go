@@ -44,7 +44,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 			prev = newToken(mTypes.TK_PAREN, prev, p)
 
 		} else if matched(p, mTypes.LIB_CORE_REG_EXP) {
-			prev = newToken(mTypes.TK_LIB, prev, p)
+			prev = newToken(mTypes.TK_LIBCALL, prev, p)
 
 		} else if matched(p, mTypes.SYMBOL_FN) {
 			prev = newToken(mTypes.TK_LAMBDA, prev, p)

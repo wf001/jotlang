@@ -13,7 +13,7 @@ const (
 	TK_NUM      = TokenKind("TK_NUM")
 	TK_OPERATOR = TokenKind("TK_OPERATOR")
 	TK_PAREN    = TokenKind("TK_PAREN")
-	TK_LIB      = TokenKind("TK_LIB")
+	TK_LIBCALL  = TokenKind("TK_LIBCALL")
 	TK_VAR      = TokenKind("TK_VAR")
 
 	TK_RESERVED = TokenKind("TK_RESERVED")
@@ -112,7 +112,7 @@ func (tok *Token) IsNum() bool {
 }
 
 func (tok *Token) IsLibrary() bool {
-	return tok.Kind == TK_LIB
+	return tok.Kind == TK_LIBCALL
 }
 func (tok *Token) IsReserved() bool {
 	return tok.Kind == TK_RESERVED

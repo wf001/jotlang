@@ -14,7 +14,19 @@ import (
 type NodeKind string
 
 const (
-	// Arithmetic
+	ND_PROGRAM_ROOT = NodeKind("ND_PROGRAM_ROOT")
+
+	// reserved symbol
+	ND_VAR_DECLARE   = NodeKind("ND_VAR_DECLARE")   // variables and functions
+	ND_VAR_REFERENCE = NodeKind("ND_VAR_REFERENCE") // variables and functions
+	ND_DECLARE       = NodeKind("ND_DECLARE")       // def
+	ND_LAMBDA        = NodeKind("ND_LAMBDA")        // fn
+	ND_BIND          = NodeKind("ND_BIND")          // let
+	ND_EXPR          = NodeKind("ND_EXPR")          // set of functions
+	ND_FUNCCALL      = NodeKind("ND_FUNCCALL")
+	ND_LIBCALL       = NodeKind("ND_LIBCALL")
+
+	// Arithmetic signature
 	ND_ADD = NodeKind("ND_ADD") // +
 	ND_SUB = NodeKind("ND_SUB") // -
 	ND_MUL = NodeKind("ND_MUL") // *
@@ -22,27 +34,13 @@ const (
 	ND_MOD = NodeKind("ND_MOD") // mod
 	ND_EQ  = NodeKind("ND_EQ")  // =
 
-	// Logical
+	// Logical signature
 	ND_AND = NodeKind("ND_AND") // and
 	ND_OR  = NodeKind("ND_OR")  // or
 
 	// type
 	ND_NIL = NodeKind("ND_NIL") // nil
 	ND_INT = NodeKind("ND_INT") // 0-9
-
-	// func
-
-	ND_VAR_DECLARE   = NodeKind("ND_VAR_DECLARE")   // variables and functions
-	ND_VAR_REFERENCE = NodeKind("ND_VAR_REFERENCE") // variables and functions
-	ND_DECLARE       = NodeKind("ND_DECLARE")       // defn
-	ND_LAMBDA        = NodeKind("ND_LAMBDA")        // fn
-	ND_EXPR          = NodeKind(
-		"ND_EXPR",
-	) // set of operator and user-defined function invoking
-	ND_FUNCCALL     = NodeKind("ND_FUNCCALL")
-	ND_BIND         = NodeKind("ND_BIND") // let
-	ND_LIBCALL      = NodeKind("ND_LIBCALL")
-	ND_PROGRAM_ROOT = NodeKind("ND_PROGRAM_ROOT")
 )
 
 type Program struct {
@@ -74,30 +72,18 @@ type Node struct {
 	Else    *Node
 	Val     string
 	Bind    *Node
-	VarPtr  *ir.InstAlloca // global and local variable
-	FuncPtr *ir.Func
+	VarPtr  *ir.InstAlloca // local variable
+	FuncPtr *ir.Func       // global variable
 }
 
-func (node *Node) IsInteger() bool {
-	return node.Kind == ND_INT
-}
-func (node *Node) IsNary() bool {
-	return node.Kind == ND_ADD
-}
-func (node *Node) IsBinary() bool {
-	return node.Kind == ND_EQ
-}
-func (node *Node) IsLibCall() bool {
-	return node.Kind == ND_LIBCALL
+func (node *Node) IsDeclare() bool {
+	return node.Kind == ND_DECLARE
 }
 func (node *Node) IsLambda() bool {
 	return node.Kind == ND_LAMBDA
 }
 func (node *Node) IsBind() bool {
 	return node.Kind == ND_BIND
-}
-func (node *Node) IsDeclare() bool {
-	return node.Kind == ND_DECLARE
 }
 func (node *Node) IsExpr() bool {
 	return node.Kind == ND_EXPR
@@ -108,13 +94,25 @@ func (node *Node) IsVarDeclare() bool {
 func (node *Node) IsVarReference() bool {
 	return node.Kind == ND_VAR_REFERENCE
 }
+func (node *Node) IsLibCall() bool {
+	return node.Kind == ND_LIBCALL
+}
+func (node *Node) IsInteger() bool {
+	return node.Kind == ND_INT
+}
+func (node *Node) IsNary() bool {
+	return node.Kind == ND_ADD
+}
+func (node *Node) IsBinary() bool {
+	return node.Kind == ND_EQ
+}
 
 func indicate(s string, depth int) {
 	log.Debug(
 		log.YELLOW(
 			fmt.Sprintf(
 				"%s [%s]",
-				strings.Repeat("  ", depth+1),
+				strings.Repeat("  ", depth),
 				s,
 			),
 		))
@@ -137,31 +135,14 @@ func (node *Node) Debug(depth int) {
 	)
 
 	switch node.Kind {
-	case ND_INT:
-		node.Next.Debug(depth)
-	case ND_ADD:
-		node.Child.Debug(depth + 1)
-	case ND_EQ:
-		node.Child.Debug(depth + 1)
-	case ND_LIBCALL:
-		node.Child.Debug(depth + 1)
-	case ND_LAMBDA:
-		node.Child.Debug(depth + 1)
-	case ND_DECLARE:
-		node.Child.Debug(depth + 1)
-	case ND_VAR_DECLARE:
-		node.Child.Debug(depth + 1)
-	case ND_VAR_REFERENCE:
-		node.Child.Debug(depth + 1)
-	case ND_EXPR:
-		node.Child.Debug(depth + 1)
 	case ND_BIND:
-		indicate("bind", depth)
+		indicate("bind", depth+1)
 		node.Bind.Debug(depth + 1)
-		indicate("child", depth)
+
+		indicate("child", depth+1)
 		node.Child.Debug(depth + 1)
 	default:
-		log.Panic("unresolved Nodekind: have %+v", node)
+		node.Child.Debug(depth + 1)
 	}
 	if node.Next != nil && node.Kind != ND_INT {
 		node.Next.Debug(depth)
