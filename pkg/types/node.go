@@ -8,9 +8,6 @@ import (
 	"github.com/wf001/modo/pkg/log"
 )
 
-// ########
-// Node
-// ########
 type NodeKind string
 
 const (
