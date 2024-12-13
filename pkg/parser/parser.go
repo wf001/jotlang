@@ -53,27 +53,25 @@ func parseExprs(
 		nextToken, prevNode.Next = parseDeclare(nextToken, exprKind)
 		prevNode = prevNode.Next
 	}
-	rootToken = nextToken
-	return rootToken, argHead
+	return nextToken, argHead
 }
 
 func parseBody(
 	rootToken *mTypes.Token,
-	rootNode *mTypes.Node, // TODO: unused?
-	exprKind mTypes.NodeKind,
+	parentKind mTypes.NodeKind,
 	exprName string,
 ) (*mTypes.Token, *mTypes.Node) {
 
-	nextToken, argHead := parseExprs(rootToken.Next, exprKind)
-	rootNode = newNode(exprKind, argHead, exprName)
-	rootToken = nextToken
-	return rootToken, rootNode
+	nextToken, argHead := parseExprs(rootToken.Next, parentKind)
+	rootNode := newNode(parentKind, argHead, exprName)
+	return nextToken, rootNode
 }
 
 func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
+	// NOTE: too huge
 	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		tok = tok.Next
 
@@ -82,7 +80,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head = newNode(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsLambda() {
-			tok, head = parseBody(tok.Next.Next, head, mTypes.ND_EXPR, "")
+			tok, head = parseBody(tok.Next.Next, mTypes.ND_EXPR, "")
 			head = newNode(
 				mTypes.ND_LAMBDA,
 				head,
@@ -116,7 +114,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				}
 			}
 
-			nextToken, body := parseBody(tok, head, mTypes.ND_EXPR, "")
+			nextToken, body := parseBody(tok, mTypes.ND_EXPR, "")
 			bind := newNode(mTypes.ND_BIND, body, "")
 			bind.Bind = varHead.Next
 
@@ -124,11 +122,11 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
-			tok, head = parseBody(tok, head, kind, tok.Val)
+			tok, head = parseBody(tok, kind, tok.Val)
 
 		} else if tok.IsLibrary() {
 			log.Debug("is Library :have %+v", tok)
-			tok, head = parseBody(tok, head, mTypes.ND_LIBCALL, tok.Val)
+			tok, head = parseBody(tok, mTypes.ND_LIBCALL, tok.Val)
 
 		} else if tok.IsIf() {
 			log.Debug("is If :have %+v", tok)
