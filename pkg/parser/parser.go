@@ -134,12 +134,13 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 			nextToken, cond := parseDeclare(tok.Next, mTypes.ND_IF)
 			head.Cond = cond
+			head.Cond.Val = "cond"
 
 			nextToken, then := parseDeclare(nextToken, mTypes.ND_IF)
-			head.Then = newNode(mTypes.ND_EXPR, then, "")
+			head.Then = newNode(mTypes.ND_EXPR, then, "then")
 
 			nextToken, els := parseDeclare(nextToken, mTypes.ND_IF)
-			head.Else = newNode(mTypes.ND_EXPR, els, "")
+			head.Else = newNode(mTypes.ND_EXPR, els, "els")
 			tok = nextToken
 		}
 

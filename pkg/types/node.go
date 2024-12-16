@@ -137,19 +137,19 @@ func (node *Node) Debug(depth int) {
 
 	switch node.Kind {
 	case ND_BIND:
-		indicate("bind", depth+1)
+		indicate(".Bind", depth+1)
 		node.Bind.Debug(depth + 1)
 
-		indicate("child", depth+1)
+		indicate(".Child", depth+1)
 		node.Child.Debug(depth + 1)
 	case ND_IF:
-		indicate("cond", depth+1)
+		indicate(".Cond", depth+1)
 		node.Cond.Debug(depth + 1)
 
-		indicate("then", depth+1)
+		indicate(".Then", depth+1)
 		node.Then.Debug(depth + 1)
 
-		indicate("else", depth+1)
+		indicate(".Else", depth+1)
 		node.Else.Debug(depth + 1)
 	default:
 		node.Child.Debug(depth + 1)
