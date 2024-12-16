@@ -57,8 +57,11 @@ func newArray(length uint64) *types.ArrayType {
 	return types.NewArray(length, types.I8)
 }
 
-func getFuncName(v string) string {
-	return fmt.Sprintf("fn-%s", v)
+func getFuncName(v *mTypes.Node) string {
+	return fmt.Sprintf("fn-%s-%p", v.Val, v)
+}
+func getBlockName(s string, v *mTypes.Node) string {
+	return fmt.Sprintf("%s-%p", s, v)
 }
 
 func doAsemble(llFile string, asmFile string) {
