@@ -138,7 +138,7 @@ func gen(
 			fmt.Sprintf("fn-%p", node),
 			types.I32,
 		)
-		llBlock := funcFn.NewBlock("fn-entry")
+		llBlock := funcFn.NewBlock(getBlockName("entry", node))
 		res := gen(mod, llBlock, funcFn, node.Child, prog, scope)
 		if res != nil {
 			llBlock.NewRet(res)
@@ -157,13 +157,14 @@ func gen(
 			block.NewStore(v, varDeclare.VarPtr)
 		}
 		return gen(mod, block, function, node.Child, prog, scope)
+
 	} else if node.IsIf() {
-		condBlock := function.NewBlock("cond")
+		condBlock := function.NewBlock(getBlockName("cond", node.Cond))
 		block.NewBr(condBlock)
 
-		thenBlock := function.NewBlock("then")
-		elsBlock := function.NewBlock("else")
-		exitBlock := function.NewBlock("exit")
+		thenBlock := function.NewBlock(getBlockName("then", node.Then))
+		elsBlock := function.NewBlock(getBlockName("els", node.Else))
+		exitBlock := function.NewBlock(getBlockName("exit", node))
 
 		cond := gen(mod, condBlock, function, node.Cond, prog, scope)
 
@@ -201,7 +202,7 @@ func gen(
 		// means declaring global variable or function named except main
 
 		retType := types.I32 // TODO: to be changable
-		funcName := getFuncName(node.Val)
+		funcName := getFuncName(node)
 
 		fnc := mod.NewFunc(
 			funcName,
