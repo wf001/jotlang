@@ -89,6 +89,7 @@ testexec(){
   echo "== if ==="
   assertexec '(def main (fn [] (if (= 1 1) (prn 11) (prn 12))))' 11
   assertexec '(def main (fn [] (if (= 1 2) (prn 11) (prn 12))))' 12
+  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' 13
 
 }
 testfile(){
