@@ -159,11 +159,11 @@ func gen(
 		return gen(mod, block, function, node.Child, prog, scope)
 
 	} else if node.IsIf() {
-		condBlock := function.NewBlock(getBlockName("cond", node.Cond))
+		condBlock := function.NewBlock(getBlockName("cond", node))
 		block.NewBr(condBlock)
 
-		thenBlock := function.NewBlock(getBlockName("then", node.Then))
-		elsBlock := function.NewBlock(getBlockName("els", node.Else))
+		thenBlock := function.NewBlock(getBlockName("then", node))
+		elsBlock := function.NewBlock(getBlockName("els", node))
 		exitBlock := function.NewBlock(getBlockName("exit", node))
 
 		cond := gen(mod, condBlock, function, node.Cond, prog, scope)
