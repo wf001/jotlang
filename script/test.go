@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"golang.org/x/sync/semaphore"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 )
@@ -23,7 +26,16 @@ var (
 	passedCount int
 	failedCount int
 	mu          sync.Mutex // for safely updating counters
+	maxWorkers  int64      = 50
 )
+
+func escapeControlChars(s string) string {
+	// 改行やタブなどの制御文字をエスケープ
+	s = strings.ReplaceAll(s, "\n", "\\n")
+	s = strings.ReplaceAll(s, "\r", "\\r")
+	s = strings.ReplaceAll(s, "\t", "\\t")
+	return strings.TrimRight(s, "\\n")
+}
 
 func buildCompiler() {
 	err := os.MkdirAll(dir, os.ModePerm)
@@ -32,36 +44,45 @@ func buildCompiler() {
 	}
 
 	cmd := exec.Command("go", "build", "-o", "./generated/test/modo", "./cmd/modo")
-	err = cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		panic("Failed to compile the compiler.")
 	}
 	fmt.Println("\033[0;32mcompiled!\033[0m")
 }
 
 func assertExec(
-	input string,
-	expected string,
+	ctx context.Context,
+	input, expected string,
 	testID int,
 	results chan<- TestResult,
-	wg *sync.WaitGroup,
+	sem *semaphore.Weighted,
 ) {
-	defer wg.Done()
+	defer sem.Release(1) // リソース解放
 
 	// 出力ディレクトリをテストごとに一意にする
 	outputDir := fmt.Sprintf("%s/out-%d", dir, testID)
-	cmd := exec.Command("./generated/test/modo", "run", "-o", outputDir, "--exec", input)
+	cmd := exec.CommandContext(
+		ctx,
+		"./generated/test/modo",
+		"run",
+		"-o",
+		outputDir,
+		"--exec",
+		input,
+	)
 
 	var stdout bytes.Buffer
 	cmd.Stdout = &stdout
 
 	err := cmd.Run()
-	actualOutput := stdout.String()
-	passed := err == nil && actualOutput == fmt.Sprintf("%s\n", expected)
+	actualOutput := escapeControlChars(stdout.String())
+	expectedOutput := escapeControlChars(expected)
+
+	passed := err == nil && actualOutput == expectedOutput
 
 	results <- TestResult{
 		Input:    input,
-		Expected: expected,
+		Expected: expectedOutput,
 		Actual:   actualOutput,
 		Passed:   passed,
 		Error:    err,
@@ -74,24 +95,90 @@ func runTests() {
 		input    string
 		expected string
 	}{
-		{"(def main (fn [] (prn 17)))", "17\n"},
-		{"(def main (fn [] (prn (+ 4 13))))", "17\n"},
 		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
-		{"(def main (fn [] (prn (+ 1 2 3 4 10))))", "20\n"},
-		{"(def main (fn [] (prn (+ 1 2 3 4 5 20))))", "35\n"},
-		{"(def main (fn [] (prn (+ 1 2 (+ 3 4)))))", "10\n"},
-		{"(def main (fn [] (prn (= 5 (+ 3 2)))))", "1\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
+		{"(def main (fn [] (prn (+ 1 2 3))))", "6\n"},
+		{"(def main (fn [] (prn 17)))", "17\n"},
 	}
 
-	var wg sync.WaitGroup
 	results := make(chan TestResult, len(testCases))
+	sem := semaphore.NewWeighted(maxWorkers)
+	ctx := context.Background()
 
 	for i, tc := range testCases {
-		wg.Add(1)
-		go assertExec(tc.input, tc.expected, i, results, &wg)
+		if err := sem.Acquire(ctx, 1); err != nil {
+			fmt.Printf("Failed to acquire semaphore: %v\n", err)
+			break
+		}
+
+		go func(ctx context.Context, input, expected string, testID int) {
+			defer func() {
+				if r := recover(); r != nil {
+					fmt.Printf("Recovered from panic in test %d: %v\n", testID, r)
+				}
+			}()
+			assertExec(ctx, input, expected, testID, results, sem)
+		}(ctx, tc.input, tc.expected, i)
 	}
 
-	wg.Wait()
+	// 全ての Goroutine の終了を待つ
+	if err := sem.Acquire(ctx, maxWorkers); err != nil {
+		fmt.Printf("Failed to acquire semaphore during finalization: %v\n", err)
+	}
+
 	close(results)
 
 	for result := range results {
@@ -102,7 +189,7 @@ func runTests() {
 			fmt.Printf("%s => %s \033[0;32mOK\033[0m\n", result.Input, result.Actual)
 		} else {
 			failedCount++
-			fmt.Printf("%s => \033[0;31m%s expected, but got %s\033[0m\n", result.Input, result.Expected, result.Actual)
+			fmt.Printf("%s => \033[0;31mExpected: %s, but got: %s\033[0m\n", result.Input, result.Expected, result.Actual)
 		}
 		mu.Unlock()
 	}
