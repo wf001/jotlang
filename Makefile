@@ -26,7 +26,7 @@ test-all:
 	make test-go
 
 test-compiler:
-	./script/test.sh
+	./script/test-full.sh
 
 test-go:
 	go test -v ./... | tc
