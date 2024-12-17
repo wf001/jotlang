@@ -58,13 +58,17 @@ func newArray(length uint64) *types.ArrayType {
 }
 
 func getFuncName(v *mTypes.Node) string {
-	return fmt.Sprintf("fn-%s-%p", v.Val, v)
+	s := v.Val
+	if s == "" {
+		s = "unnamed"
+	}
+	return fmt.Sprintf("fn.%s.%p", s, v)
 }
 func getBlockName(s string, v *mTypes.Node) string {
-	return fmt.Sprintf("%s-%p", s, v)
+	return fmt.Sprintf("%s.%p", s, v)
 }
 
-func genBlock(
+func genCondBlock(
 	mod *ir.Module,
 	block *ir.Block,
 	function *ir.Func,
@@ -73,12 +77,12 @@ func genBlock(
 	scope *mTypes.Node,
 
 ) *ir.Block {
-	condBlock := function.NewBlock(getBlockName("cond", node))
+	condBlock := function.NewBlock(getBlockName("if.cond", node))
 	block.NewBr(condBlock)
 
-	thenBlock := function.NewBlock(getBlockName("then", node))
-	elseBlock := function.NewBlock(getBlockName("else", node))
-	exitBlock := function.NewBlock(getBlockName("exit", node))
+	thenBlock := function.NewBlock(getBlockName("if.then", node))
+	elseBlock := function.NewBlock(getBlockName("if.else", node))
+	exitBlock := function.NewBlock(getBlockName("if.exit", node))
 
 	cond := gen(mod, condBlock, function, node.Cond, prog, scope)
 
@@ -166,10 +170,10 @@ func gen(
 	} else if node.IsLambda() {
 		// TODO: validate
 		funcFn := mod.NewFunc(
-			fmt.Sprintf("fn-%p", node),
+			getFuncName(node),
 			types.I32,
 		)
-		llBlock := funcFn.NewBlock(getBlockName("entry", node))
+		llBlock := funcFn.NewBlock(getBlockName("fn.entry", node))
 		res := gen(mod, llBlock, funcFn, node.Child, prog, scope)
 		if res != nil {
 			llBlock.NewRet(res)
@@ -190,7 +194,7 @@ func gen(
 		return gen(mod, block, function, node.Child, prog, scope)
 
 	} else if node.IsIf() {
-		genBlock(mod, block, function, node, prog, scope)
+		genCondBlock(mod, block, function, node, prog, scope)
 
 	} else if node.IsExpr() {
 		var res value.Value

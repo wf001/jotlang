@@ -10,7 +10,7 @@ import (
 func DeclareBuiltin(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	globalVars := &mTypes.BuiltinGlobalVarsProp{}
 	globalVars.FormatDigit = ir.NewGlobalDef(
-		"formatDigit",
+		"format.digit",
 		constant.NewCharArray([]byte("%d\n\x00")),
 	)
 	libs.GlobalVar = globalVars
