@@ -64,39 +64,9 @@ func getFuncName(v *mTypes.Node) string {
 	}
 	return fmt.Sprintf("fn.%s.%p", s, v)
 }
+
 func getBlockName(s string, v *mTypes.Node) string {
 	return fmt.Sprintf("%s.%p", s, v)
-}
-
-func genCondBlock(
-	mod *ir.Module,
-	block *ir.Block,
-	function *ir.Func,
-	node *mTypes.Node,
-	prog *mTypes.Program,
-	scope *mTypes.Node,
-
-) *ir.Block {
-	condBlock := function.NewBlock(getBlockName("if.cond", node))
-	block.NewBr(condBlock)
-
-	thenBlock := function.NewBlock(getBlockName("if.then", node))
-	elseBlock := function.NewBlock(getBlockName("if.else", node))
-	exitBlock := function.NewBlock(getBlockName("if.exit", node))
-
-	cond := gen(mod, condBlock, function, node.Cond, prog, scope)
-
-	exitBlock.NewRet(newI32("0"))
-
-	thenBlock.NewBr(exitBlock)
-	elseBlock.NewBr(exitBlock)
-
-	gen(mod, thenBlock, function, node.Then, prog, scope)
-	gen(mod, elseBlock, function, node.Else, prog, scope)
-
-	condBlock.NewCondBr(cond, thenBlock, elseBlock)
-	return condBlock
-
 }
 
 func doAsemble(llFile string, asmFile string) {
@@ -194,7 +164,24 @@ func gen(
 		return gen(mod, block, function, node.Child, prog, scope)
 
 	} else if node.IsIf() {
-		genCondBlock(mod, block, function, node, prog, scope)
+		condBlock := function.NewBlock(getBlockName("if.cond", node))
+		block.NewBr(condBlock)
+
+		thenBlock := function.NewBlock(getBlockName("if.then", node))
+		elseBlock := function.NewBlock(getBlockName("if.else", node))
+		exitBlock := function.NewBlock(getBlockName("if.exit", node))
+
+		cond := gen(mod, condBlock, function, node.Cond, prog, scope)
+
+		exitBlock.NewRet(newI32("0"))
+
+		thenBlock.NewBr(exitBlock)
+		elseBlock.NewBr(exitBlock)
+
+		gen(mod, thenBlock, function, node.Then, prog, scope)
+		gen(mod, elseBlock, function, node.Else, prog, scope)
+
+		condBlock.NewCondBr(cond, thenBlock, elseBlock)
 
 	} else if node.IsExpr() {
 		var res value.Value

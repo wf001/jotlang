@@ -107,7 +107,7 @@ var (
 )
 
 func (tok *Token) IsKindAndVal(kind string, val string) bool {
-	return tok.Kind == kind && tok.Val == val
+	return tok != nil && tok.Kind == kind && tok.Val == val
 }
 
 func (tok *Token) IsNum() bool {
