@@ -69,7 +69,7 @@ func getBlockName(s string, v *mTypes.Node) string {
 	return fmt.Sprintf("%s.%p", s, v)
 }
 
-func doAsemble(llFile string, asmFile string) {
+func Assemble(llFile string, asmFile string) {
 	// TODO: work it?
 	out, err, errMsg := util.RunCommand("llc", llFile, "-o", asmFile)
 	if err != nil {
@@ -262,7 +262,7 @@ func Construct(program *mTypes.Program) *assembler {
 	}
 }
 
-func (a assembler) Assemble(llName string, asmName string) {
+func (a assembler) GenFrontend(llName string, asmName string) {
 	log.DebugMessage("ir module constructing")
 	module := constructModule(a.program)
 	log.DebugMessage("ir module constructed")
@@ -274,5 +274,4 @@ func (a assembler) Assemble(llName string, asmName string) {
 	}
 	log.Debug("written ll: %s", llName)
 
-	doAsemble(llName, asmName)
 }

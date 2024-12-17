@@ -110,12 +110,45 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	llName, asmName, executableName := util.PrepareWorkingFile(workingDirPrefix, currentTime)
 
 	// Node -> AST -> write assembly
-	codegen.Construct(node).Assemble(llName, asmName)
+	codegen.Construct(node).GenFrontend(llName, asmName)
+	codegen.Assemble(llName, asmName)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)
 
 	return nil, executableName
+}
+
+func doRunLLI(workingDirPrefix string, evaluatee string) int {
+	currentTime := time.Now().Unix()
+	// string -> Token
+	token := lexer.Lex(evaluatee)
+
+	// Token -> Node
+	node := parser.Parse(token)
+
+	llName, asmName, _ := util.PrepareWorkingFile(workingDirPrefix, currentTime)
+
+	// Node -> AST -> write assembly
+	codegen.Construct(node).GenFrontend(llName, asmName)
+
+	out, err, errMsg := util.RunCommand("lli", llName)
+	// TODO: it works, but correctly?
+	log.Debug("executed: %s", llName)
+	if err != nil {
+		log.Debug("artifactDir: %s", llName)
+		log.Error(
+			"fail to run: %+v",
+			map[string]interface{}{
+				"err":     err,
+				"message": errMsg,
+			},
+		)
+		return 1
+	}
+	fmt.Println(out)
+
+	return 0
 }
 
 // HACK: It might be better if the return type matches that of doBuild
@@ -141,7 +174,7 @@ func main() {
 		} else {
 			if inputFile != nil {
 				arg := util.ReadFile(inputFile)
-				os.Exit(doRun(*appOutput, arg))
+				os.Exit(doRunLLI(*appOutput, arg))
 			} else {
 				log.Panic("fail to run, input must be specified")
 			}
