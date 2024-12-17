@@ -100,6 +100,8 @@ testexec(){
   assertexec '(def main (fn [] (if (= 1 2) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' 13
   assertexec '(def main (fn [] (if (= 1 2) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' 13
 
+  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' 13
+
 }
 testfile(){
   echo "== multi line ==="
