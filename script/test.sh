@@ -23,7 +23,7 @@ assertfile() {
 assert() {
   input="$1"
   expected="$2"
-  actual_output=$(./generated/test/modo run -o "$dir/out" --exec "$input")
+  actual_output=$(./generated/test/modo run -o "$dir/out" --exec "$input" |gsed ':a;N;$!ba;s/\n/\\\\n/g')
   actual_exit_code="$?"
 
   ((total_tests++))
@@ -53,66 +53,64 @@ summary(){
 }
 
 testexec(){
+  # multiline
+  echo "== multi line ==="
+  assertexec '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' "3\\\n7\\\n"
+  assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' "11\\\n6\\\n"
+
   # operator
   echo "== operation ==="
-  assertexec '(def main (fn [] (prn 17)))' 17
-  assertexec '(def main (fn [] (prn (+ 4 13))))' 17
-  assertexec '(def main (fn [] (prn (+ 1 2 3))))' 6
-  assertexec '(def main (fn [] (prn (+ 1 2 3 4 10))))' 20
-  assertexec '(def main (fn [] (prn (+ 1 2 3 4 5 20))))' 35
-  assertexec '(def main (fn [] (prn (+ 1 2 (+ 3 4)))))' 10
-  assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ 3 4)))))' 10
-  assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))' 21
-  assertexec '(def main (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))' 39
-  assertexec '(def main (fn [] (prn (= 5 (+ 3 2)))))' 1
-  assertexec '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))' 0
+  assertexec '(def main (fn [] (prn 17)))' "17\\\n"
+  assertexec '(def main (fn [] (prn (+ 4 13))))' "17\\\n"
+  assertexec '(def main (fn [] (prn (+ 1 2 3))))' "6\\\n"
+  assertexec '(def main (fn [] (prn (+ 1 2 3 4 10))))' "20\\\n"
+  assertexec '(def main (fn [] (prn (+ 1 2 3 4 5 20))))' "35\\\n"
+  assertexec '(def main (fn [] (prn (+ 1 2 (+ 3 4)))))' "10\\\n"
+  assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ 3 4)))))' "10\\\n"
+  assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))' "21\\\n"
+  assertexec '(def main (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))' "39\\\n"
+  assertexec '(def main (fn [] (prn (= 5 (+ 3 2)))))' "1\\\n"
+  assertexec '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "0\\\n"
 
   # variable
   echo "== variable ==="
-  assertexec '(def x 1) (def main (fn [] (prn (+ x 2))))' 3
-  assertexec '(def x 1) (def main (fn [] (prn (+ 2 x))))' 3
-  assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3)))))' 6
-  assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3) 4))))' 10
-  assertexec '(def x 1) (def y 2) (def main (fn [] (prn (+ x y))))' 3
-  assertexec '(def x 1) (def main (fn [] (prn (+ x x))))' 2
+  assertexec '(def x 1) (def main (fn [] (prn (+ x 2))))' "3\\\n"
+  assertexec '(def x 1) (def main (fn [] (prn (+ 2 x))))' "3\\\n"
+  assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3)))))' "6\\\n"
+  assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3) 4))))' "10\\\n"
+  assertexec '(def x 1) (def y 2) (def main (fn [] (prn (+ x y))))' "3\\\n"
+  assertexec '(def x 1) (def main (fn [] (prn (+ x x))))' "2\\\n"
 
-  assertexec '(def x 1) (def main (fn [] (prn (= x 2))))' 0
-  assertexec '(def x 1) (def main (fn [] (prn (= x 1))))' 1
-  assertexec '(def x 1) (def y 2) (def main (fn [] (prn (= x y))))' 0
+  assertexec '(def x 1) (def main (fn [] (prn (= x 2))))' "0\\\n"
+  assertexec '(def x 1) (def main (fn [] (prn (= x 1))))' "1\\\n"
+  assertexec '(def x 1) (def y 2) (def main (fn [] (prn (= x y))))' "0\\\n"
 
   # binding
   echo "== binding ==="
-  assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' 6
-  assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' 9
+  assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' "6\\\n"
+  assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' "9\\\n"
 
   # if
   echo "== if ==="
-  assertexec '(def main (fn [] (if (= 1 1) (prn 11) (prn 12))))' 11
-  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (prn 12))))' 12
+  assertexec '(def main (fn [] (if (= 1 1) (prn 11) (prn 12))))' "11\\\n"
+  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (prn 12))))' "12\\\n"
 
-  assertexec '(def main (fn [] (if (= 1 1) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' 11
-  assertexec '(def main (fn [] (if (= 1 1) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' 11
-  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' 12
-  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' 13
+  assertexec '(def main (fn [] (if (= 1 1) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' "11\\\n"
+  assertexec '(def main (fn [] (if (= 1 1) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' "11\\\n"
+  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' "12\\\n"
+  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' "13\\\n"
 
-  assertexec '(def main (fn [] (if (= 1 1) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' 11
-  assertexec '(def main (fn [] (if (= 1 1) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' 12
-  assertexec '(def main (fn [] (if (= 1 2) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' 13
-  assertexec '(def main (fn [] (if (= 1 2) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' 13
+  assertexec '(def main (fn [] (if (= 1 1) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' "11\\\n"
+  assertexec '(def main (fn [] (if (= 1 1) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' "12\\\n"
+  assertexec '(def main (fn [] (if (= 1 2) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' "13\\\n"
+  assertexec '(def main (fn [] (if (= 1 2) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' "13\\\n"
 
-  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' 13
+  assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' "13\\\n"
 
-}
-testfile(){
-  echo "== multi line ==="
-  assertfile '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' 'SimpleSequentialOutput1' 
-  assertfile '(def x 4) (def main (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' 'BindingSequentialOutput1'
 }
 
 build-compiler
 testexec
-# not work
-testfile
 summary
 
 exit $code
