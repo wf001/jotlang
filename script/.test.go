@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+// WIP
+
 type TestResult struct {
 	Input    string
 	Expected string
