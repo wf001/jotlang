@@ -19,12 +19,14 @@ const (
 )
 
 var (
-	app = kingpin.New("modo", "Compiler for the modo programming language.").
+	app = kingpin.
+		New("modo", "Compiler for the modo programming language.").
 		Version(VERSION).
 		Author(AUTHOR)
-	appVerbose      = app.Flag("verbose", "Use verbose log").Bool()
-	appDebug        = app.Flag("debug", "Use debug log").Bool()
-	appOutput       = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
+	appVerbose = app.Flag("verbose", "Use verbose log").Bool()
+	appDebug   = app.Flag("debug", "Use debug log").Bool()
+	appOutput  = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
+	// TODO: rename to keep-intermediates
 	appPersistTemps = app.Flag("persist-temps", "Persist all of build artifacts").Bool()
 
 	buildCmd = app.Command("build", "Build an executable.")
@@ -35,11 +37,11 @@ var (
 )
 
 type IAssebler interface {
-	Assemble()
+	GenFrontend()
 }
 
-func Assemble(a IAssebler) {
-	a.Assemble()
+func GenFrontend(a IAssebler) {
+	a.GenFrontend()
 }
 
 // HACK: It might be better to move it to different package?
@@ -119,6 +121,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	return nil, executableName
 }
 
+// TODO: refactoring
 func doRunLLI(workingDirPrefix string, evaluatee string) int {
 	currentTime := time.Now().Unix()
 	// string -> Token

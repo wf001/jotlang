@@ -102,6 +102,7 @@ func Panic(format string, value ...interface{}) {
 }
 
 func init() {
+	// TODO: support switching
 	logrus.SetOutput(os.Stdout)
 	SetLevelWarning()
 	SetFormatter()
