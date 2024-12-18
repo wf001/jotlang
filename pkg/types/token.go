@@ -32,8 +32,8 @@ type Token struct {
 }
 
 var (
-	FRACTIONAL_REG_EXP = `\d+\.\d+`
-	INTEGER_REG_EXP    = `\d+`
+	FRACTIONAL_REG_EXP = `-?\d+\.\d+`
+	INTEGER_REG_EXP    = `-?\d+`
 
 	PARREN_OPEN      = "("
 	PARREN_CLOSE     = ")"
