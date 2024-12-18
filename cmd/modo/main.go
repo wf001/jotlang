@@ -26,8 +26,7 @@ var (
 	appVerbose = app.Flag("verbose", "Use verbose log").Bool()
 	appDebug   = app.Flag("debug", "Use debug log").Bool()
 	appOutput  = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
-	// TODO: rename to keep-intermediates
-	appPersistTemps = app.Flag("persist-temps", "Persist all of build artifacts").Bool()
+	appLLI     = app.Flag("lli", "run with lli").Bool()
 
 	buildCmd = app.Command("build", "Build an executable.")
 
@@ -49,7 +48,7 @@ func showOpts(cmd string) {
 	m := map[string]interface{}{}
 	m["cmd"] = cmd
 	m["appOutput"] = *appOutput
-	m["appPersistTemps"] = *appPersistTemps
+	m["appLLI"] = *appLLI
 	m["exec"] = *runExec
 	m["debug"] = *appDebug
 	m["verbose"] = *appVerbose
@@ -75,21 +74,7 @@ func compile(asmFile string, executableFile string) {
 	log.Debug("written executable: %s", executableFile)
 }
 
-func run(executableFile string) int {
-	out, err, errMsg := util.RunCommand(executableFile)
-	// TODO: it works, but correctly?
-	log.Debug("executed: %s", executableFile)
-	if err != nil {
-		log.Debug("artifactDir: %s", executableFile)
-		log.Error("fail to run: err %+v, message %+v", err, errMsg)
-		return 1
-	}
-	fmt.Println(out)
-
-	return 0
-}
-
-func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
+func genFrontend(workingDirPrefix string, evaluatee string) (string, string, string) {
 	currentTime := time.Now().Unix()
 	// string -> Token
 	token := lexer.Lex(evaluatee)
@@ -99,8 +84,16 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 
 	llName, asmName, executableName := util.PrepareWorkingFile(workingDirPrefix, currentTime)
 
-	// Node -> AST -> write assembly
+	// Node -> write intermediate representation(IR)
 	codegen.Construct(node).GenFrontend(llName, asmName)
+
+	return llName, asmName, executableName
+}
+
+func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
+	llName, asmName, executableName := genFrontend(workingDirPrefix, evaluatee)
+
+	// IR -> write assembly
 	codegen.Assemble(llName, asmName)
 
 	// assembly file -> write executable
@@ -109,19 +102,8 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	return nil, executableName
 }
 
-// TODO: refactoring
 func doRunLLI(workingDirPrefix string, evaluatee string) int {
-	currentTime := time.Now().Unix()
-	// string -> Token
-	token := lexer.Lex(evaluatee)
-
-	// Token -> Node
-	node := parser.Parse(token)
-
-	llName, asmName, _ := util.PrepareWorkingFile(workingDirPrefix, currentTime)
-
-	// Node -> AST -> write assembly
-	codegen.Construct(node).GenFrontend(llName, asmName)
+	llName, _, _ := genFrontend(workingDirPrefix, evaluatee)
 
 	out, err, errMsg := util.RunCommand("lli", llName)
 	// TODO: it works, but correctly?
@@ -137,13 +119,23 @@ func doRunLLI(workingDirPrefix string, evaluatee string) int {
 }
 
 // HACK: It might be better if the return type matches that of doBuild
-func doRun(workingDirPrefix string, evaluatee string) int {
+func doRunExecutable(workingDirPrefix string, evaluatee string) int {
 	err, executableName := doBuild(workingDirPrefix, evaluatee)
 	if err != nil {
 		log.Panic("fail to run: err %+v, executable %+v", err, executableName)
-
 	}
-	return run(executableName)
+
+	out, err, errMsg := util.RunCommand(executableName)
+	// TODO: it works, but correctly?
+	log.Debug("executed: %s", executableName)
+	if err != nil {
+		log.Debug("artifactDir: %s", executableName)
+		log.Error("fail to run: err %+v, message %+v", err, errMsg)
+		return 1
+	}
+	fmt.Println(out)
+
+	return 0
 }
 
 func main() {
@@ -156,11 +148,15 @@ func main() {
 
 	case runCmd.FullCommand():
 		if *runExec != "" {
-			os.Exit(doRun(*appOutput, *runExec))
+			os.Exit(doRunExecutable(*appOutput, *runExec))
 		} else {
 			if inputFile != nil {
 				arg := util.ReadFile(inputFile)
-				os.Exit(doRunLLI(*appOutput, arg))
+				if *appLLI {
+					os.Exit(doRunLLI(*appOutput, arg))
+				} else {
+					os.Exit(doRunExecutable(*appOutput, arg))
+				}
 			} else {
 				log.Panic("fail to run, input must be specified")
 			}
