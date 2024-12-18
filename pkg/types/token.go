@@ -86,7 +86,7 @@ var (
 	LIB_CORE_PRN     = "prn"
 	LIB_CORE_REG_EXP = fmt.Sprintf("\\b(%s)\\b", LIB_CORE_PRN)
 
-	SYMBOL_USER_DEFINED_REG_EXP = `\w+`
+	SYMBOL_UNDEFINED_REG_EXP = `\w+`
 
 	ALL_REG_EXP = fmt.Sprintf(
 		"%s",
@@ -99,7 +99,7 @@ var (
 				OPERATORS_REG_EXP,
 				BRACKETS_REG_EXP,
 				LIB_CORE_PRN,
-				SYMBOL_USER_DEFINED_REG_EXP,
+				SYMBOL_UNDEFINED_REG_EXP,
 			},
 			"|",
 		),
