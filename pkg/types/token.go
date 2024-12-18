@@ -10,6 +10,7 @@ type TokenKind = string
 
 const (
 	TK_NUM      = TokenKind("TK_NUM")
+	TK_STR      = TokenKind("TK_STR")
 	TK_OPERATOR = TokenKind("TK_OPERATOR")
 	TK_PAREN    = TokenKind("TK_PAREN")
 	TK_LIBCALL  = TokenKind("TK_LIBCALL")

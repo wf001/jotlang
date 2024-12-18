@@ -8,6 +8,7 @@ import (
 var (
 	FRACTIONAL_REG_EXP = `-?\d+\.\d+`
 	INTEGER_REG_EXP    = `-?\d+`
+	STRING_REG_EXP     = `"([^"]*)"`
 
 	PARREN_OPEN      = "("
 	PARREN_CLOSE     = ")"
@@ -68,6 +69,7 @@ var (
 			[]string{
 				FRACTIONAL_REG_EXP,
 				INTEGER_REG_EXP,
+				STRING_REG_EXP,
 				THREADING_REG_EXP,
 				BRANCH_REG_EXP,
 				OPERATORS_REG_EXP,

@@ -22,7 +22,13 @@ func newToken(kind mTypes.TokenKind, prev *mTypes.Token, val string) *mTypes.Tok
 }
 
 func splitString(expr string) []string {
-	re := regexp.MustCompile(mTypes.ALL_REG_EXP)
+	// Replace strings enclosed in double quotes with \"
+	re := regexp.MustCompile(mTypes.STRING_REG_EXP)
+	expr = re.ReplaceAllString(expr, `"$1"`)
+
+	log.Debug(log.YELLOW("preprocessed %#+v"), expr)
+
+	re = regexp.MustCompile(mTypes.ALL_REG_EXP)
 	res := re.FindAllString(expr, -1)
 	log.Debug(log.YELLOW("splitted program: %#+v"), res)
 	return res
@@ -30,6 +36,7 @@ func splitString(expr string) []string {
 
 var tokenMap = map[string]string{
 	mTypes.INTEGER_REG_EXP:   mTypes.TK_NUM,
+	mTypes.STRING_REG_EXP:    mTypes.TK_STR,
 	mTypes.OPERATORS_REG_EXP: mTypes.TK_OPERATOR,
 	mTypes.BRACKETS_REG_EXP:  mTypes.TK_PAREN,
 	mTypes.LIB_CORE_REG_EXP:  mTypes.TK_LIBCALL,
