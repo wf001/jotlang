@@ -10,53 +10,34 @@ import (
 func TestSplitProgram(t *testing.T) {
 	assert.ElementsMatch(t, []string{}, splitString(""))
 	assert.ElementsMatch(t, []string{"1"}, splitString("1"))
-	assert.ElementsMatch(t, []string{"123", "+", "45"}, splitString("123+45"))
-	assert.ElementsMatch(t, []string{"123", "-", "45"}, splitString("123-45"))
-	assert.ElementsMatch(t, []string{"123", "*", "45"}, splitString("123*45"))
-	assert.ElementsMatch(t, []string{"123", "/", "45"}, splitString("123/45"))
+	assert.ElementsMatch(t, []string{"+", "123", "45"}, splitString("+ 123 45"))
+	assert.ElementsMatch(t, []string{"-", "123", "45"}, splitString("- 123 45"))
+	assert.ElementsMatch(t, []string{"*", "123", "45"}, splitString("* 123 45"))
+	assert.ElementsMatch(t, []string{"/", "123", "45"}, splitString("/ 123 45"))
 	assert.ElementsMatch(
 		t,
-		[]string{"(", "123", "+", "45", ")"},
-		splitString("(123+45)"),
+		[]string{"(", "+", "123", "45", ")"},
+		splitString("(+ 123 45)"),
 	)
 	assert.ElementsMatch(
 		t,
-		[]string{"(", "a", "+", "45", ")"},
-		splitString("(a+45)"),
+		[]string{"(", "+", "a", "45", ")"},
+		splitString("(+ a 45)"),
 	)
 	assert.ElementsMatch(
 		t,
-		[]string{"(", "ae", "+", "45", ")"},
-		splitString("(ae+45)"),
+		[]string{"(", "+", "ae", "45", ")"},
+		splitString("(+ ae 45)"),
 	)
 	assert.ElementsMatch(
 		t,
-		[]string{"(", "ifa", "+", "45", ")"},
-		splitString("(ifa+45)"),
+		[]string{"(", "+", "ifa", "45", ")"},
+		splitString("(+ ifa 45)"),
 	)
 	assert.ElementsMatch(
 		t,
-		[]string{"(", "->", "(", "123", "+", "45", ")", ")"},
-		splitString("(->(123+45))"),
-	)
-	assert.ElementsMatch(
-		t,
-		[]string{"(", "if", "a", ">", "1", "(", "2", "+", "3", ")", "(", "4", "-", "5", ")", ")"},
-		splitString("(if a>1 (2+3) (4-5))"),
-	)
-	assert.ElementsMatch(
-		t,
-		[]string{"(", "if", "a", ">", "1", "(", "2", "+", "3", ")", "(", "4", "-", "5", ")", ")"},
-		splitString("(if a>1 (2+3) (4-5))"),
-	)
-	assert.ElementsMatch(
-		t,
-		[]string{
-			"(", "defn", "f", "[", "arg", "]", "(", "let", "[", "x", "1", "y", "3", "]",
-			"(", "if", "x", ">", "1", "(", "2", "+", "y", ")", "(", "4", "-", "5", ")",
-			")", ")", ")",
-		},
-		splitString("(defn f [arg] (let [x 1 y 3] (if x>1 (2+y) (4-5))))"),
+		[]string{"(", "->", "(", "+", "123", "45", ")", ")"},
+		splitString("(->(+ 123 45))"),
 	)
 	assert.ElementsMatch(
 		t,
@@ -64,6 +45,14 @@ func TestSplitProgram(t *testing.T) {
 			"(", "=", "1", "1", ")",
 		},
 		splitString("(= 1 1)"),
+	)
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"(", "def", "main", "(", "fn", "[", "]", "(", "if", "(", "=", "1", "1", ")", "(", "prn",
+			"(", "+", "1", "2", ")", ")", "(", "prn", "(", "+", "3", "-3", ")", ")", ")", ")", ")",
+		},
+		splitString("(def main (fn [] (if (= 1 1) (prn (+ 1 2)) (prn (+ 3 -3)))))"),
 	)
 	t.Log(mTypes.ALL_REG_EXP)
 }
