@@ -74,15 +74,7 @@ func Assemble(llFile string, asmFile string) {
 	out, err, errMsg := util.RunCommand("llc", llFile, "-o", asmFile)
 	if err != nil {
 		log.Debug("llFile: %s, asmFile: %s", llFile, asmFile)
-		// TODO: move to utility
-		log.Panic(
-			"fail to asemble: %+v",
-			map[string]interface{}{
-				"out":    out,
-				"err":    err,
-				"errMsg": errMsg,
-			},
-		)
+		log.Panic("fail to asemble: out %+v, err %+v, message %+v", out, err, errMsg)
 	}
 	log.Debug("written asm: %s", asmFile)
 }

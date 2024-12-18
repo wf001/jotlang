@@ -70,13 +70,7 @@ func compile(asmFile string, executableFile string) {
 	_, err, errMsg := util.RunCommand("clang", asmFile, "-o", executableFile)
 	if err != nil {
 		log.Debug("artifactDir: %s", executableFile)
-		log.Panic(
-			"fail to compile: %v",
-			map[string]interface{}{
-				"err":     err,
-				"message": errMsg,
-			},
-		)
+		log.Panic("fail to run: err %+v, message %+v", err, errMsg)
 	}
 	log.Debug("written executable: %s", executableFile)
 }
@@ -87,13 +81,7 @@ func run(executableFile string) int {
 	log.Debug("executed: %s", executableFile)
 	if err != nil {
 		log.Debug("artifactDir: %s", executableFile)
-		log.Error(
-			"fail to run: %+v",
-			map[string]interface{}{
-				"err":     err,
-				"message": errMsg,
-			},
-		)
+		log.Error("fail to run: err %+v, message %+v", err, errMsg)
 		return 1
 	}
 	fmt.Println(out)
@@ -140,13 +128,7 @@ func doRunLLI(workingDirPrefix string, evaluatee string) int {
 	log.Debug("executed: %s", llName)
 	if err != nil {
 		log.Debug("artifactDir: %s", llName)
-		log.Error(
-			"fail to run: %+v",
-			map[string]interface{}{
-				"err":     err,
-				"message": errMsg,
-			},
-		)
+		log.Error("fail to run: err %+v, message %+v", err, errMsg)
 		return 1
 	}
 	fmt.Println(out)
@@ -158,7 +140,8 @@ func doRunLLI(workingDirPrefix string, evaluatee string) int {
 func doRun(workingDirPrefix string, evaluatee string) int {
 	err, executableName := doBuild(workingDirPrefix, evaluatee)
 	if err != nil {
-		log.Panic("fail to run: %s", map[string]interface{}{"err": err, "llName": executableName})
+		log.Panic("fail to run: err %+v, executable %+v", err, executableName)
+
 	}
 	return run(executableName)
 }
