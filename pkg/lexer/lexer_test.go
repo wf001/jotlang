@@ -61,84 +61,52 @@ func TestLexOneInteger(t *testing.T) {
 	assert.Equal(t, &mTypes.Token{Kind: mTypes.TK_NUM, Val: "1"}, Lex("1"))
 }
 
-func TestLexOperationAdd(t *testing.T) {
-	want := &mTypes.Token{
-		Kind: mTypes.TK_PAREN,
-		Val:  "(",
-		Next: &mTypes.Token{
-			Kind: mTypes.TK_OPERATOR,
-			Val:  "+",
-			Next: &mTypes.Token{
-				Kind: mTypes.TK_NUM,
-				Val:  "1",
-				Next: &mTypes.Token{
-					Kind: mTypes.TK_NUM,
-					Val:  "2",
-					Next: &mTypes.Token{
-						Kind: mTypes.TK_PAREN,
-						Val:  ")",
-					},
-				},
-			},
-		},
+func add(kind mTypes.TokenKind, val string) *mTypes.Token {
+	return &mTypes.Token{
+		Kind: kind,
+		Val:  val,
 	}
+}
+
+func buildTokenList(tokens []*mTypes.Token) *mTypes.Token {
+	for i := 0; i < len(tokens)-1; i++ {
+		tokens[i].Next = tokens[i+1]
+	}
+	return tokens[0]
+}
+
+func TestLexOperationAdd(t *testing.T) {
+	tokens := []*mTypes.Token{
+		add(mTypes.TK_PAREN, "("),
+		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_NUM, "1"),
+		add(mTypes.TK_NUM, "2"),
+		add(mTypes.TK_PAREN, ")"),
+	}
+
+	want := buildTokenList(tokens)
 
 	assert.EqualValues(t, want, Lex("(+ 1 2)"))
 }
 
 func TestLexOperationAddTakingAdd(t *testing.T) {
-	want := &mTypes.Token{
-		Kind: mTypes.TK_PAREN,
-		Val:  "(",
-		Next: &mTypes.Token{
-			Kind: mTypes.TK_OPERATOR,
-			Val:  "+",
-			Next: &mTypes.Token{
-				Kind: mTypes.TK_PAREN,
-				Val:  "(",
-				Next: &mTypes.Token{
-					Kind: mTypes.TK_OPERATOR,
-					Val:  "+",
-					Next: &mTypes.Token{
-						Kind: mTypes.TK_NUM,
-						Val:  "1",
-						Next: &mTypes.Token{
-							Kind: mTypes.TK_NUM,
-							Val:  "2",
-							Next: &mTypes.Token{
-								Kind: mTypes.TK_PAREN,
-								Val:  ")",
-								Next: &mTypes.Token{
-									Kind: mTypes.TK_PAREN,
-									Val:  "(",
-									Next: &mTypes.Token{
-										Kind: mTypes.TK_OPERATOR,
-										Val:  "+",
-										Next: &mTypes.Token{
-											Kind: mTypes.TK_NUM,
-											Val:  "3",
-											Next: &mTypes.Token{
-												Kind: mTypes.TK_NUM,
-												Val:  "4",
-												Next: &mTypes.Token{
-													Kind: mTypes.TK_PAREN,
-													Val:  ")",
-													Next: &mTypes.Token{
-														Kind: mTypes.TK_PAREN,
-														Val:  ")",
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+	tokens := []*mTypes.Token{
+		add(mTypes.TK_PAREN, "("),
+		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_PAREN, "("),
+		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_NUM, "1"),
+		add(mTypes.TK_NUM, "2"),
+		add(mTypes.TK_PAREN, ")"),
+		add(mTypes.TK_PAREN, "("),
+		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_NUM, "3"),
+		add(mTypes.TK_NUM, "4"),
+		add(mTypes.TK_PAREN, ")"),
+		add(mTypes.TK_PAREN, ")"),
 	}
+
+	want := buildTokenList(tokens)
 
 	assert.EqualValues(t, want, Lex("(+ (+ 1 2) (+ 3 4))"))
 }
