@@ -72,6 +72,7 @@ func newI32(s string) *constant.Int {
 
 func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
 	trimmed := strings.Trim(s, "\"")
+	trimmed = trimmed + string([]byte{0})
 	helloType := types.NewArray(uint64(len(trimmed)), types.I8)
 	helloPtr := block.NewAlloca(helloType)
 
