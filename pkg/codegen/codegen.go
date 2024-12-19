@@ -51,13 +51,7 @@ var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value)
 			block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
 		} else if reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstGetElementPtr)(nil)) {
 			formatStr := libs.GlobalVar.FormatStr
-			formatPtr := block.NewGetElementPtr(
-				formatStr.ContentType,
-				formatStr,
-				constant.NewInt(types.I32, 0),
-				constant.NewInt(types.I32, 0),
-			)
-			block.NewCall(libs.Printf.FuncPtr, formatPtr, arg)
+			block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
 		} else {
 			log.Panic("unresolved type: have %+v", reflect.TypeOf(arg))
 		}
