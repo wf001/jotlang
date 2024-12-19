@@ -135,16 +135,32 @@ func (node *Node) Debug(depth int) {
 	if node == nil {
 		return
 	}
-	log.Debug(
-		log.BLUE(
-			fmt.Sprintf(
-				"%s %p %#+v %#+v",
-				strings.Repeat("  ", depth),
-				node,
-				node.Kind,
-				node.Val),
-		),
-	)
+	if node.Kind == ND_SCALAR {
+		log.Debug(
+			log.BLUE(
+				fmt.Sprintf(
+					"%s %p %#+v %#+v %#+v",
+					strings.Repeat("  ", depth),
+					node,
+					node.Kind,
+					node.Type,
+					node.Val,
+				),
+			),
+		)
+
+	} else {
+		log.Debug(
+			log.BLUE(
+				fmt.Sprintf(
+					"%s %p %#+v %#+v",
+					strings.Repeat("  ", depth),
+					node,
+					node.Kind,
+					node.Val),
+			),
+		)
+	}
 
 	switch node.Kind {
 	case ND_BIND:
