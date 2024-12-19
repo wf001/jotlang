@@ -7,6 +7,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+// TODO: unused
 type parser struct {
 	token *mTypes.Token
 }
@@ -28,20 +29,20 @@ func newNodeScalar(ty mTypes.ScalarType, val string) *mTypes.Node {
 }
 
 func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
+	var operatorTokenMap = map[string]mTypes.NodeKind{
+		mTypes.NARY_OPERATOR_ADD:  mTypes.ND_ADD,
+		mTypes.BINARY_OPERATOR_EQ: mTypes.ND_EQ,
+	}
+
 	if tok.Kind != mTypes.TK_OPERATOR {
-		// TODO: change return ND_LITERAL
-		return mTypes.ND_NIL, false
+		return "", false
 	}
-	switch tok.Val {
-	case mTypes.NARY_OPERATOR_ADD:
-		return mTypes.ND_ADD, true
-	case mTypes.BINARY_OPERATOR_EQ:
-		return mTypes.ND_EQ, true
-	default:
-		log.Error("unresolved token :have %+v", tok)
+
+	if kind, exists := operatorTokenMap[tok.Val]; exists {
+		return kind, true
 	}
-	// TODO: change return ND_LITERAL
-	return mTypes.ND_NIL, false
+
+	return "", false
 }
 
 func parseExprs(

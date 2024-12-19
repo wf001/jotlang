@@ -18,5 +18,5 @@ func TestNewTokenMap(t *testing.T) {
 		&mTypes.Token{Kind: mTypes.TK_BIND, Val: mTypes.SYMBOL_LET},
 	)
 	assert.EqualValues(t, false, ok)
-	assert.EqualValues(t, mTypes.ND_NIL, res)
+	assert.EqualValues(t, "", res)
 }
