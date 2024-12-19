@@ -54,6 +54,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 		matched := false
 
 		for pattern, tokenType := range tokenMap {
+			// FIXME: bug caused by looping with different order on each lexing
 			if isMatched(p, pattern) {
 				prev = newToken(tokenType, prev, p)
 				matched = true

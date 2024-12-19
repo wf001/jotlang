@@ -11,7 +11,7 @@ type parser struct {
 	token *mTypes.Token
 }
 
-func newNode(kind mTypes.NodeKind, child *mTypes.Node, val string) *mTypes.Node {
+func newNodeParent(kind mTypes.NodeKind, child *mTypes.Node, val string) *mTypes.Node {
 	return &mTypes.Node{
 		Kind:  kind,
 		Child: child,
@@ -19,12 +19,17 @@ func newNode(kind mTypes.NodeKind, child *mTypes.Node, val string) *mTypes.Node 
 	}
 }
 
-func newNodeInt(tok *mTypes.Token) *mTypes.Node {
-	return newNode(mTypes.ND_INT, nil, tok.Val)
+func newNodeScalar(ty mTypes.ScalarType, val string) *mTypes.Node {
+	return &mTypes.Node{
+		Kind: mTypes.ND_SCALAR,
+		Type: ty,
+		Val:  val,
+	}
 }
 
 func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 	if tok.Kind != mTypes.TK_OPERATOR {
+		// TODO: change return ND_LITERAL
 		return mTypes.ND_NIL, false
 	}
 	switch tok.Val {
@@ -35,6 +40,7 @@ func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
 	default:
 		log.Error("unresolved token :have %+v", tok)
 	}
+	// TODO: change return ND_LITERAL
 	return mTypes.ND_NIL, false
 }
 
@@ -63,7 +69,7 @@ func parseBody(
 ) (*mTypes.Token, *mTypes.Node) {
 
 	nextToken, argHead := parseExprs(rootToken.Next, parentKind)
-	rootNode := newNode(parentKind, argHead, exprName)
+	rootNode := newNodeParent(parentKind, argHead, exprName)
 	return nextToken, rootNode
 }
 
@@ -77,11 +83,11 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 		if tok.IsDeclare() {
 			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
-			head = newNode(mTypes.ND_DECLARE, head, "")
+			head = newNodeParent(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsLambda() {
 			tok, head = parseBody(tok.Next.Next, mTypes.ND_EXPR, "")
-			head = newNode(
+			head = newNodeParent(
 				mTypes.ND_LAMBDA,
 				head,
 				"",
@@ -115,7 +121,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			}
 
 			nextToken, body := parseBody(tok, mTypes.ND_EXPR, "")
-			bind := newNode(mTypes.ND_BIND, body, "")
+			bind := newNodeParent(mTypes.ND_BIND, body, "")
 			bind.Bind = varHead.Next
 
 			return nextToken, bind
@@ -137,10 +143,10 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head.Cond.Val = "cond"
 
 			nextToken, then := parseDeclare(nextToken, mTypes.ND_IF)
-			head.Then = newNode(mTypes.ND_EXPR, then, "then")
+			head.Then = newNodeParent(mTypes.ND_EXPR, then, "then")
 
 			nextToken, els := parseDeclare(nextToken, mTypes.ND_IF)
-			head.Else = newNode(mTypes.ND_EXPR, els, "els")
+			head.Else = newNodeParent(mTypes.ND_EXPR, els, "els")
 			tok = nextToken
 		}
 
@@ -154,16 +160,19 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			log.Debug("is Variable declaration :have %+v", tok)
 			v := tok.Val
 			tok, head = parseDeclare(tok.Next, mTypes.ND_VAR_DECLARE)
-			return tok, newNode(mTypes.ND_VAR_DECLARE, head, v)
+			return tok, newNodeParent(mTypes.ND_VAR_DECLARE, head, v)
 
 		} else {
 			log.Debug("is Variable reference :have %+v", tok)
-			return tok.Next, newNode(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+			return tok.Next, newNodeParent(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
 
 		}
 
 	} else if tok.IsNum() {
-		return tok.Next, newNodeInt(tok)
+		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
+
+	} else if tok.IsStr() {
+		return tok.Next, newNodeScalar(mTypes.TY_STR, tok.Val)
 
 	} else {
 		log.Panic("unresolved token :have %+v", tok)

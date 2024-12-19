@@ -89,7 +89,7 @@ func gen(
 	scope *mTypes.Node,
 ) value.Value {
 
-	if node.IsInteger() {
+	if node.IsInt32() {
 		return newI32(node.Val)
 
 	} else if node.IsNary() {

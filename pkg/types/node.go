@@ -38,7 +38,17 @@ const (
 
 	// type
 	ND_NIL = NodeKind("ND_NIL") // nil
-	ND_INT = NodeKind("ND_INT") // 0-9
+
+	ND_SCALAR     = NodeKind("ND_SCALAR") // int32, string, bool
+	ND_COLLECTION = NodeKind("ND_COLLECTION")
+)
+
+type ScalarType string
+
+const (
+	TY_INT32 = ScalarType("TY_INT32")
+	TY_STR   = ScalarType("TY_STR")
+	TY_NIL   = ScalarType("TY_NIL")
 )
 
 type Program struct {
@@ -64,6 +74,7 @@ type BuiltinGlobalVarsProp struct {
 type Node struct {
 	Kind    NodeKind
 	Next    *Node
+	Type    ScalarType
 	Child   *Node
 	Cond    *Node
 	Then    *Node
@@ -98,8 +109,8 @@ func (node *Node) IsVarReference() bool {
 func (node *Node) IsLibCall() bool {
 	return node.Kind == ND_LIBCALL
 }
-func (node *Node) IsInteger() bool {
-	return node.Kind == ND_INT
+func (node *Node) IsInt32() bool {
+	return node.Kind == ND_SCALAR && node.Type == TY_INT32
 }
 func (node *Node) IsNary() bool {
 	return node.Kind == ND_ADD

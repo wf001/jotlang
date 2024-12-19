@@ -39,6 +39,10 @@ func (tok *Token) IsNum() bool {
 	return tok.Kind == TK_NUM
 }
 
+func (tok *Token) IsStr() bool {
+	return tok.Kind == TK_STR
+}
+
 func (tok *Token) IsLibrary() bool {
 	return tok.Kind == TK_LIBCALL
 }
