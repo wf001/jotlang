@@ -43,7 +43,10 @@ var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) 
 var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value) {
 
-		if reflect.TypeOf(arg) == reflect.TypeOf((*constant.Int)(nil)) {
+		// TODO: not good
+		if reflect.TypeOf(arg) == reflect.TypeOf((*constant.Int)(nil)) ||
+			reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstAdd)(nil)) ||
+			reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstICmp)(nil)) {
 			formatStr := libs.GlobalVar.FormatDigit
 			block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
 		} else if reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstGetElementPtr)(nil)) {
