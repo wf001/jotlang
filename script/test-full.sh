@@ -111,6 +111,7 @@ testexec(){
 
   # string
   assertexec '(def main (fn [] (prn "hello")))' "hello\\\n"
+  # assertexec '(def main (fn [] (let [s "hello"] (prn s))))' "hello\\\n"
 
 }
 
