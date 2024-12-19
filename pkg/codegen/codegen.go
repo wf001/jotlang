@@ -5,6 +5,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
@@ -45,7 +46,7 @@ var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value)
 
 		if reflect.TypeOf(arg) == reflect.TypeOf((*constant.Int)(nil)) {
 			format = libs.GlobalVar.FormatDigit
-		} else if reflect.TypeOf(arg) == reflect.TypeOf((*constant.CharArray)(nil)) {
+		} else if reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstGetElementPtr)(nil)) {
 			format = libs.GlobalVar.FormatStr
 		} else {
 			log.Panic("unresolved type: have %+v", reflect.TypeOf(arg))
@@ -63,8 +64,27 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
-func newStr(s string) *constant.CharArray {
-	return constant.NewCharArray([]byte(s))
+func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
+	trimmed := strings.Trim(s, "\"")
+	// alloca 命令で [6 x i8] 型のメモリを確保
+	helloType := types.NewArray(5, types.I8)
+	helloPtr := block.NewAlloca(helloType)
+
+	// getelementptr 命令を生成
+	helloGEP := block.NewGetElementPtr(
+		helloType,
+		helloPtr,
+		constant.NewInt(types.I32, 0),
+		constant.NewInt(types.I32, 0),
+	)
+
+	// "hello\00" 文字列を表す定数を生成
+	helloConst := constant.NewCharArray([]byte(trimmed))
+
+	// store 命令で "hello\00" をメモリに格納
+	block.NewStore(helloConst, helloPtr)
+
+	return helloGEP
 }
 
 func newArray(length uint64) *types.ArrayType {
@@ -107,7 +127,7 @@ func gen(
 		return newI32(node.Val)
 
 	} else if node.IsStr() {
-		return newStr(node.Val)
+		return newStr(block, node.Val)
 
 	} else if node.IsNary() {
 		// nary takes more than 2 arguments
