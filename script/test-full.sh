@@ -109,6 +109,9 @@ testexec(){
 
   assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' "13\\\n"
 
+  # string
+  assertexec '(def main (fn [] (prn "hello")))' "hello\\\n"
+
 }
 
 build-compiler
