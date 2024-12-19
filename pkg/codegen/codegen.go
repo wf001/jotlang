@@ -39,21 +39,27 @@ var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) 
 		return res
 	},
 }
+
+func typeOf(v interface{}, ty interface{}) bool {
+	return reflect.TypeOf(v) == reflect.TypeOf(ty)
+}
+
 var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value) {
+		var formatStr *ir.Global
 
-		// TODO: not good
-		if reflect.TypeOf(arg) == reflect.TypeOf((*constant.Int)(nil)) ||
-			reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstAdd)(nil)) ||
-			reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstICmp)(nil)) {
-			formatStr := libs.GlobalVar.FormatDigit
-			block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
-		} else if reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstGetElementPtr)(nil)) {
-			formatStr := libs.GlobalVar.FormatStr
-			block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
+		if typeOf(arg, (*constant.Int)(nil)) ||
+			typeOf(arg, (*ir.InstAdd)(nil)) ||
+			typeOf(arg, (*ir.InstICmp)(nil)) {
+			formatStr = libs.GlobalVar.FormatDigit
+
+		} else if typeOf(arg, (*ir.InstGetElementPtr)(nil)) {
+			formatStr = libs.GlobalVar.FormatStr
+
 		} else {
 			log.Panic("unresolved type: have %+v", reflect.TypeOf(arg))
 		}
+		block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
 	},
 }
 
@@ -67,21 +73,14 @@ func newI32(s string) *constant.Int {
 }
 
 func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
-	helloType := types.NewArray(uint64(len(s)), types.I8)
-	helloPtr := block.NewAlloca(helloType)
+	strType := types.NewArray(uint64(len(s)), types.I8)
+	strPtr := block.NewAlloca(strType)
 
-	helloGEP := block.NewGetElementPtr(
-		helloType,
-		helloPtr,
-		constant.NewInt(types.I32, 0),
-		constant.NewInt(types.I32, 0),
-	)
+	strGEP := block.NewGetElementPtr(strType, strPtr)
 
-	helloConst := constant.NewCharArray([]byte(s))
+	block.NewStore(constant.NewCharArray([]byte(s)), strPtr)
 
-	block.NewStore(helloConst, helloPtr)
-
-	return helloGEP
+	return strGEP
 }
 
 func newArray(length uint64) *types.ArrayType {
