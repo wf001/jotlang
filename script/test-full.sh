@@ -72,7 +72,7 @@ testexec(){
   assertexec '(def main (fn [] (prn (= 5 (+ 3 2)))))' "1\\\n"
   assertexec '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "0\\\n"
   # as often failed
-  # assertexec '(def main (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
+  assertexec '(def main (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
 
   # variable
   echo "== variable ==="

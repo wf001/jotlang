@@ -7,21 +7,64 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-var tokenMap = map[string]string{
-	mTypes.INTEGER_REG_EXP:   mTypes.TK_NUM,
-	mTypes.STRING_REG_EXP:    mTypes.TK_STR,
-	mTypes.OPERATORS_REG_EXP: mTypes.TK_OPERATOR,
-	mTypes.BRACKETS_REG_EXP:  mTypes.TK_PAREN,
-	mTypes.LIB_CORE_REG_EXP:  mTypes.TK_LIBCALL,
-	mTypes.SYMBOL_FN:         mTypes.TK_LAMBDA,
-	mTypes.SYMBOL_DEF:        mTypes.TK_DECLARE,
-	mTypes.SYMBOL_LET:        mTypes.TK_BIND,
-	mTypes.SYMBOL_IF:         mTypes.TK_IF,
+// defines the structure for token patterns as a linked list
+type tokenPatternStruct struct {
+	Pattern   string
+	TokenType string
+	Next      *tokenPatternStruct
+}
+
+// holds the head of the linked list of TokenPatternStruct
+type tokenMap struct {
+	Head *tokenPatternStruct
 }
 
 func isMatched(s string, typ string) bool {
 	re := regexp.MustCompile(typ)
 	return re.MatchString(s)
+}
+
+// traverses the linked list to find a matching pattern and returns the TokenType
+func (tm *tokenMap) match(input string) (string, bool) {
+	current := tm.Head
+	for current != nil {
+		if isMatched(input, current.Pattern) {
+			return current.TokenType, true
+		}
+		current = current.Next
+	}
+	return "", false
+}
+
+// initializes a TokenMap with predefined patterns and token types
+func newTokenMap() *tokenMap {
+	head := &tokenPatternStruct{
+		Pattern:   mTypes.INTEGER_REG_EXP,
+		TokenType: mTypes.TK_NUM,
+	}
+	current := head
+
+	// Helper function to add a new pattern to the linked list
+	add := func(pattern, tokenType string) {
+		newNode := &tokenPatternStruct{
+			Pattern:   pattern,
+			TokenType: tokenType,
+		}
+		current.Next = newNode
+		current = newNode
+	}
+
+	// Define all patterns and their types
+	add(mTypes.STRING_REG_EXP, mTypes.TK_STR)
+	add(mTypes.OPERATORS_REG_EXP, mTypes.TK_OPERATOR)
+	add(mTypes.BRACKETS_REG_EXP, mTypes.TK_PAREN)
+	add(mTypes.LIB_CORE_REG_EXP, mTypes.TK_LIBCALL)
+	add(mTypes.SYMBOL_FN, mTypes.TK_LAMBDA)
+	add(mTypes.SYMBOL_DEF, mTypes.TK_DECLARE)
+	add(mTypes.SYMBOL_LET, mTypes.TK_BIND)
+	add(mTypes.SYMBOL_IF, mTypes.TK_IF)
+
+	return &tokenMap{Head: head}
 }
 
 func newToken(kind mTypes.TokenKind, prev *mTypes.Token, val string) *mTypes.Token {
@@ -46,22 +89,17 @@ func splitString(expr string) []string {
 	return res
 }
 
+// performs lexical analysis on the input strings
 func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	prev := &mTypes.Token{}
 	head := prev
 
-	for _, p := range splittedString {
-		matched := false
+	tokenMap := newTokenMap()
 
-		for pattern, tokenType := range tokenMap {
-			// FIXME: bug caused by looping with different order on each lexing
-			if isMatched(p, pattern) {
-				prev = newToken(tokenType, prev, p)
-				matched = true
-				break
-			}
-		}
-		if !matched {
+	for _, p := range splittedString {
+		if tokenType, matched := tokenMap.match(p); matched {
+			prev = newToken(tokenType, prev, p)
+		} else {
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
 			prev = newToken(mTypes.TK_IDENT, prev, p)
 		}
