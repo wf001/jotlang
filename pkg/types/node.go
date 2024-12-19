@@ -69,6 +69,7 @@ type BuiltinProp struct {
 // HACK: should remove llir/ir reference from this namespace
 type BuiltinGlobalVarsProp struct {
 	FormatDigit *ir.Global
+	FormatStr   *ir.Global
 }
 
 type Node struct {
@@ -117,6 +118,9 @@ func (node *Node) IsBinary() bool {
 }
 func (node *Node) IsInt32() bool {
 	return node.Kind == ND_SCALAR && node.Type == TY_INT32
+}
+func (node *Node) IsStr() bool {
+	return node.Kind == ND_SCALAR && node.Type == TY_STR
 }
 
 func indicate(s string, depth int) {

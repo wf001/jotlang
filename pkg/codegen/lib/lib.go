@@ -13,6 +13,10 @@ func DeclareBuiltin(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 		"format.digit",
 		constant.NewCharArray([]byte("%d\n\x00")),
 	)
+	globalVars.FormatStr = ir.NewGlobalDef(
+		"format.string",
+		constant.NewCharArray([]byte("%s\n\x00")),
+	)
 	libs.GlobalVar = globalVars
 
 	declareCore(ir, libs)

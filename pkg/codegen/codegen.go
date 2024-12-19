@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 
 	"github.com/llir/llvm/ir"
@@ -40,7 +41,16 @@ var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) 
 }
 var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value) {
-		block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatDigit, arg)
+		var format *ir.Global
+
+		if reflect.TypeOf(arg) == reflect.TypeOf((*constant.Int)(nil)) {
+			format = libs.GlobalVar.FormatDigit
+		} else if reflect.TypeOf(arg) == reflect.TypeOf((*constant.CharArray)(nil)) {
+			format = libs.GlobalVar.FormatStr
+		} else {
+			log.Panic("unresolved type: have %+v", reflect.TypeOf(arg))
+		}
+		block.NewCall(libs.Printf.FuncPtr, format, arg)
 	},
 }
 
@@ -51,6 +61,10 @@ func newI32(s string) *constant.Int {
 		log.Panic("fail to newI32: %s", err)
 	}
 	return constant.NewInt(types.I32, i)
+}
+
+func newStr(s string) *constant.CharArray {
+	return constant.NewCharArray([]byte(s))
 }
 
 func newArray(length uint64) *types.ArrayType {
@@ -91,6 +105,9 @@ func gen(
 
 	if node.IsInt32() {
 		return newI32(node.Val)
+
+	} else if node.IsStr() {
+		return newStr(node.Val)
 
 	} else if node.IsNary() {
 		// nary takes more than 2 arguments
