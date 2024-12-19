@@ -109,14 +109,14 @@ func (node *Node) IsVarReference() bool {
 func (node *Node) IsLibCall() bool {
 	return node.Kind == ND_LIBCALL
 }
-func (node *Node) IsInt32() bool {
-	return node.Kind == ND_SCALAR && node.Type == TY_INT32
-}
 func (node *Node) IsNary() bool {
 	return node.Kind == ND_ADD
 }
 func (node *Node) IsBinary() bool {
 	return node.Kind == ND_EQ
+}
+func (node *Node) IsInt32() bool {
+	return node.Kind == ND_SCALAR && node.Type == TY_INT32
 }
 
 func indicate(s string, depth int) {
