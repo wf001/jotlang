@@ -7,6 +7,18 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+var tokenMap = map[string]string{
+	mTypes.INTEGER_REG_EXP:   mTypes.TK_NUM,
+	mTypes.STRING_REG_EXP:    mTypes.TK_STR,
+	mTypes.OPERATORS_REG_EXP: mTypes.TK_OPERATOR,
+	mTypes.BRACKETS_REG_EXP:  mTypes.TK_PAREN,
+	mTypes.LIB_CORE_REG_EXP:  mTypes.TK_LIBCALL,
+	mTypes.SYMBOL_FN:         mTypes.TK_LAMBDA,
+	mTypes.SYMBOL_DEF:        mTypes.TK_DECLARE,
+	mTypes.SYMBOL_LET:        mTypes.TK_BIND,
+	mTypes.SYMBOL_IF:         mTypes.TK_IF,
+}
+
 func isMatched(s string, typ string) bool {
 	re := regexp.MustCompile(typ)
 	return re.MatchString(s)
@@ -32,18 +44,6 @@ func splitString(expr string) []string {
 	res := re.FindAllString(expr, -1)
 	log.Debug(log.YELLOW("splitted program: %#+v"), res)
 	return res
-}
-
-var tokenMap = map[string]string{
-	mTypes.INTEGER_REG_EXP:   mTypes.TK_NUM,
-	mTypes.STRING_REG_EXP:    mTypes.TK_STR,
-	mTypes.OPERATORS_REG_EXP: mTypes.TK_OPERATOR,
-	mTypes.BRACKETS_REG_EXP:  mTypes.TK_PAREN,
-	mTypes.LIB_CORE_REG_EXP:  mTypes.TK_LIBCALL,
-	mTypes.SYMBOL_FN:         mTypes.TK_LAMBDA,
-	mTypes.SYMBOL_DEF:        mTypes.TK_DECLARE,
-	mTypes.SYMBOL_LET:        mTypes.TK_BIND,
-	mTypes.SYMBOL_IF:         mTypes.TK_IF,
 }
 
 func doLexicalAnalyse(splittedString []string) *mTypes.Token {
