@@ -42,16 +42,22 @@ var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) 
 }
 var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value) {
-		var format *ir.Global
 
 		if reflect.TypeOf(arg) == reflect.TypeOf((*constant.Int)(nil)) {
-			format = libs.GlobalVar.FormatDigit
+			formatStr := libs.GlobalVar.FormatDigit
+			block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
 		} else if reflect.TypeOf(arg) == reflect.TypeOf((*ir.InstGetElementPtr)(nil)) {
-			format = libs.GlobalVar.FormatStr
+			formatStr := libs.GlobalVar.FormatStr
+			formatPtr := block.NewGetElementPtr(
+				formatStr.ContentType,
+				formatStr,
+				constant.NewInt(types.I32, 0),
+				constant.NewInt(types.I32, 0),
+			)
+			block.NewCall(libs.Printf.FuncPtr, formatPtr, arg)
 		} else {
 			log.Panic("unresolved type: have %+v", reflect.TypeOf(arg))
 		}
-		block.NewCall(libs.Printf.FuncPtr, format, arg)
 	},
 }
 
@@ -66,11 +72,9 @@ func newI32(s string) *constant.Int {
 
 func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
 	trimmed := strings.Trim(s, "\"")
-	// alloca 命令で [6 x i8] 型のメモリを確保
-	helloType := types.NewArray(5, types.I8)
+	helloType := types.NewArray(uint64(len(trimmed)), types.I8)
 	helloPtr := block.NewAlloca(helloType)
 
-	// getelementptr 命令を生成
 	helloGEP := block.NewGetElementPtr(
 		helloType,
 		helloPtr,
@@ -78,10 +82,8 @@ func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
 		constant.NewInt(types.I32, 0),
 	)
 
-	// "hello\00" 文字列を表す定数を生成
 	helloConst := constant.NewCharArray([]byte(trimmed))
 
-	// store 命令で "hello\00" をメモリに格納
 	block.NewStore(helloConst, helloPtr)
 
 	return helloGEP
