@@ -7,7 +7,6 @@ require (
 	github.com/llir/llvm v0.3.6
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.2
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
 
 require (
