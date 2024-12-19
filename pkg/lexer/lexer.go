@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
@@ -102,6 +103,14 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 		} else {
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
 			prev = newToken(mTypes.TK_IDENT, prev, p)
+		}
+	}
+
+	for t := head.Next; t != nil; t = t.Next {
+		if t.Kind == mTypes.TK_STR {
+			s := strings.Trim(t.Val, "\"")
+			s = s + string([]byte{0})
+			t.Val = s
 		}
 	}
 

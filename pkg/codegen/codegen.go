@@ -5,7 +5,6 @@ import (
 	"os"
 	"reflect"
 	"strconv"
-	"strings"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
@@ -68,9 +67,7 @@ func newI32(s string) *constant.Int {
 }
 
 func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
-	trimmed := strings.Trim(s, "\"")
-	trimmed = trimmed + string([]byte{0})
-	helloType := types.NewArray(uint64(len(trimmed)), types.I8)
+	helloType := types.NewArray(uint64(len(s)), types.I8)
 	helloPtr := block.NewAlloca(helloType)
 
 	helloGEP := block.NewGetElementPtr(
@@ -80,7 +77,7 @@ func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
 		constant.NewInt(types.I32, 0),
 	)
 
-	helloConst := constant.NewCharArray([]byte(trimmed))
+	helloConst := constant.NewCharArray([]byte(s))
 
 	block.NewStore(helloConst, helloPtr)
 
