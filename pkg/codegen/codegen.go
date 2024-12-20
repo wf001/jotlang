@@ -128,7 +128,7 @@ func gen(
 	scope *mTypes.Node,
 ) value.Value {
 
-	if node.IsType(mTypes.TY_INT32) {
+	if node.IsKind(mTypes.ND_SCALAR) && node.IsType(mTypes.TY_INT32) {
 		return newI32(node.Val)
 
 	} else if node.IsType(mTypes.TY_STR) {
@@ -263,8 +263,7 @@ func gen(
 		// find in local variable which is declared with let
 		for s := scope; s != nil; s = s.Next {
 			if s.Val == node.Val {
-				// TODO: add Type for ND_ADD
-				if s.Child.IsType(mTypes.TY_INT32) || s.Child.IsKindNary() || s.Child.IsKindBinary() {
+				if s.Child.IsType(mTypes.TY_INT32) {
 					node.Type = mTypes.TY_INT32
 					return block.NewLoad(types.I32, s.VarPtr)
 

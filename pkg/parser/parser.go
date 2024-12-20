@@ -130,6 +130,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
 			log.Debug("is Operator :have %+v", tok)
 			tok, head = parseBody(tok, kind, tok.Val)
+			head.Type = mTypes.TY_INT32
 
 		} else if tok.IsLibrary() {
 			log.Debug("is Library :have %+v", tok)
