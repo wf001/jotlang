@@ -108,7 +108,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 
 	// post processing: remove escaped \" from origin string
 	for t := head.Next; t != nil; t = t.Next {
-		if t.Kind == mTypes.TK_STR {
+		if t.IsKind(mTypes.TK_STR) {
 			s := strings.Trim(t.Val, "\"")
 			s = s + string([]byte{0})
 			t.Val = s

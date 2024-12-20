@@ -44,7 +44,7 @@ func matchedOperator(
 	tokenMap map[string]mTypes.NodeKind,
 ) (mTypes.NodeKind, bool) {
 
-	if tok.Kind != mTypes.TK_OPERATOR {
+	if !tok.IsKind(mTypes.TK_OPERATOR) {
 		return "", false
 	}
 
