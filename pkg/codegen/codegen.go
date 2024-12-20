@@ -126,7 +126,6 @@ type context struct {
 	scope    *mTypes.Node
 }
 
-// HACK: too many argument
 func (ctx *context) gen(
 	node *mTypes.Node,
 ) value.Value {

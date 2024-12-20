@@ -28,17 +28,32 @@ func newNodeScalar(ty mTypes.ModoType, val string) *mTypes.Node {
 	}
 }
 
-func matchedOperator(tok *mTypes.Token) (mTypes.NodeKind, bool) {
-	var operatorTokenMap = map[string]mTypes.NodeKind{
-		mTypes.NARY_OPERATOR_ADD:  mTypes.ND_ADD,
+func matchedNary(tok *mTypes.Token) (mTypes.NodeKind, bool) {
+	var tokenMap = map[string]mTypes.NodeKind{
+		mTypes.NARY_OPERATOR_ADD: mTypes.ND_ADD,
+	}
+
+	return matchedOperator(tok, tokenMap)
+}
+
+func matchedBinary(tok *mTypes.Token) (mTypes.NodeKind, bool) {
+	var tokenMap = map[string]mTypes.NodeKind{
 		mTypes.BINARY_OPERATOR_EQ: mTypes.ND_EQ,
 	}
+
+	return matchedOperator(tok, tokenMap)
+}
+
+func matchedOperator(
+	tok *mTypes.Token,
+	tokenMap map[string]mTypes.NodeKind,
+) (mTypes.NodeKind, bool) {
 
 	if tok.Kind != mTypes.TK_OPERATOR {
 		return "", false
 	}
 
-	if kind, exists := operatorTokenMap[tok.Val]; exists {
+	if kind, exists := tokenMap[tok.Val]; exists {
 		return kind, true
 	}
 
@@ -127,9 +142,15 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 			return nextToken, bind
 
-		} else if kind, isOperatorCall := matchedOperator(tok); isOperatorCall {
-			log.Debug("is Operator :have %+v", tok)
+		} else if kind, isNary := matchedNary(tok); isNary {
+			log.Debug("is nary operator :have %+v", tok)
 			tok, head = parseBody(tok, kind, tok.Val)
+			head.Type = mTypes.TY_INT32
+
+		} else if kind, isBinary := matchedBinary(tok); isBinary {
+			log.Debug("is binary operator :have %+v", tok)
+			tok, head = parseBody(tok, kind, tok.Val)
+			// FIXME: TY_INT32 => TY_BOOL
 			head.Type = mTypes.TY_INT32
 
 		} else if tok.IsLibrary() {
