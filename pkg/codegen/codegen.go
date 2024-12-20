@@ -119,15 +119,15 @@ func Assemble(llFile string, asmFile string) {
 }
 
 type context struct {
-	mod   *ir.Module
-	prog  *mTypes.Program
-	scope *mTypes.Node
+	mod      *ir.Module
+	function *ir.Func
+	prog     *mTypes.Program
+	scope    *mTypes.Node
 }
 
 // HACK: too many argument
 func (ctx *context) gen(
 	block *ir.Block,
-	function *ir.Func,
 	node *mTypes.Node,
 ) value.Value {
 
@@ -140,17 +140,17 @@ func (ctx *context) gen(
 	} else if node.IsKindNary() {
 		// nary takes more than 2 arguments
 		child := node.Child
-		fst := ctx.gen(block, function, child)
+		fst := ctx.gen(block, child)
 
 		child = child.Next
-		snd := ctx.gen(block, function, child)
+		snd := ctx.gen(block, child)
 
 		nary := operatorMap[node.Kind]
 		res := nary(block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
-			snd = ctx.gen(block, function, child)
+			snd = ctx.gen(block, child)
 			res = nary(block, fst, snd)
 		}
 		return res
@@ -158,10 +158,10 @@ func (ctx *context) gen(
 	} else if node.IsKindBinary() {
 		// binary takes exactly 2 arguments
 		child := node.Child
-		fst := ctx.gen(block, function, child)
+		fst := ctx.gen(block, child)
 
 		child = child.Next
-		snd := ctx.gen(block, function, child)
+		snd := ctx.gen(block, child)
 
 		binary := operatorMap[node.Kind]
 		res := binary(block, fst, snd)
@@ -169,7 +169,7 @@ func (ctx *context) gen(
 
 	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library
-		arg := ctx.gen(block, function, node.Child)
+		arg := ctx.gen(block, node.Child)
 		libFunc := libraryMap[node.Val]
 		libFunc(block, ctx.prog.BuiltinLibs, arg, node.Child)
 		return newI32("0")
@@ -181,7 +181,9 @@ func (ctx *context) gen(
 			types.I32,
 		)
 		llBlock := funcFn.NewBlock(getBlockName("fn.entry", node))
-		res := ctx.gen(llBlock, funcFn, node.Child)
+
+		ctx.function = funcFn
+		res := ctx.gen(llBlock, node.Child)
 		if res != nil {
 			llBlock.NewRet(res)
 		}
@@ -189,7 +191,7 @@ func (ctx *context) gen(
 
 	} else if node.IsKind(mTypes.ND_BIND) {
 		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
-			v := ctx.gen(block, function, varDeclare.Child)
+			v := ctx.gen(block, varDeclare.Child)
 			if ctx.scope.Child == nil {
 				ctx.scope = varDeclare
 			} else {
@@ -204,32 +206,32 @@ func (ctx *context) gen(
 			}
 
 		}
-		return ctx.gen(block, function, node.Child)
+		return ctx.gen(block, node.Child)
 
 	} else if node.IsKind(mTypes.ND_IF) {
-		condBlock := function.NewBlock(getBlockName("if.cond", node))
+		condBlock := ctx.function.NewBlock(getBlockName("if.cond", node))
 		block.NewBr(condBlock)
 
-		thenBlock := function.NewBlock(getBlockName("if.then", node))
-		elseBlock := function.NewBlock(getBlockName("if.else", node))
-		exitBlock := function.NewBlock(getBlockName("if.exit", node))
+		thenBlock := ctx.function.NewBlock(getBlockName("if.then", node))
+		elseBlock := ctx.function.NewBlock(getBlockName("if.else", node))
+		exitBlock := ctx.function.NewBlock(getBlockName("if.exit", node))
 
-		cond := ctx.gen(condBlock, function, node.Cond)
+		cond := ctx.gen(condBlock, node.Cond)
 
 		exitBlock.NewRet(newI32("0"))
 
 		thenBlock.NewBr(exitBlock)
 		elseBlock.NewBr(exitBlock)
 
-		ctx.gen(thenBlock, function, node.Then)
-		ctx.gen(elseBlock, function, node.Else)
+		ctx.gen(thenBlock, node.Then)
+		ctx.gen(elseBlock, node.Else)
 
 		condBlock.NewCondBr(cond, thenBlock, elseBlock)
 
 	} else if node.IsKind(mTypes.ND_EXPR) {
 		var res value.Value
 		for child := node.Child; child != nil; child = child.Next {
-			res = ctx.gen(block, function, child)
+			res = ctx.gen(block, child)
 		}
 		return res
 
@@ -242,7 +244,8 @@ func (ctx *context) gen(
 		)
 		llBlock := fnc.NewBlock("")
 
-		res := ctx.gen(llBlock, fnc, node.Child)
+		ctx.function = fnc
+		res := ctx.gen(llBlock, node.Child)
 		llBlock.NewCall(res)
 		llBlock.NewRet(newI32("0"))
 
@@ -258,7 +261,8 @@ func (ctx *context) gen(
 		)
 		llBlock := fnc.NewBlock("")
 
-		res := ctx.gen(llBlock, fnc, node.Child)
+		ctx.function = fnc
+		res := ctx.gen(llBlock, node.Child)
 		node.FuncPtr = fnc
 		llBlock.NewRet(res)
 
@@ -291,7 +295,7 @@ func (ctx *context) gen(
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
 	} else if node.IsKind(mTypes.ND_DECLARE) {
-		return ctx.gen(block, function, node.Child)
+		return ctx.gen(block, node.Child)
 
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)
@@ -306,7 +310,7 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
 		c := &context{mod: module, scope: &mTypes.Node{}, prog: prog}
-		c.gen(nil, nil, declare)
+		c.gen(nil, declare)
 	}
 
 	return module
