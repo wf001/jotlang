@@ -59,7 +59,7 @@ var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value,
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) {
 		var formatStr *ir.Global
 
-		if node.IsInt32() || node.IsNary() || node.IsBinary() {
+		if node.IsInt32() || node.IsKindNary() || node.IsKindBinary() {
 			formatStr = libs.GlobalVar.FormatDigit
 
 		} else if node.IsStr() {
@@ -134,7 +134,7 @@ func gen(
 	} else if node.IsStr() {
 		return newStr(block, node)
 
-	} else if node.IsNary() {
+	} else if node.IsKindNary() {
 		// nary takes more than 2 arguments
 		child := node.Child
 		fst := gen(mod, block, function, child, prog, scope)
@@ -152,7 +152,7 @@ func gen(
 		}
 		return res
 
-	} else if node.IsBinary() {
+	} else if node.IsKindBinary() {
 		// binary takes exactly 2 arguments
 		child := node.Child
 		fst := gen(mod, block, function, child, prog, scope)
@@ -164,14 +164,14 @@ func gen(
 		res := binary(block, fst, snd)
 		return res
 
-	} else if node.IsLibCall() {
+	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library
 		arg := gen(mod, block, function, node.Child, prog, scope)
 		libFunc := libraryMap[node.Val]
 		libFunc(block, prog.BuiltinLibs, arg, node.Child)
 		return newI32("0")
 
-	} else if node.IsLambda() {
+	} else if node.IsKind(mTypes.ND_LAMBDA) {
 		// TODO: validate
 		funcFn := mod.NewFunc(
 			getFuncName(node),
@@ -184,7 +184,7 @@ func gen(
 		}
 		return funcFn
 
-	} else if node.IsBind() {
+	} else if node.IsKind(mTypes.ND_BIND) {
 		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
 			v := gen(mod, block, function, varDeclare.Child, prog, scope)
 			if scope.Child == nil {
@@ -202,7 +202,7 @@ func gen(
 		}
 		return gen(mod, block, function, node.Child, prog, scope)
 
-	} else if node.IsIf() {
+	} else if node.IsKind(mTypes.ND_IF) {
 		condBlock := function.NewBlock(getBlockName("if.cond", node))
 		block.NewBr(condBlock)
 
@@ -222,14 +222,14 @@ func gen(
 
 		condBlock.NewCondBr(cond, thenBlock, elseBlock)
 
-	} else if node.IsExpr() {
+	} else if node.IsKind(mTypes.ND_EXPR) {
 		var res value.Value
 		for child := node.Child; child != nil; child = child.Next {
 			res = gen(mod, block, function, child, prog, scope)
 		}
 		return res
 
-	} else if node.IsVarDeclare() && node.Val == "main" {
+	} else if node.IsKind(mTypes.ND_VAR_DECLARE) && node.Val == "main" {
 		// means declaring main function regarded as entrypoint
 
 		fnc := mod.NewFunc(
@@ -242,7 +242,7 @@ func gen(
 		llBlock.NewCall(res)
 		llBlock.NewRet(newI32("0"))
 
-	} else if node.IsVarDeclare() {
+	} else if node.IsKind(mTypes.ND_VAR_DECLARE) {
 		// means declaring global variable or function named except main
 
 		retType := types.I32 // TODO: to be changable
@@ -258,7 +258,7 @@ func gen(
 		node.FuncPtr = fnc
 		llBlock.NewRet(res)
 
-	} else if node.IsVarReference() {
+	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		// PERFORMANCE: too redundant
 		// find in local variable which is declared with let
 		for s := scope; s != nil; s = s.Next {
@@ -287,7 +287,7 @@ func gen(
 
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
-	} else if node.IsDeclare() {
+	} else if node.IsKind(mTypes.ND_DECLARE) {
 		return gen(mod, block, function, node.Child, prog, scope)
 
 	} else {

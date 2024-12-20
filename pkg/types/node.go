@@ -90,38 +90,21 @@ type Node struct {
 }
 
 // pred kind
-func (node *Node) IsDeclare() bool {
-	return node.Kind == ND_DECLARE
+func (node *Node) IsKind(kind NodeKind) bool {
+	return node.Kind == kind
 }
-func (node *Node) IsLambda() bool {
-	return node.Kind == ND_LAMBDA
+func (node *Node) IsKindNary() bool {
+	return node.IsKind(ND_ADD)
 }
-func (node *Node) IsBind() bool {
-	return node.Kind == ND_BIND
-}
-func (node *Node) IsIf() bool {
-	return node.Kind == ND_IF
-}
-func (node *Node) IsExpr() bool {
-	return node.Kind == ND_EXPR
-}
-func (node *Node) IsVarDeclare() bool {
-	return node.Kind == ND_VAR_DECLARE
-}
-func (node *Node) IsVarReference() bool {
-	return node.Kind == ND_VAR_REFERENCE
-}
-func (node *Node) IsLibCall() bool {
-	return node.Kind == ND_LIBCALL
-}
-func (node *Node) IsNary() bool {
-	return node.Kind == ND_ADD
-}
-func (node *Node) IsBinary() bool {
-	return node.Kind == ND_EQ
+func (node *Node) IsKindBinary() bool {
+	return node.IsKind(ND_EQ)
 }
 
 // pred type
+func (node *Node) IsType(ty ModoType) bool {
+	return node.Type == ty
+}
+
 func (node *Node) IsInt32() bool {
 	return node.Type == TY_INT32
 }
