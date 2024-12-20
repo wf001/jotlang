@@ -134,38 +134,39 @@ func (ctx *context) gen(
 	if node.IsKind(mTypes.ND_DECLARE) {
 		return ctx.gen(node.Child)
 
-	} else if node.IsKind(mTypes.ND_VAR_DECLARE) && node.Val == "main" {
-		// means declaring main function regarded as entrypoint
-
-		fnc := ctx.mod.NewFunc(
-			"main",
-			types.I32,
-		)
-		llBlock := fnc.NewBlock("")
-
-		ctx.function = fnc
-		ctx.block = llBlock
-		res := ctx.gen(node.Child)
-		llBlock.NewCall(res)
-		llBlock.NewRet(newI32("0"))
-
 	} else if node.IsKind(mTypes.ND_VAR_DECLARE) {
-		// means declaring global variable or function named except main
-		retType := types.I32 // TODO: to be changable
-		funcName := getFuncName(node)
+		if node.Val == "main" {
+			// means declaring main function regarded as entrypoint
 
-		fnc := ctx.mod.NewFunc(
-			funcName,
-			retType,
-		)
-		llBlock := fnc.NewBlock("")
+			fnc := ctx.mod.NewFunc(
+				"main",
+				types.I32,
+			)
+			llBlock := fnc.NewBlock("")
 
-		ctx.function = fnc
-		ctx.block = llBlock
-		res := ctx.gen(node.Child)
-		node.FuncPtr = fnc
-		llBlock.NewRet(res)
+			ctx.function = fnc
+			ctx.block = llBlock
+			res := ctx.gen(node.Child)
+			llBlock.NewCall(res)
+			llBlock.NewRet(newI32("0"))
 
+		} else {
+			// means declaring global variable or function named except main
+			retType := types.I32 // TODO: to be changable
+			funcName := getFuncName(node)
+
+			fnc := ctx.mod.NewFunc(
+				funcName,
+				retType,
+			)
+			llBlock := fnc.NewBlock("")
+
+			ctx.function = fnc
+			res := ctx.gen(node.Child)
+			node.FuncPtr = fnc
+			llBlock.NewRet(res)
+
+		}
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		// PERFORMANCE: too redundant
 		// find in local variable which is declared with let
