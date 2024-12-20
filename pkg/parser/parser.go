@@ -173,7 +173,9 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
 
 	} else if tok.IsStr() {
-		return tok.Next, newNodeScalar(mTypes.TY_STR, tok.Val)
+		strNode := newNodeScalar(mTypes.TY_STR, tok.Val)
+		strNode.Len = uint64(len(tok.Val))
+		return tok.Next, strNode
 
 	} else {
 		log.Panic("unresolved token :have %+v", tok)

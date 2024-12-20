@@ -51,18 +51,22 @@ func isNumeric(arg value.Value) bool {
 		typeOf(arg, (*ir.InstICmp)(nil))
 }
 
-var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
-	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value) {
+func isString(arg value.Value) bool {
+	return typeOf(arg, (*ir.InstGetElementPtr)(nil))
+}
+
+var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value, *mTypes.Node){
+	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) {
 		var formatStr *ir.Global
 
-		if isNumeric(arg) {
+		if node.IsInt32() || node.IsNary() || node.IsBinary() {
 			formatStr = libs.GlobalVar.FormatDigit
 
-		} else if typeOf(arg, (*ir.InstGetElementPtr)(nil)) {
+		} else if node.IsStr() {
 			formatStr = libs.GlobalVar.FormatStr
 
 		} else {
-			log.Panic("unresolved type: have %+v", reflect.TypeOf(arg))
+			log.Panic("unresolved type: have %+v", node)
 		}
 		block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
 	},
@@ -77,19 +81,19 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
-func newStr(block *ir.Block, s string) *ir.InstGetElementPtr {
-	strType := types.NewArray(uint64(len(s)), types.I8)
+func newArray(length uint64) *types.ArrayType {
+	return types.NewArray(length, types.I8)
+}
+
+func newStr(block *ir.Block, n *mTypes.Node) *ir.InstGetElementPtr {
+	strType := newArray(n.Len)
 	strPtr := block.NewAlloca(strType)
 
 	strGEP := block.NewGetElementPtr(strType, strPtr)
 
-	block.NewStore(constant.NewCharArray([]byte(s)), strPtr)
+	block.NewStore(constant.NewCharArray([]byte(n.Val)), strPtr)
 
 	return strGEP
-}
-
-func newArray(length uint64) *types.ArrayType {
-	return types.NewArray(length, types.I8)
 }
 
 func getFuncName(v *mTypes.Node) string {
@@ -128,7 +132,7 @@ func gen(
 		return newI32(node.Val)
 
 	} else if node.IsStr() {
-		return newStr(block, node.Val)
+		return newStr(block, node)
 
 	} else if node.IsNary() {
 		// nary takes more than 2 arguments
@@ -164,7 +168,7 @@ func gen(
 		// means calling standard library
 		arg := gen(mod, block, function, node.Child, prog, scope)
 		libFunc := libraryMap[node.Val]
-		libFunc(block, prog.BuiltinLibs, arg)
+		libFunc(block, prog.BuiltinLibs, arg, node.Child)
 		return newI32("0")
 
 	} else if node.IsLambda() {
@@ -188,8 +192,13 @@ func gen(
 			} else {
 				scope.Next = varDeclare
 			}
-			varDeclare.VarPtr = block.NewAlloca(types.I32)
-			block.NewStore(v, varDeclare.VarPtr)
+			if isNumeric(v) {
+				varDeclare.VarPtr = block.NewAlloca(types.I32)
+				block.NewStore(v, varDeclare.VarPtr)
+			} else if isString(v) {
+				varDeclare.VarPtr = v
+			}
+
 		}
 		return gen(mod, block, function, node.Child, prog, scope)
 
@@ -253,7 +262,18 @@ func gen(
 		// PERFORMANCE: too redundant
 		for s := scope; s != nil; s = s.Next {
 			if s.Val == node.Val {
-				return block.NewLoad(types.I32, s.VarPtr)
+				// TODO: add Type for ND_ADD
+				if s.Child.IsInt32() || s.Child.Kind == mTypes.ND_ADD {
+					node.Type = mTypes.TY_INT32
+					return block.NewLoad(types.I32, s.VarPtr)
+
+				} else if s.Child.IsStr() {
+					node.Type = mTypes.TY_STR
+					return block.NewGetElementPtr(newArray(s.Child.Len), s.VarPtr)
+
+				} else {
+					log.Panic("unresolved variable: have %+v, %+s", s)
+				}
 			}
 		}
 

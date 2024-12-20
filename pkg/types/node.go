@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/value"
+
 	"github.com/wf001/modo/pkg/log"
 )
 
@@ -81,9 +83,10 @@ type Node struct {
 	Then    *Node
 	Else    *Node
 	Val     string
+	Len     uint64
 	Bind    *Node
-	VarPtr  *ir.InstAlloca // local variable
-	FuncPtr *ir.Func       // global variable
+	VarPtr  value.Value // local variable
+	FuncPtr *ir.Func    // global variable
 }
 
 func (node *Node) IsDeclare() bool {
@@ -117,10 +120,10 @@ func (node *Node) IsBinary() bool {
 	return node.Kind == ND_EQ
 }
 func (node *Node) IsInt32() bool {
-	return node.Kind == ND_SCALAR && node.Type == TY_INT32
+	return node.Type == TY_INT32
 }
 func (node *Node) IsStr() bool {
-	return node.Kind == ND_SCALAR && node.Type == TY_STR
+	return node.Type == TY_STR
 }
 
 func indicate(s string, depth int) {
@@ -143,12 +146,13 @@ func (node *Node) Debug(depth int) {
 		log.Debug(
 			log.BLUE(
 				fmt.Sprintf(
-					"%s %p %#+v %#+v %#+v",
+					"%s %p %#+v %#+v %#+v %d",
 					strings.Repeat("  ", depth),
 					node,
 					node.Kind,
 					node.Type,
 					node.Val,
+					node.Len,
 				),
 			),
 		)
