@@ -44,14 +44,14 @@ func typeOf(v interface{}, ty interface{}) bool {
 	return reflect.TypeOf(v) == reflect.TypeOf(ty)
 }
 
-func isNumeric(arg value.Value) bool {
+func isNumericIR(arg value.Value) bool {
 	return typeOf(arg, (*constant.Int)(nil)) ||
 		typeOf(arg, (*ir.InstAdd)(nil)) ||
 		typeOf(arg, (*ir.InstLoad)(nil)) ||
 		typeOf(arg, (*ir.InstICmp)(nil))
 }
 
-func isString(arg value.Value) bool {
+func isStringIR(arg value.Value) bool {
 	return typeOf(arg, (*ir.InstGetElementPtr)(nil))
 }
 
@@ -192,10 +192,10 @@ func gen(
 			} else {
 				scope.Next = varDeclare
 			}
-			if isNumeric(v) {
+			if isNumericIR(v) {
 				varDeclare.VarPtr = block.NewAlloca(types.I32)
 				block.NewStore(v, varDeclare.VarPtr)
-			} else if isString(v) {
+			} else if isStringIR(v) {
 				varDeclare.VarPtr = v
 			}
 
@@ -260,6 +260,7 @@ func gen(
 
 	} else if node.IsVarReference() {
 		// PERFORMANCE: too redundant
+		// find in local variable which is declared with let
 		for s := scope; s != nil; s = s.Next {
 			if s.Val == node.Val {
 				// TODO: add Type for ND_ADD
@@ -277,6 +278,7 @@ func gen(
 			}
 		}
 
+		// find in global variable which is declared with def
 		for declare := prog.Declares; declare != nil; declare = declare.Next {
 			if declare.Child.Val == node.Val {
 				return block.NewCall(declare.Child.FuncPtr)
