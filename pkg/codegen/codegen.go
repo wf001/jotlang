@@ -264,7 +264,7 @@ func gen(
 		for s := scope; s != nil; s = s.Next {
 			if s.Val == node.Val {
 				// TODO: add Type for ND_ADD
-				if s.Child.IsType(mTypes.TY_INT32) || s.Child.Kind == mTypes.ND_ADD {
+				if s.Child.IsType(mTypes.TY_INT32) || s.Child.IsKindNary() || s.Child.IsKindBinary() {
 					node.Type = mTypes.TY_INT32
 					return block.NewLoad(types.I32, s.VarPtr)
 
