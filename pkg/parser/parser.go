@@ -20,7 +20,7 @@ func newNodeParent(kind mTypes.NodeKind, child *mTypes.Node, val string) *mTypes
 	}
 }
 
-func newNodeScalar(ty mTypes.ScalarType, val string) *mTypes.Node {
+func newNodeScalar(ty mTypes.ModoType, val string) *mTypes.Node {
 	return &mTypes.Node{
 		Kind: mTypes.ND_SCALAR,
 		Type: ty,

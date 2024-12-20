@@ -45,12 +45,12 @@ const (
 	ND_COLLECTION = NodeKind("ND_COLLECTION")
 )
 
-type ScalarType string
+type ModoType string
 
 const (
-	TY_INT32 = ScalarType("TY_INT32")
-	TY_STR   = ScalarType("TY_STR")
-	TY_NIL   = ScalarType("TY_NIL")
+	TY_INT32 = ModoType("TY_INT32")
+	TY_STR   = ModoType("TY_STR")
+	TY_NIL   = ModoType("TY_NIL")
 )
 
 type Program struct {
@@ -77,7 +77,7 @@ type BuiltinGlobalVarsProp struct {
 type Node struct {
 	Kind    NodeKind
 	Next    *Node
-	Type    ScalarType
+	Type    ModoType
 	Child   *Node
 	Cond    *Node
 	Then    *Node
@@ -89,6 +89,7 @@ type Node struct {
 	FuncPtr *ir.Func    // global variable
 }
 
+// pred kind
 func (node *Node) IsDeclare() bool {
 	return node.Kind == ND_DECLARE
 }
@@ -119,6 +120,8 @@ func (node *Node) IsNary() bool {
 func (node *Node) IsBinary() bool {
 	return node.Kind == ND_EQ
 }
+
+// pred type
 func (node *Node) IsInt32() bool {
 	return node.Type == TY_INT32
 }
