@@ -131,114 +131,8 @@ func (ctx *context) gen(
 	node *mTypes.Node,
 ) value.Value {
 
-	if node.IsKind(mTypes.ND_SCALAR) && node.IsType(mTypes.TY_INT32) {
-		return newI32(node.Val)
-
-	} else if node.IsType(mTypes.TY_STR) {
-		return newStr(ctx.block, node)
-
-	} else if node.IsKindNary() {
-		// nary takes more than 2 arguments
-		child := node.Child
-		fst := ctx.gen(child)
-
-		child = child.Next
-		snd := ctx.gen(child)
-
-		nary := operatorMap[node.Kind]
-		res := nary(ctx.block, fst, snd)
-
-		for child = child.Next; child != nil; child = child.Next {
-			fst = res
-			snd = ctx.gen(child)
-			res = nary(ctx.block, fst, snd)
-		}
-		return res
-
-	} else if node.IsKindBinary() {
-		// binary takes exactly 2 arguments
-		child := node.Child
-		fst := ctx.gen(child)
-
-		child = child.Next
-		snd := ctx.gen(child)
-
-		binary := operatorMap[node.Kind]
-		res := binary(ctx.block, fst, snd)
-		return res
-
-	} else if node.IsKind(mTypes.ND_LIBCALL) {
-		// means calling standard library
-		arg := ctx.gen(node.Child)
-		libFunc := libraryMap[node.Val]
-		libFunc(ctx.block, ctx.prog.BuiltinLibs, arg, node.Child)
-		return newI32("0")
-
-	} else if node.IsKind(mTypes.ND_LAMBDA) {
-		// TODO: validate
-		funcFn := ctx.mod.NewFunc(
-			getFuncName(node),
-			types.I32,
-		)
-		llBlock := funcFn.NewBlock(getBlockName("fn.entry", node))
-
-		ctx.function = funcFn
-		ctx.block = llBlock
-		res := ctx.gen(node.Child)
-		if res != nil {
-			llBlock.NewRet(res)
-		}
-		return funcFn
-
-	} else if node.IsKind(mTypes.ND_BIND) {
-		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
-			v := ctx.gen(varDeclare.Child)
-			if ctx.scope.Child == nil {
-				ctx.scope = varDeclare
-			} else {
-				ctx.scope.Next = varDeclare
-			}
-
-			if isNumericIR(v) {
-				varDeclare.VarPtr = ctx.block.NewAlloca(types.I32)
-				ctx.block.NewStore(v, varDeclare.VarPtr)
-			} else if isStringIR(v) {
-				varDeclare.VarPtr = v
-			}
-
-		}
+	if node.IsKind(mTypes.ND_DECLARE) {
 		return ctx.gen(node.Child)
-
-	} else if node.IsKind(mTypes.ND_IF) {
-		condBlock := ctx.function.NewBlock(getBlockName("if.cond", node))
-		ctx.block.NewBr(condBlock)
-
-		thenBlock := ctx.function.NewBlock(getBlockName("if.then", node))
-		elseBlock := ctx.function.NewBlock(getBlockName("if.else", node))
-		exitBlock := ctx.function.NewBlock(getBlockName("if.exit", node))
-
-		ctx.block = condBlock
-		cond := ctx.gen(node.Cond)
-
-		exitBlock.NewRet(newI32("0"))
-
-		thenBlock.NewBr(exitBlock)
-		elseBlock.NewBr(exitBlock)
-
-		ctx.block = thenBlock
-		ctx.gen(node.Then)
-
-		ctx.block = elseBlock
-		ctx.gen(node.Else)
-
-		condBlock.NewCondBr(cond, thenBlock, elseBlock)
-
-	} else if node.IsKind(mTypes.ND_EXPR) {
-		var res value.Value
-		for child := node.Child; child != nil; child = child.Next {
-			res = ctx.gen(child)
-		}
-		return res
 
 	} else if node.IsKind(mTypes.ND_VAR_DECLARE) && node.Val == "main" {
 		// means declaring main function regarded as entrypoint
@@ -257,7 +151,6 @@ func (ctx *context) gen(
 
 	} else if node.IsKind(mTypes.ND_VAR_DECLARE) {
 		// means declaring global variable or function named except main
-
 		retType := types.I32 // TODO: to be changable
 		funcName := getFuncName(node)
 
@@ -301,8 +194,119 @@ func (ctx *context) gen(
 
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
-	} else if node.IsKind(mTypes.ND_DECLARE) {
+	} else if node.IsKind(mTypes.ND_LAMBDA) {
+		// TODO: validate
+		funcFn := ctx.mod.NewFunc(
+			getFuncName(node),
+			types.I32,
+		)
+		llBlock := funcFn.NewBlock(getBlockName("fn.entry", node))
+
+		ctx.function = funcFn
+		ctx.block = llBlock
+		res := ctx.gen(node.Child)
+		if res != nil {
+			llBlock.NewRet(res)
+		}
+		return funcFn
+
+	} else if node.IsKind(mTypes.ND_BIND) {
+		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
+			v := ctx.gen(varDeclare.Child)
+			if ctx.scope.Child == nil {
+				ctx.scope = varDeclare
+			} else {
+				ctx.scope.Next = varDeclare
+			}
+
+			if isNumericIR(v) {
+				varDeclare.VarPtr = ctx.block.NewAlloca(types.I32)
+				ctx.block.NewStore(v, varDeclare.VarPtr)
+			} else if isStringIR(v) {
+				varDeclare.VarPtr = v
+			}
+
+		}
 		return ctx.gen(node.Child)
+
+	} else if node.IsKind(mTypes.ND_EXPR) {
+		var res value.Value
+		for child := node.Child; child != nil; child = child.Next {
+			res = ctx.gen(child)
+		}
+		return res
+
+	} else if node.IsKind(mTypes.ND_LIBCALL) {
+		// means calling standard library
+		arg := ctx.gen(node.Child)
+		libFunc := libraryMap[node.Val]
+		libFunc(ctx.block, ctx.prog.BuiltinLibs, arg, node.Child)
+		return newI32("0")
+
+	} else if node.IsKindNary() {
+		// nary takes more than 2 arguments
+		child := node.Child
+		fst := ctx.gen(child)
+
+		child = child.Next
+		snd := ctx.gen(child)
+
+		nary := operatorMap[node.Kind]
+		res := nary(ctx.block, fst, snd)
+
+		for child = child.Next; child != nil; child = child.Next {
+			fst = res
+			snd = ctx.gen(child)
+			res = nary(ctx.block, fst, snd)
+		}
+		return res
+
+	} else if node.IsKindBinary() {
+		// binary takes exactly 2 arguments
+		child := node.Child
+		fst := ctx.gen(child)
+
+		child = child.Next
+		snd := ctx.gen(child)
+
+		binary := operatorMap[node.Kind]
+		res := binary(ctx.block, fst, snd)
+		return res
+
+	} else if node.IsKind(mTypes.ND_IF) {
+		condBlock := ctx.function.NewBlock(getBlockName("if.cond", node))
+		ctx.block.NewBr(condBlock)
+
+		thenBlock := ctx.function.NewBlock(getBlockName("if.then", node))
+		elseBlock := ctx.function.NewBlock(getBlockName("if.else", node))
+		exitBlock := ctx.function.NewBlock(getBlockName("if.exit", node))
+
+		ctx.block = condBlock
+		cond := ctx.gen(node.Cond)
+
+		exitBlock.NewRet(newI32("0"))
+
+		thenBlock.NewBr(exitBlock)
+		elseBlock.NewBr(exitBlock)
+
+		ctx.block = thenBlock
+		ctx.gen(node.Then)
+
+		ctx.block = elseBlock
+		ctx.gen(node.Else)
+
+		condBlock.NewCondBr(cond, thenBlock, elseBlock)
+
+	} else if node.IsKind(mTypes.ND_SCALAR) {
+		if node.IsType(mTypes.TY_INT32) {
+			return newI32(node.Val)
+
+		} else if node.IsType(mTypes.TY_STR) {
+			return newStr(ctx.block, node)
+
+		} else {
+			log.Panic("unresolved Scalar: have %+v", node)
+		}
 
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)
