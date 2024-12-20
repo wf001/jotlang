@@ -196,7 +196,6 @@ func (ctx *context) gen(
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
-		// TODO: validate
 		funcFn := ctx.mod.NewFunc(
 			getFuncName(node),
 			types.I32,
