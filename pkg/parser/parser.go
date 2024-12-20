@@ -7,11 +7,6 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-// TODO: unused
-type parser struct {
-	token *mTypes.Token
-}
-
 func newNodeParent(kind mTypes.NodeKind, child *mTypes.Node, val string) *mTypes.Node {
 	return &mTypes.Node{
 		Kind:  kind,

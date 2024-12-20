@@ -22,6 +22,14 @@ type assembler struct {
 	program *mTypes.Program
 }
 
+type context struct {
+	mod      *ir.Module
+	function *ir.Func
+	block    *ir.Block
+	prog     *mTypes.Program
+	scope    *mTypes.Node
+}
+
 var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
 	// nary
 	mTypes.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
@@ -48,6 +56,7 @@ func isNumericIR(arg value.Value) bool {
 	return typeOf(arg, (*constant.Int)(nil)) ||
 		typeOf(arg, (*ir.InstAdd)(nil)) ||
 		typeOf(arg, (*ir.InstLoad)(nil)) ||
+		// TODO: %d -> %s
 		typeOf(arg, (*ir.InstICmp)(nil))
 }
 
@@ -116,14 +125,6 @@ func Assemble(llFile string, asmFile string) {
 		log.Panic("fail to asemble: out %+v, err %+v, message %+v", out, err, errMsg)
 	}
 	log.Debug("written asm: %s", asmFile)
-}
-
-type context struct {
-	mod      *ir.Module
-	function *ir.Func
-	block    *ir.Block
-	prog     *mTypes.Program
-	scope    *mTypes.Node
 }
 
 func (ctx *context) gen(
