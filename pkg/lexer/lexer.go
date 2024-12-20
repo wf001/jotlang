@@ -41,7 +41,7 @@ func (tm *tokenMap) match(input string) (string, bool) {
 func newTokenMap() *tokenMap {
 	head := &tokenPatternStruct{
 		Pattern:   mTypes.INTEGER_REG_EXP,
-		TokenType: mTypes.TK_NUM,
+		TokenType: mTypes.TK_INT,
 	}
 	current := head
 

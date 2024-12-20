@@ -63,8 +63,8 @@ func parseExprs(
 	nextToken, argHead := parseDeclare(rootToken, exprKind)
 	prevNode := argHead
 	// NOTE: what means?
-	for nextToken.IsNum() ||
-		nextToken.IsVar() ||
+	for nextToken.IsKind(mTypes.TK_INT) ||
+		nextToken.IsKind(mTypes.TK_IDENT) ||
 		nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 
 		nextToken, prevNode.Next = parseDeclare(nextToken, exprKind)
@@ -92,11 +92,11 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		tok = tok.Next
 
-		if tok.IsDeclare() {
+		if tok.IsKind(mTypes.TK_DECLARE) {
 			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
 			head = newNodeParent(mTypes.ND_DECLARE, head, "")
 
-		} else if tok.IsLambda() {
+		} else if tok.IsKind(mTypes.TK_LAMBDA) {
 			tok, head = parseBody(tok.Next.Next, mTypes.ND_EXPR, "")
 			head = newNodeParent(
 				mTypes.ND_LAMBDA,
@@ -104,7 +104,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				"",
 			)
 
-		} else if tok.IsBind() {
+		} else if tok.IsKind(mTypes.TK_BIND) {
 			tok = tok.Next
 
 			if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
@@ -148,11 +148,11 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			// FIXME: TY_INT32 => TY_BOOL
 			head.Type = mTypes.TY_INT32
 
-		} else if tok.IsLibrary() {
+		} else if tok.IsKind(mTypes.TK_LIBCALL) {
 			log.Debug("is Library :have %+v", tok)
 			tok, head = parseBody(tok, mTypes.ND_LIBCALL, tok.Val)
 
-		} else if tok.IsIf() {
+		} else if tok.IsKind(mTypes.TK_IF) {
 			log.Debug("is If :have %+v", tok)
 			head.Kind = mTypes.ND_IF
 
@@ -173,7 +173,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		}
 		return tok.Next, head
 
-	} else if tok.IsVar() {
+	} else if tok.IsKind(mTypes.TK_IDENT) {
 		if parentKind == mTypes.ND_DECLARE {
 			log.Debug("is Variable declaration :have %+v", tok)
 			v := tok.Val
@@ -186,10 +186,10 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 		}
 
-	} else if tok.IsNum() {
+	} else if tok.IsKind(mTypes.TK_INT) {
 		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
 
-	} else if tok.IsStr() {
+	} else if tok.IsKind(mTypes.TK_STR) {
 		strNode := newNodeScalar(mTypes.TY_STR, tok.Val)
 		strNode.Len = uint64(len(tok.Val))
 		return tok.Next, strNode
@@ -208,7 +208,7 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 
 	for tok != nil && tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 
-		if !tok.Next.IsDeclare() {
+		if !tok.Next.IsKind(mTypes.TK_DECLARE) {
 			log.Panic("must be declare token: have %+v", tok.Next)
 		}
 

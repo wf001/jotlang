@@ -58,7 +58,7 @@ func TestSplitProgram(t *testing.T) {
 }
 
 func TestLexOneInteger(t *testing.T) {
-	assert.Equal(t, &mTypes.Token{Kind: mTypes.TK_NUM, Val: "1"}, Lex("1"))
+	assert.Equal(t, &mTypes.Token{Kind: mTypes.TK_INT, Val: "1"}, Lex("1"))
 }
 
 func add(kind mTypes.TokenKind, val string) *mTypes.Token {
@@ -79,8 +79,8 @@ func TestLexOperationAdd(t *testing.T) {
 	tokens := []*mTypes.Token{
 		add(mTypes.TK_PAREN, "("),
 		add(mTypes.TK_OPERATOR, "+"),
-		add(mTypes.TK_NUM, "1"),
-		add(mTypes.TK_NUM, "2"),
+		add(mTypes.TK_INT, "1"),
+		add(mTypes.TK_INT, "2"),
 		add(mTypes.TK_PAREN, ")"),
 	}
 
@@ -95,13 +95,13 @@ func TestLexOperationAddTakingAdd(t *testing.T) {
 		add(mTypes.TK_OPERATOR, "+"),
 		add(mTypes.TK_PAREN, "("),
 		add(mTypes.TK_OPERATOR, "+"),
-		add(mTypes.TK_NUM, "1"),
-		add(mTypes.TK_NUM, "2"),
+		add(mTypes.TK_INT, "1"),
+		add(mTypes.TK_INT, "2"),
 		add(mTypes.TK_PAREN, ")"),
 		add(mTypes.TK_PAREN, "("),
 		add(mTypes.TK_OPERATOR, "+"),
-		add(mTypes.TK_NUM, "3"),
-		add(mTypes.TK_NUM, "4"),
+		add(mTypes.TK_INT, "3"),
+		add(mTypes.TK_INT, "4"),
 		add(mTypes.TK_PAREN, ")"),
 		add(mTypes.TK_PAREN, ")"),
 	}
