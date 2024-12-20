@@ -105,13 +105,6 @@ func (node *Node) IsType(ty ModoType) bool {
 	return node.Type == ty
 }
 
-func (node *Node) IsInt32() bool {
-	return node.Type == TY_INT32
-}
-func (node *Node) IsStr() bool {
-	return node.Type == TY_STR
-}
-
 func indicate(s string, depth int) {
 	log.Debug(
 		log.YELLOW(

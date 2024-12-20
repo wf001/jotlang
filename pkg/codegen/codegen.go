@@ -59,10 +59,10 @@ var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value,
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) {
 		var formatStr *ir.Global
 
-		if node.IsInt32() || node.IsKindNary() || node.IsKindBinary() {
+		if node.IsType(mTypes.TY_INT32) || node.IsKindNary() || node.IsKindBinary() {
 			formatStr = libs.GlobalVar.FormatDigit
 
-		} else if node.IsStr() {
+		} else if node.IsType(mTypes.TY_STR) {
 			formatStr = libs.GlobalVar.FormatStr
 
 		} else {
@@ -128,10 +128,10 @@ func gen(
 	scope *mTypes.Node,
 ) value.Value {
 
-	if node.IsInt32() {
+	if node.IsType(mTypes.TY_INT32) {
 		return newI32(node.Val)
 
-	} else if node.IsStr() {
+	} else if node.IsType(mTypes.TY_STR) {
 		return newStr(block, node)
 
 	} else if node.IsKindNary() {
@@ -264,11 +264,11 @@ func gen(
 		for s := scope; s != nil; s = s.Next {
 			if s.Val == node.Val {
 				// TODO: add Type for ND_ADD
-				if s.Child.IsInt32() || s.Child.Kind == mTypes.ND_ADD {
+				if s.Child.IsType(mTypes.TY_INT32) || s.Child.Kind == mTypes.ND_ADD {
 					node.Type = mTypes.TY_INT32
 					return block.NewLoad(types.I32, s.VarPtr)
 
-				} else if s.Child.IsStr() {
+				} else if s.Child.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
 					return block.NewGetElementPtr(newArray(s.Child.Len), s.VarPtr)
 
