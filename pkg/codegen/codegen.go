@@ -44,13 +44,18 @@ func typeOf(v interface{}, ty interface{}) bool {
 	return reflect.TypeOf(v) == reflect.TypeOf(ty)
 }
 
+func isNumeric(arg value.Value) bool {
+	return typeOf(arg, (*constant.Int)(nil)) ||
+		typeOf(arg, (*ir.InstAdd)(nil)) ||
+		typeOf(arg, (*ir.InstLoad)(nil)) ||
+		typeOf(arg, (*ir.InstICmp)(nil))
+}
+
 var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value){
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value) {
 		var formatStr *ir.Global
 
-		if typeOf(arg, (*constant.Int)(nil)) ||
-			typeOf(arg, (*ir.InstAdd)(nil)) ||
-			typeOf(arg, (*ir.InstICmp)(nil)) {
+		if isNumeric(arg) {
 			formatStr = libs.GlobalVar.FormatDigit
 
 		} else if typeOf(arg, (*ir.InstGetElementPtr)(nil)) {
