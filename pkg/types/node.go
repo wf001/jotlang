@@ -121,7 +121,7 @@ func (node *Node) Debug(depth int) {
 	if node == nil {
 		return
 	}
-	if node.Kind == ND_SCALAR {
+	if node.IsKind(ND_SCALAR) || node.IsKindNary() || node.IsKindBinary() {
 		log.Debug(
 			log.BLUE(
 				fmt.Sprintf(
