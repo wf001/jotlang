@@ -108,6 +108,20 @@ func (node *Node) IsType(ty ModoType) bool {
 	return node.Type == ty
 }
 
+// naming
+func (v *Node) GetFuncName() string {
+	s := v.Val
+	if s == "" {
+		s = "unnamed"
+	}
+	return fmt.Sprintf("fn.%s.%p", s, v)
+}
+
+func (v *Node) GetBlockName(s string) string {
+	return fmt.Sprintf("%s.%p", s, v)
+}
+
+// debug
 func indicate(s string, depth int) {
 	log.Debug(
 		log.YELLOW(

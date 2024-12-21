@@ -1,9 +1,7 @@
 package codegen
 
 import (
-	"fmt"
 	"os"
-	"reflect"
 	"strconv"
 
 	"github.com/llir/llvm/ir"
@@ -48,22 +46,6 @@ var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) 
 	},
 }
 
-func typeOf(v interface{}, ty interface{}) bool {
-	return reflect.TypeOf(v) == reflect.TypeOf(ty)
-}
-
-func isNumericIR(arg value.Value) bool {
-	return typeOf(arg, (*constant.Int)(nil)) ||
-		typeOf(arg, (*ir.InstAdd)(nil)) ||
-		typeOf(arg, (*ir.InstLoad)(nil)) ||
-		// TODO: %d -> %s
-		typeOf(arg, (*ir.InstICmp)(nil))
-}
-
-func isStringIR(arg value.Value) bool {
-	return typeOf(arg, (*ir.InstGetElementPtr)(nil))
-}
-
 var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value, *mTypes.Node){
 	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) {
 		var formatStr *ir.Global
@@ -105,16 +87,16 @@ func newStr(block *ir.Block, n *mTypes.Node) *ir.InstGetElementPtr {
 	return strGEP
 }
 
-func getFuncName(v *mTypes.Node) string {
-	s := v.Val
-	if s == "" {
-		s = "unnamed"
-	}
-	return fmt.Sprintf("fn.%s.%p", s, v)
+func isNumericIR(arg value.Value) bool {
+	return util.TypeOf(arg, (*constant.Int)(nil)) ||
+		util.TypeOf(arg, (*ir.InstAdd)(nil)) ||
+		util.TypeOf(arg, (*ir.InstLoad)(nil)) ||
+		// TODO: %d -> %s
+		util.TypeOf(arg, (*ir.InstICmp)(nil))
 }
 
-func getBlockName(s string, v *mTypes.Node) string {
-	return fmt.Sprintf("%s.%p", s, v)
+func isStringIR(arg value.Value) bool {
+	return util.TypeOf(arg, (*ir.InstGetElementPtr)(nil))
 }
 
 func Assemble(llFile string, asmFile string) {
@@ -151,7 +133,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		} else {
 			// means declaring global variable or function named except main
 			retType := types.I32 // TODO: to be changable
-			funcName := getFuncName(node)
+			funcName := node.GetFuncName()
 
 			fnc := ctx.mod.NewFunc(
 				funcName,
@@ -195,10 +177,10 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
 		funcFn := ctx.mod.NewFunc(
-			getFuncName(node),
+			node.GetFuncName(),
 			types.I32,
 		)
-		llBlock := funcFn.NewBlock(getBlockName("fn.entry", node))
+		llBlock := funcFn.NewBlock(node.GetBlockName("fn.entry"))
 
 		ctx.function = funcFn
 		ctx.block = llBlock
@@ -273,12 +255,12 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		return res
 
 	} else if node.IsKind(mTypes.ND_IF) {
-		condBlock := ctx.function.NewBlock(getBlockName("if.cond", node))
+		condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
 		ctx.block.NewBr(condBlock)
 
-		thenBlock := ctx.function.NewBlock(getBlockName("if.then", node))
-		elseBlock := ctx.function.NewBlock(getBlockName("if.else", node))
-		exitBlock := ctx.function.NewBlock(getBlockName("if.exit", node))
+		thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then"))
+		elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
+		exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
 
 		ctx.block = condBlock
 		cond := ctx.gen(node.Cond)
