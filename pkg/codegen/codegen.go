@@ -6,7 +6,6 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
-	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -28,44 +27,7 @@ type context struct {
 	scope    *mTypes.Node
 }
 
-var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) value.Value{
-	// nary
-	mTypes.ND_ADD: func(block *ir.Block, x, y value.Value) value.Value {
-		return block.NewAdd(x, y)
-	},
-	mTypes.ND_SUB: func(block *ir.Block, x, y value.Value) value.Value {
-		return block.NewSub(x, y)
-	},
-	mTypes.ND_MUL: func(block *ir.Block, x, y value.Value) value.Value {
-		return block.NewMul(x, y)
-	},
-	// binary
-	mTypes.ND_EQ: func(block *ir.Block, x, y value.Value) value.Value {
-		res := block.NewICmp(enum.IPredEQ, x, y)
-		return res
-	},
-}
-
-var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value, *mTypes.Node) value.Value{
-	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) value.Value {
-		var formatStr *ir.Global
-
-		if node.IsType(mTypes.TY_INT32) || node.IsKindNary() || node.IsKindBinary() {
-			formatStr = libs.GlobalVar.FormatDigit
-
-		} else if node.IsType(mTypes.TY_STR) {
-			formatStr = libs.GlobalVar.FormatStr
-
-		} else {
-			log.Panic("unresolved type: have %+v", node)
-		}
-		block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
-		return newI32("0")
-	},
-}
-
 func newI32(s string) *constant.Int {
-
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
 		log.Panic("fail to newI32: %s", err)
@@ -98,16 +60,6 @@ func isNumericIR(arg value.Value) bool {
 
 func isStringIR(arg value.Value) bool {
 	return util.TypeOf(arg, (*ir.InstGetElementPtr)(nil))
-}
-
-func Assemble(llFile string, asmFile string) {
-	// TODO: work it?
-	out, err, errMsg := util.RunCommand("llc", llFile, "-o", asmFile)
-	if err != nil {
-		log.Debug("llFile: %s, asmFile: %s", llFile, asmFile)
-		log.Panic("fail to asemble: out %+v, err %+v, message %+v", out, err, errMsg)
-	}
-	log.Debug("written asm: %s", asmFile)
 }
 
 func (ctx *context) gen(node *mTypes.Node) value.Value {
@@ -221,7 +173,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library
 		arg := ctx.gen(node.Child)
-		libFunc := libraryMap[node.Val]
+		libFunc := lib.LibInsts[node.Val]
 		return libFunc(ctx.block, ctx.prog.BuiltinLibs, arg, node.Child)
 
 	} else if node.IsKindNary() {
@@ -232,7 +184,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		child = child.Next
 		snd := ctx.gen(child)
 
-		nary := operatorMap[node.Kind]
+		nary := operatorInsts[node.Kind]
 		res := nary(ctx.block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
@@ -250,7 +202,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		child = child.Next
 		snd := ctx.gen(child)
 
-		binary := operatorMap[node.Kind]
+		binary := operatorInsts[node.Kind]
 		res := binary(ctx.block, fst, snd)
 		return res
 

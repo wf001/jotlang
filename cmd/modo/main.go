@@ -74,6 +74,16 @@ func compile(asmFile string, executableFile string) {
 	log.Debug("written executable: %s", executableFile)
 }
 
+func assemble(llFile string, asmFile string) {
+	// TODO: work it?
+	out, err, errMsg := util.RunCommand("llc", llFile, "-o", asmFile)
+	if err != nil {
+		log.Debug("llFile: %s, asmFile: %s", llFile, asmFile)
+		log.Panic("fail to asemble: out %+v, err %+v, message %+v", out, err, errMsg)
+	}
+	log.Debug("written asm: %s", asmFile)
+}
+
 func genFrontend(workingDirPrefix string, evaluatee string) (string, string, string) {
 	currentTime := time.Now().Unix()
 	// string -> Token
@@ -94,7 +104,7 @@ func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
 	llName, asmName, executableName := genFrontend(workingDirPrefix, evaluatee)
 
 	// IR -> write assembly
-	codegen.Assemble(llName, asmName)
+	assemble(llName, asmName)
 
 	// assembly file -> write executable
 	compile(asmName, executableName)
