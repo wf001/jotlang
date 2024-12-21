@@ -253,7 +253,11 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
-		c := &context{mod: module, scope: &mTypes.Node{}, prog: prog}
+		c := &context{
+			mod:   module,
+			scope: &mTypes.Node{},
+			prog:  prog,
+		}
 		c.gen(declare)
 	}
 
