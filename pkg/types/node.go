@@ -127,6 +127,8 @@ func (node *Node) Debug(depth int) {
 	if node.IsKind(ND_SCALAR) ||
 		node.IsKindNary() ||
 		node.IsKindBinary() ||
+		node.IsKind(ND_VAR_REFERENCE) ||
+		node.IsKind(ND_VAR_DECLARE) ||
 		node.IsKind(ND_LIBCALL) {
 		log.Debug(
 			log.BLUE(
