@@ -31,20 +31,23 @@ func declareCore(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	declarePrintf(ir, libs)
 }
 
-var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value, *mTypes.Node) value.Value{
-	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) value.Value {
+var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) value.Value{
+	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 		var formatStr *ir.Global
 
-		if node.IsType(mTypes.TY_INT32) || node.IsKindNary() || node.IsKindBinary() {
-			formatStr = libs.GlobalVar.FormatDigit
+		for n := node; n != nil; n = n.Next {
+			if n.IsType(mTypes.TY_INT32) || n.IsKindNary() || n.IsKindBinary() {
+				formatStr = libs.GlobalVar.FormatDigit
 
-		} else if node.IsType(mTypes.TY_STR) {
-			formatStr = libs.GlobalVar.FormatStr
+			} else if n.IsType(mTypes.TY_STR) {
+				formatStr = libs.GlobalVar.FormatStr
 
-		} else {
-			log.Panic("unresolved type: have %+v", node)
+			} else {
+				log.Panic("unresolved type: have %+v", n)
+			}
+			block.NewCall(libs.Printf.FuncPtr, formatStr, n.IRValue)
+
 		}
-		block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
 		// todo: return nil
 		return constant.NewInt(types.I32, 0)
 	},

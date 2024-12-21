@@ -64,6 +64,7 @@ func parseExprs(
 	prevNode := argHead
 	// NOTE: what means?
 	for nextToken.IsKind(mTypes.TK_INT) ||
+		nextToken.IsKind(mTypes.TK_STR) ||
 		nextToken.IsKind(mTypes.TK_IDENT) ||
 		nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 

@@ -173,8 +173,15 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library
 		arg := ctx.gen(node.Child)
+		node.Child.IRValue = arg
+
+		for n := node.Child.Next; n != nil; n = n.Next {
+			arg := ctx.gen(n)
+			n.IRValue = arg
+		}
+
 		libFunc := lib.LibInsts[node.Val]
-		return libFunc(ctx.block, ctx.prog.BuiltinLibs, arg, node.Child)
+		return libFunc(ctx.block, ctx.prog.BuiltinLibs, node.Child)
 
 	} else if node.IsKindNary() {
 		// nary takes more than 2 arguments
