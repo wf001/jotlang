@@ -127,9 +127,7 @@ func Assemble(llFile string, asmFile string) {
 	log.Debug("written asm: %s", asmFile)
 }
 
-func (ctx *context) gen(
-	node *mTypes.Node,
-) value.Value {
+func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 	if node.IsKind(mTypes.ND_DECLARE) {
 		return ctx.gen(node.Child)
@@ -222,6 +220,7 @@ func (ctx *context) gen(
 			if isNumericIR(v) {
 				varDeclare.VarPtr = ctx.block.NewAlloca(types.I32)
 				ctx.block.NewStore(v, varDeclare.VarPtr)
+
 			} else if isStringIR(v) {
 				varDeclare.VarPtr = v
 			}
