@@ -11,18 +11,18 @@ import (
 func TestGetFuncName(t *testing.T) {
 	node := &mTypes.Node{Val: "testFunc"}
 	want := "fn.testFunc." + fmt.Sprintf("%p", node)
-	assert.Equal(t, want, getFuncName(node))
+	assert.Equal(t, want, node.GetFuncName())
 }
 
 func TestGetFuncNameUnnamed(t *testing.T) {
 	node := &mTypes.Node{}
 	want := "fn.unnamed." + fmt.Sprintf("%p", node)
-	assert.Equal(t, want, getFuncName(node))
+	assert.Equal(t, want, node.GetFuncName())
 }
 
 func TestGetBlockName(t *testing.T) {
 	node := &mTypes.Node{}
 	blockName := "block"
 	want := blockName + "." + fmt.Sprintf("%p", node)
-	assert.Equal(t, want, getBlockName(blockName, node))
+	assert.Equal(t, want, node.GetBlockName(blockName))
 }
