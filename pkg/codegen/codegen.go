@@ -46,8 +46,8 @@ var operatorMap = map[mTypes.NodeKind]func(*ir.Block, value.Value, value.Value) 
 	},
 }
 
-var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value, *mTypes.Node){
-	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) {
+var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value, *mTypes.Node) value.Value{
+	"prn": func(block *ir.Block, libs *mTypes.BuiltinLibProp, arg value.Value, node *mTypes.Node) value.Value {
 		var formatStr *ir.Global
 
 		if node.IsType(mTypes.TY_INT32) || node.IsKindNary() || node.IsKindBinary() {
@@ -60,6 +60,7 @@ var libraryMap = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, value.Value,
 			log.Panic("unresolved type: have %+v", node)
 		}
 		block.NewCall(libs.Printf.FuncPtr, formatStr, arg)
+		return newI32("0")
 	},
 }
 
@@ -221,8 +222,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		// means calling standard library
 		arg := ctx.gen(node.Child)
 		libFunc := libraryMap[node.Val]
-		libFunc(ctx.block, ctx.prog.BuiltinLibs, arg, node.Child)
-		return newI32("0")
+		return libFunc(ctx.block, ctx.prog.BuiltinLibs, arg, node.Child)
 
 	} else if node.IsKindNary() {
 		// nary takes more than 2 arguments
