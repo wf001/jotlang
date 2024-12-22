@@ -47,6 +47,13 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 			}
 			block.NewCall(libs.Printf.FuncPtr, formatStr, n.IRValue)
 
+			if n.Next != nil {
+				block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
+			}
+			if n.Next == nil {
+				block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatCR)
+			}
+
 		}
 		// todo: return nil
 		return constant.NewInt(types.I32, 0)

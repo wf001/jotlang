@@ -72,6 +72,8 @@ type BuiltinProp struct {
 type BuiltinGlobalVarsProp struct {
 	FormatDigit *ir.Global
 	FormatStr   *ir.Global
+	FormatSpace *ir.Global
+	FormatCR    *ir.Global
 }
 
 type Node struct {

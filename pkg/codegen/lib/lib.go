@@ -12,11 +12,19 @@ func DeclareBuiltin(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 
 	globalVars.FormatDigit = ir.NewGlobalDef(
 		"format.digit",
-		constant.NewCharArray([]byte("%d\n\x00")),
+		constant.NewCharArray([]byte("%d\x00")),
 	)
 	globalVars.FormatStr = ir.NewGlobalDef(
 		"format.string",
-		constant.NewCharArray([]byte("%s\n\x00")),
+		constant.NewCharArray([]byte("%s\x00")),
+	)
+	globalVars.FormatSpace = ir.NewGlobalDef(
+		"format.space",
+		constant.NewCharArray([]byte(" \x00")),
+	)
+	globalVars.FormatCR = ir.NewGlobalDef(
+		"format.cr",
+		constant.NewCharArray([]byte("\n\x00")),
 	)
 
 	libs.GlobalVar = globalVars

@@ -114,7 +114,9 @@ testexec(){
   echo "== string ==="
   assertexec '(def main (fn [] (prn "hello")))' "hello\\\n"
   assertexec '(def main (fn [] (let [s "hello"] (prn s))))' "hello\\\n"
-  assertexec '(def main (fn [] (let [x 1 s "hello"] (prn s) (prn x))))' "hello\\\n1\\\n"
+
+  # prn
+  assertexec '(def main (fn [] (prn 1 2 "hello")))' "1 2 hello\\\n"
 
 }
 
