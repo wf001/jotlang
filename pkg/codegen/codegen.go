@@ -111,7 +111,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 				} else if s.Child.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
-					return ctx.block.NewGetElementPtr(newArray(s.Child.Len), s.VarPtr)
+					return s.VarPtr
 
 				} else {
 					log.Panic("unresolved variable: have %+v, %+s", s)
