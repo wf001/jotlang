@@ -51,15 +51,15 @@ func newStr(block *ir.Block, n *mTypes.Node) *ir.InstGetElementPtr {
 }
 
 func isNumericIR(arg value.Value) bool {
-	return util.TypeOf(arg, (*constant.Int)(nil)) ||
-		util.TypeOf(arg, (*ir.InstAdd)(nil)) ||
-		util.TypeOf(arg, (*ir.InstLoad)(nil)) ||
+	return util.EqualType(arg, (*constant.Int)(nil)) ||
+		util.EqualType(arg, (*ir.InstAdd)(nil)) ||
+		util.EqualType(arg, (*ir.InstLoad)(nil)) ||
 		// TODO: %d -> %s
-		util.TypeOf(arg, (*ir.InstICmp)(nil))
+		util.EqualType(arg, (*ir.InstICmp)(nil))
 }
 
 func isStringIR(arg value.Value) bool {
-	return util.TypeOf(arg, (*ir.InstGetElementPtr)(nil))
+	return util.EqualType(arg, (*ir.InstGetElementPtr)(nil))
 }
 
 func (ctx *context) gen(node *mTypes.Node) value.Value {
