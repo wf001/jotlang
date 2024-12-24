@@ -34,7 +34,10 @@ var (
 	BINARY_OPERATOR_EQ = "="
 	BINARY_OPERATOR_LT = "<"
 	BINARY_OPERATOR_GT = ">"
-	OPERATORS_REG_EXP  = fmt.Sprintf(
+	BINARY_OPERATOR_LE = "<="
+	BINARY_OPERATOR_GE = ">="
+
+	OPERATORS_REG_EXP = fmt.Sprintf(
 		"[%s\\%s%s%s%s%s%s]",
 		NARY_OPERATOR_ADD,
 		NARY_OPERATOR_SUB,
