@@ -14,6 +14,10 @@ build:
 	mkdir -p $(dir)
 	go build ./cmd/modo
 
+build-debug:
+	mkdir -p $(dir)
+	go build -a -p 1 -x -work ./cmd/modo
+
 run:
 	@echo "----------------------\n"
 	./modo run --debug --exec "1+2"
