@@ -95,7 +95,7 @@ func genFrontend(workingDirPrefix string, evaluatee string) (string, string, str
 	llName, asmName, executableName := util.PrepareWorkingFile(workingDirPrefix, currentTime)
 
 	// Node -> write intermediate representation(IR)
-	codegen.Construct(node).GenFrontend(llName, asmName)
+	codegen.Construct(node).GenIntermediates(llName, asmName)
 
 	return llName, asmName, executableName
 }

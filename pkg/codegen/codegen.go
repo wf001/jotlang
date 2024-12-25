@@ -277,7 +277,7 @@ func Construct(program *mTypes.Program) *assembler {
 	}
 }
 
-func (a assembler) GenFrontend(llName string, asmName string) {
+func (a assembler) GenIntermediates(llName string, asmName string) {
 	log.DebugMessage("ir module constructing")
 	module := constructModule(a.program)
 	log.DebugMessage("ir module constructed")
