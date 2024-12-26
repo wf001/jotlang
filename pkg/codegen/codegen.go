@@ -35,12 +35,12 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
-func newArray(length uint64) *types.ArrayType {
+func arrayType(length uint64) *types.ArrayType {
 	return types.NewArray(length, types.I8)
 }
 
 func newStr(block *ir.Block, n *mTypes.Node) *ir.InstGetElementPtr {
-	strType := newArray(n.Len)
+	strType := arrayType(n.Len)
 	strPtr := block.NewAlloca(strType)
 
 	strGEP := block.NewGetElementPtr(strType, strPtr)

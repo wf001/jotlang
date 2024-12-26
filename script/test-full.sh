@@ -53,11 +53,6 @@ summary(){
 }
 
 testexec(){
-  # multiline
-  echo "== multi line ==="
-  assertexec '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' "3\\\n7\\\n"
-  assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' "11\\\n6\\\n"
-
   # operator
   echo "== operation ==="
   assertexec '(def main (fn [] (prn 17)))' "17\\\n"
@@ -115,7 +110,12 @@ testexec(){
   assertexec '(def main (fn [] (prn "hello")))' "hello\\\n"
   assertexec '(def main (fn [] (let [s "hello"] (prn s))))' "hello\\\n"
 
-  # prn
+  # multiline
+  echo "== multi line ==="
+  assertexec '(def main (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' "3\\\n7\\\n"
+  assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' "11\\\n6\\\n"
+
+  # prn multivalue
   echo "== prn ==="
   assertexec '(def main (fn [] (prn 1 2 "hello")))' "1 2 hello\\\n"
   assertexec '(def main (fn [] (prn (+ 1 2) (= 2 4) "world")))' "3 0 world\\\n"
