@@ -224,6 +224,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		ctx.block = condBlock
 		cond := ctx.gen(node.Cond)
 
+		// NOTE: can not declare after then/else gen
 		exitBlock.NewRet(newI32("0"))
 
 		thenBlock.NewBr(exitBlock)
