@@ -82,7 +82,7 @@ type Node struct {
 	Then    *Node
 	Else    *Node
 	Val     string
-	Len     uint64 // the number of bytes, only use string type
+	Len     uint64 // the number of bytes, only used with string type
 	Bind    *Node
 	VarPtr  value.Value // binded local variable
 	FuncPtr *ir.Func    // declared function, library function
