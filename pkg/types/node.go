@@ -39,10 +39,8 @@ const (
 	ND_OR  = NodeKind("ND_OR")  // or
 
 	// type
-	ND_NIL = NodeKind("ND_NIL") // nil
-
-	ND_SCALAR     = NodeKind("ND_SCALAR") // int32, string, bool
-	ND_COLLECTION = NodeKind("ND_COLLECTION")
+	ND_SCALAR     = NodeKind("ND_SCALAR")     // int32, string, bool
+	ND_COLLECTION = NodeKind("ND_COLLECTION") // vector, map, list
 )
 
 type ModoType string
@@ -50,7 +48,6 @@ type ModoType string
 const (
 	TY_INT32 = ModoType("TY_INT32")
 	TY_STR   = ModoType("TY_STR")
-	TY_NIL   = ModoType("TY_NIL")
 )
 
 type Program struct {
