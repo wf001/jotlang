@@ -120,6 +120,11 @@ testexec(){
   assertexec '(def main (fn [] (prn 1 2 "hello")))' "1 2 hello\\\n"
   assertexec '(def main (fn [] (prn (+ 1 2) (= 2 4) "world")))' "3 0 world\\\n"
 
+
+  # function calling
+  echo "== function calling ==="
+  assertexec '(def f (fn [a] (prn a))) (def main (fn [] (f 4)))' "4\\\n"
+
 }
 
 build-compiler

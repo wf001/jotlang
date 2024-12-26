@@ -107,9 +107,14 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 			ctx.function = fnc
 			res := ctx.gen(node.Child)
-			r := llBlock.NewCall(res, arg...)
-			node.FuncPtr = fnc
-			llBlock.NewRet(r)
+			if node.Child.IsKind(mTypes.ND_LAMBDA) {
+				r := llBlock.NewCall(res, arg...)
+				node.FuncPtr = fnc
+				llBlock.NewRet(r)
+			} else {
+				node.FuncPtr = fnc
+				llBlock.NewRet(res)
+			}
 
 		}
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
@@ -119,6 +124,8 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		// find in local variable which is declared with let
 		for i := 0; i < len(ctx.function.Params); i = i + 1 {
 			if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
+				// TODO: to be flexible
+				node.Type = mTypes.TY_INT32
 				return ctx.function.Params[i]
 			}
 		}
