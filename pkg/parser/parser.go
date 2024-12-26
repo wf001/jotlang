@@ -98,12 +98,30 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head = newNodeParent(mTypes.ND_DECLARE, head, "")
 
 		} else if tok.IsKind(mTypes.TK_LAMBDA) {
-			tok, head = parseBody(tok.Next.Next, mTypes.ND_EXPR, "")
+			// arguments
+			argHead := &mTypes.Node{}
+			argCur := argHead
+
+			tok = tok.Next
+
+			for tok = tok.Next; !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE); tok = tok.Next {
+				if !tok.IsKind(mTypes.TK_IDENT) {
+					log.Panic("unresolved token kind, must be TK_IDENT: have %+v", tok)
+				}
+
+				argCur.Next = newNodeParent(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+				argCur = argCur.Next
+			}
+
+			// expressions body
+			// NOTE: why passing ]?
+			tok, head = parseBody(tok, mTypes.ND_EXPR, "")
 			head = newNodeParent(
 				mTypes.ND_LAMBDA,
 				head,
 				"",
 			)
+			head.Args = argHead.Next
 
 		} else if tok.IsKind(mTypes.TK_BIND) {
 			tok = tok.Next

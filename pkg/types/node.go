@@ -84,6 +84,7 @@ type Node struct {
 	Val     string
 	Len     uint64 // the number of bytes, only used with string type
 	Bind    *Node
+	Args    *Node
 	VarPtr  value.Value // binded local variable
 	FuncPtr *ir.Func    // declared function, library function
 	IRValue value.Value //
