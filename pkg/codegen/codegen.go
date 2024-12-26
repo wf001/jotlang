@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -25,6 +26,7 @@ type context struct {
 	block    *ir.Block
 	prog     *mTypes.Program
 	scope    *mTypes.Node
+	argument []*ir.Param
 }
 
 func newI32(s string) *constant.Int {
@@ -86,23 +88,40 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		} else {
 			// means declaring global variable or function named except main
 			retType := types.I32 // TODO: to be changable
-			funcName := node.GetFuncName()
+			funcName := fmt.Sprintf("fn.%s", node.Val)
+
+			var arg []value.Value
+			var argp []*ir.Param
+
+			for a := node.Child.Args; a != nil; a = a.Next {
+				arg = append(arg, ir.NewParam(a.Val, types.I32))
+				argp = append(argp, ir.NewParam(a.Val, types.I32))
+			}
 
 			fnc := ctx.mod.NewFunc(
 				funcName,
 				retType,
+				argp...,
 			)
 			llBlock := fnc.NewBlock("")
 
 			ctx.function = fnc
 			res := ctx.gen(node.Child)
+			r := llBlock.NewCall(res, arg...)
 			node.FuncPtr = fnc
-			llBlock.NewRet(res)
+			llBlock.NewRet(r)
 
 		}
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		// PERFORMANCE: too redundant
+		// TODO: prohibit same name identify between global var, binded variable and function argument
+
 		// find in local variable which is declared with let
+		for i := 0; i < len(ctx.function.Params); i = i + 1 {
+			if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
+				return ctx.function.Params[i]
+			}
+		}
 		for s := ctx.scope; s != nil; s = s.Next {
 			if s.Val == node.Val {
 				if s.Child.IsType(mTypes.TY_INT32) {
@@ -129,9 +148,16 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
+		var arg []*ir.Param
+
+		for a := node.Args; a != nil; a = a.Next {
+			arg = append(arg, ir.NewParam(a.Val, types.I32))
+		}
+
 		funcFn := ctx.mod.NewFunc(
 			node.GetFuncName(),
 			types.I32,
+			arg...,
 		)
 		llBlock := funcFn.NewBlock(node.GetBlockName("fn.entry"))
 
@@ -182,6 +208,26 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 		libFunc := lib.LibInsts[node.Val]
 		return libFunc(ctx.block, ctx.prog.BuiltinLibs, node.Child)
+
+	} else if node.IsKind(mTypes.ND_FUNCCALL) {
+		var arg []value.Value
+		for node := node.Child; node != nil; node = node.Next {
+			arg = append(arg, ctx.gen(node))
+		}
+		node.Type = mTypes.TY_INT32
+
+		for n := node.Child.Next; n != nil; n = n.Next {
+			arg := ctx.gen(n)
+			n.IRValue = arg
+		}
+
+		for i := 0; i < len(ctx.mod.Funcs); i = i + 1 {
+			if ctx.mod.Funcs[i].GlobalName == fmt.Sprintf("fn.%s", node.Val) {
+				return ctx.block.NewCall(ctx.mod.Funcs[i], arg...)
+			}
+
+		}
+		log.Panic("unresolved function name: have %+v", node)
 
 	} else if node.IsKindNary() {
 		// nary takes more than 2 arguments

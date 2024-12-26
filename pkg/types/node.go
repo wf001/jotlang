@@ -179,6 +179,12 @@ func (node *Node) Debug(depth int) {
 
 		indicate(".Child", depth+1)
 		node.Child.Debug(depth + 1)
+	case ND_LAMBDA:
+		indicate(".Args", depth+1)
+		node.Args.Debug(depth + 1)
+
+		indicate(".Child", depth+1)
+		node.Child.Debug(depth + 1)
 	case ND_IF:
 		indicate(".Cond", depth+1)
 		node.Cond.Debug(depth + 1)
