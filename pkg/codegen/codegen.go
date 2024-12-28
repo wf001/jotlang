@@ -121,7 +121,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		// PERFORMANCE: too redundant
 		// TODO: prohibit same name identify between global var, binded variable and function argument
 
-		// find in local variable which is declared with let
+		// find in variable which is passed as function argument
 		for i := 0; i < len(ctx.function.Params); i = i + 1 {
 			if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
 				// TODO: to be flexible
@@ -129,6 +129,8 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 				return ctx.function.Params[i]
 			}
 		}
+
+		// find in local variable which is declared with let
 		for s := ctx.scope; s != nil; s = s.Next {
 			if s.Val == node.Val {
 				if s.Child.IsType(mTypes.TY_INT32) {
