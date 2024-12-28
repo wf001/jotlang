@@ -157,16 +157,11 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		log.Panic("unresolved symbol: '%s'", node.Val)
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
-		var arg []*ir.Param
-
-		for a := node.Args; a != nil; a = a.Next {
-			arg = append(arg, ir.NewParam(a.Val, types.I32))
-		}
 
 		funcFn := ctx.mod.NewFunc(
 			node.GetFuncName(),
-			types.I32,
-			arg...,
+			ctx.function.Sig.RetType,
+			ctx.function.Params...,
 		)
 		llBlock := funcFn.NewBlock(node.GetBlockName("fn.entry"))
 
