@@ -64,6 +64,21 @@ var (
 	LIB_CORE_PRN     = "prn"
 	LIB_CORE_REG_EXP = fmt.Sprintf("\\b(%s)\\b", LIB_CORE_PRN)
 
+	SYMBOL_TYPE_SIG   = "::"
+	SYMBOL_TYPE_ARROW = "=>"
+	SYMBOL_TYPE_INT   = "int"
+	SYMBOL_TYPE_STR   = "string"
+	SYMBOL_TYPE_NIL   = "nil"
+
+	TYPE_REG_EXP = fmt.Sprintf(
+		"(%s|%s|\\b(%s|%s|%s)\\b)",
+		SYMBOL_TYPE_SIG,
+		SYMBOL_TYPE_ARROW,
+		SYMBOL_TYPE_INT,
+		SYMBOL_TYPE_STR,
+		SYMBOL_TYPE_NIL,
+	)
+
 	SYMBOL_UNDEFINED_REG_EXP = `\w+`
 
 	ALL_REG_EXP = fmt.Sprintf(
@@ -73,6 +88,7 @@ var (
 				FRACTIONAL_REG_EXP,
 				INTEGER_REG_EXP,
 				STRING_REG_EXP,
+				TYPE_REG_EXP,
 				THREADING_REG_EXP,
 				BRANCH_REG_EXP,
 				OPERATORS_REG_EXP,

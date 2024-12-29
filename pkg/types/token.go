@@ -20,9 +20,17 @@ const (
 	TK_LIBCALL  = TokenKind("TK_LIBCALL")
 	TK_IDENT    = TokenKind("TK_IDENT")
 
+	TK_TYPE_SIG   = TokenKind("TK_TYPE_SIG")
+	TK_TYPE_ARROW = TokenKind("TK_TYPE_ARROW")
+	TK_TYPE_INT   = TokenKind("TK_TYPE_INT")
+	TK_TYPE_FLOAT = TokenKind("TK_TYPE_FLOAT")
+	TK_TYPE_STR   = TokenKind("TK_TYPE_STR")
+	TK_TYPE_NIL   = TokenKind("TK_TYPE_NIL")
+
 	TK_INT   = TokenKind("TK_INT")
 	TK_FLOAT = TokenKind("TK_FLOAT")
 	TK_STR   = TokenKind("TK_STR")
+	TK_NIL   = TokenKind("TK_NIL")
 )
 
 type Token struct {
