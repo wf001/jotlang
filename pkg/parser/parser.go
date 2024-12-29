@@ -55,6 +55,22 @@ func matchedOperator(
 	return "", false
 }
 
+func matchedType(
+	tok *mTypes.Token,
+) (mTypes.ModoType, bool) {
+	var typeMap = map[string]mTypes.ModoType{
+		mTypes.TK_TYPE_INT: mTypes.TY_INT32,
+		mTypes.TK_TYPE_STR: mTypes.TY_STR,
+		mTypes.TK_TYPE_NIL: mTypes.TY_NIL,
+	}
+
+	if kind, exists := typeMap[tok.Kind]; exists {
+		return kind, true
+	}
+
+	return "", false
+}
+
 func parseExprs(
 	rootToken *mTypes.Token,
 	exprKind mTypes.NodeKind,
@@ -94,8 +110,40 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		tok = tok.Next
 
 		if tok.IsKind(mTypes.TK_DECLARE) {
-			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
+			t := &mTypes.Node{}
+			h := t
+
+			if tok.Next.Next.IsKind(mTypes.TK_TYPE_SIG) {
+				tok = tok.Next.Next.Next
+				for {
+					if !tok.IsKindType() {
+						break
+					}
+					ty, _ := matchedType(tok)
+					t.Type = ty
+					t.Next = &mTypes.Node{}
+					t = t.Next
+
+					tok = tok.Next
+					if tok.IsKind(mTypes.TK_TYPE_ARROW) {
+						tok = tok.Next
+					}
+				}
+			}
+
+			tok, head = parseDeclare(tok, mTypes.ND_DECLARE)
 			head = newNodeParent(mTypes.ND_DECLARE, head, "")
+			if head.Child.Args != nil {
+				for a := head.Child.Args; a != nil; a = a.Next {
+					if h.Type == "" {
+						log.Panic("must be ) :have %+v, %+v", t, a)
+					}
+					a.Type = h.Type
+					h = h.Next
+				}
+
+			}
+			head.Type = h.Type
 
 		} else if tok.IsKind(mTypes.TK_LAMBDA) {
 			// arguments
@@ -201,7 +249,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			log.Debug("is Variable declaration :have %+v", tok)
 			v := tok.Val
 			tok, head = parseDeclare(tok.Next, mTypes.ND_VAR_DECLARE)
-			return tok, newNodeParent(mTypes.ND_VAR_DECLARE, head, v)
+			res := newNodeParent(mTypes.ND_VAR_DECLARE, head, v)
+			return tok, res
 
 		} else {
 			log.Debug("is Variable reference :have %+v", tok)

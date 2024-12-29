@@ -48,6 +48,7 @@ type ModoType string
 const (
 	TY_INT32 = ModoType("TY_INT32")
 	TY_STR   = ModoType("TY_STR")
+	TY_NIL   = ModoType("TY_NIL")
 )
 
 type Program struct {
@@ -144,6 +145,7 @@ func (node *Node) Debug(depth int) {
 		node.IsKindBinary() ||
 		node.IsKind(ND_VAR_REFERENCE) ||
 		node.IsKind(ND_VAR_DECLARE) ||
+		node.IsKind(ND_DECLARE) ||
 		node.IsKind(ND_LIBCALL) {
 		log.Debug(
 			log.BLUE(
