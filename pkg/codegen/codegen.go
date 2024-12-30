@@ -87,15 +87,33 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 		} else {
 			// means declaring global variable or function named except main
-			retType := types.I32 // TODO: to be changable
+
+			var retType types.Type
+			if node.IsType(mTypes.TY_INT32) {
+				retType = types.I32
+			} else if node.IsType(mTypes.TY_STR) {
+				retType = arrayType(node.Len)
+			} else if node.IsType(mTypes.TY_NIL) {
+				retType = types.I32
+			}
 			funcName := fmt.Sprintf("fn.%s", node.Val)
 
 			var arg []value.Value
 			var argp []*ir.Param
 
 			for a := node.Child.Args; a != nil; a = a.Next {
-				arg = append(arg, ir.NewParam(a.Val, types.I32))
-				argp = append(argp, ir.NewParam(a.Val, types.I32))
+
+				var t types.Type
+				if a.IsType(mTypes.TY_INT32) {
+					t = types.I32
+				} else if a.IsType(mTypes.TY_STR) {
+					t = types.NewPointer(types.I8)
+				} else if a.IsType(mTypes.TY_NIL) {
+					t = types.I32
+				}
+
+				arg = append(arg, ir.NewParam(a.Val, t))
+				argp = append(argp, ir.NewParam(a.Val, t))
 			}
 
 			fnc := ctx.mod.NewFunc(
@@ -217,12 +235,6 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		var arg []value.Value
 		for node := node.Child; node != nil; node = node.Next {
 			arg = append(arg, ctx.gen(node))
-		}
-		node.Type = mTypes.TY_INT32
-
-		for n := node.Child.Next; n != nil; n = n.Next {
-			arg := ctx.gen(n)
-			n.IRValue = arg
 		}
 
 		for i := 0; i < len(ctx.mod.Funcs); i = i + 1 {

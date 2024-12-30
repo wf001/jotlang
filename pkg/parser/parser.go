@@ -110,40 +110,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		tok = tok.Next
 
 		if tok.IsKind(mTypes.TK_DECLARE) {
-			t := &mTypes.Node{}
-			h := t
-
-			if tok.Next.Next.IsKind(mTypes.TK_TYPE_SIG) {
-				tok = tok.Next.Next.Next
-				for {
-					if !tok.IsKindType() {
-						break
-					}
-					ty, _ := matchedType(tok)
-					t.Type = ty
-					t.Next = &mTypes.Node{}
-					t = t.Next
-
-					tok = tok.Next
-					if tok.IsKind(mTypes.TK_TYPE_ARROW) {
-						tok = tok.Next
-					}
-				}
-			}
-
-			tok, head = parseDeclare(tok, mTypes.ND_DECLARE)
+			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
 			head = newNodeParent(mTypes.ND_DECLARE, head, "")
-			if head.Child.Args != nil {
-				for a := head.Child.Args; a != nil; a = a.Next {
-					if h.Type == "" {
-						log.Panic("must be ) :have %+v, %+v", t, a)
-					}
-					a.Type = h.Type
-					h = h.Next
-				}
-
-			}
-			head.Type = h.Type
 
 		} else if tok.IsKind(mTypes.TK_LAMBDA) {
 			// arguments
@@ -247,9 +215,43 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	} else if tok.IsKind(mTypes.TK_IDENT) {
 		if parentKind == mTypes.ND_DECLARE {
 			log.Debug("is Variable declaration :have %+v", tok)
+
 			v := tok.Val
-			tok, head = parseDeclare(tok.Next, mTypes.ND_VAR_DECLARE)
+			t := &mTypes.Node{}
+			h := t
+
+			if tok.Next.IsKind(mTypes.TK_TYPE_SIG) {
+				tok = tok.Next.Next
+				for {
+					if !tok.IsKindType() {
+						break
+					}
+					ty, _ := matchedType(tok)
+					t.Type = ty
+					t.Next = &mTypes.Node{}
+					t = t.Next
+
+					tok = tok.Next
+					if tok.IsKind(mTypes.TK_TYPE_ARROW) {
+						tok = tok.Next
+					}
+				}
+			}
+
+			tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
+			if head.Args != nil {
+				for a := head.Args; a != nil; a = a.Next {
+					if h.Type == "" {
+						log.Panic("must be ) :have %+v, %+v", t, a)
+					}
+					a.Type = h.Type
+					h = h.Next
+				}
+
+			}
+
 			res := newNodeParent(mTypes.ND_VAR_DECLARE, head, v)
+			res.Type = h.Type
 			return tok, res
 
 		} else {
