@@ -237,6 +237,9 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 					}
 				}
 			}
+			if !tok.IsKind(mTypes.TK_PAREN) {
+				tok = tok.Next
+			}
 
 			tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
 			if head.Args != nil {
