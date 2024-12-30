@@ -84,6 +84,7 @@ testexec(){
   ## binding
   echo "== binding ==="
   assertexec '(def main ::int (fn [] (let [x 1] (prn x))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (let [x 1 y (+ x 2)] (prn y))))' "3\\\n"
   #assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' "6\\\n"
   #assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' "9\\\n"
 
