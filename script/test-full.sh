@@ -70,23 +70,23 @@ testexec(){
 
   ## variable
   #echo "== variable ==="
-  #assertexec '(def x 1) (def main (fn [] (prn (+ x 2))))' "3\\\n"
-  #assertexec '(def x 1) (def main (fn [] (prn (+ 2 x))))' "3\\\n"
-  #assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3)))))' "6\\\n"
-  #assertexec '(def x 1) (def main (fn [] (prn (+ x (+ 2 3) 4))))' "10\\\n"
-  #assertexec '(def x 1) (def y 2) (def main (fn [] (prn (+ x y))))' "3\\\n"
-  #assertexec '(def x 1) (def main (fn [] (prn (+ x x))))' "2\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x 2))))' "3\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ 2 x))))' "3\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x (+ 2 3)))))' "6\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x (+ 2 3) 4))))' "10\\\n"
+  assertexec '(def x ::int 1) (def y ::int 2) (def main ::int (fn [] (prn (+ x y))))' "3\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x x))))' "2\\\n"
 
-  #assertexec '(def x 1) (def main (fn [] (prn (= x 2))))' "0\\\n"
-  #assertexec '(def x 1) (def main (fn [] (prn (= x 1))))' "1\\\n"
-  #assertexec '(def x 1) (def y 2) (def main (fn [] (prn (= x y))))' "0\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (= x 2))))' "0\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (= x 1))))' "1\\\n"
+  assertexec '(def x ::int 1) (def y ::int 2) (def main ::int (fn [] (prn (= x y))))' "0\\\n"
 
   ## binding
   echo "== binding ==="
-  assertexec '(def main ::int (fn [] (let [x 1] (prn x))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (let [x 1 y (+ x 2)] (prn y))))' "3\\\n"
-  #assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' "6\\\n"
-  #assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' "9\\\n"
+  assertexec '(def main ::int (fn [] (let [x ::int 1] (prn x))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (let [x ::int 1 y ::int (+ x 2)] (prn y))))' "3\\\n"
+  assertexec '(def x ::int 4) (def main ::int (fn [] (let [y ::int 2] (prn (+ x y)))))' "6\\\n"
+  assertexec '(def x ::int 4) (def main ::int (fn [] (let [y ::int 2 z ::int (+ y 3)] (prn (+ x z)))))' "9\\\n"
 
   ## if
   echo "== if ==="
@@ -108,12 +108,12 @@ testexec(){
   ## string
   echo "== string ==="
   assertexec '(def main ::int (fn [] (prn "hello")))' "hello\\\n"
-  assertexec '(def main ::int (fn [] (let [s "hello"] (prn s))))' "hello\\\n"
+  assertexec '(def main ::int (fn [] (let [s ::string "hello"] (prn s))))' "hello\\\n"
 
   ## multiline
   echo "== multi line ==="
   assertexec '(def main :: int (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' "3\\\n7\\\n"
-  #assertexec '(def x :: int 4) (def main ::int (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' "11\\\n6\\\n"
+  assertexec '(def x :: int 4) (def main ::int (fn [] (let [y ::int 2 z ::int (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' "11\\\n6\\\n"
 
   ## prn multivalue
   echo "== prn ==="
