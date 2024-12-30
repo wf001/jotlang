@@ -26,7 +26,7 @@ type context struct {
 	block    *ir.Block
 	prog     *mTypes.Program
 	scope    *mTypes.Node
-	argument []*ir.Param
+	argument *mTypes.Node
 }
 
 func newI32(s string) *constant.Int {
@@ -124,6 +124,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			llBlock := fnc.NewBlock("")
 
 			ctx.function = fnc
+			ctx.argument = node.Child.Args
 			res := ctx.gen(node.Child)
 			if node.Child.IsKind(mTypes.ND_LAMBDA) {
 				r := llBlock.NewCall(res, arg...)
@@ -140,11 +141,24 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		// TODO: prohibit same name identify between global var, binded variable and function argument
 
 		// find in variable which is passed as function argument
-		for i := 0; i < len(ctx.function.Params); i = i + 1 {
-			if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
-				// TODO: to be flexible
-				node.Type = mTypes.TY_INT32
-				return ctx.function.Params[i]
+		for a := ctx.argument; a != nil; a = a.Next {
+			if a.Val == node.Val {
+				var res value.Value
+				for i := 0; i < len(ctx.function.Params); i = i + 1 {
+					if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
+						res = ctx.function.Params[i]
+					}
+				}
+				if a.IsType(mTypes.TY_INT32) {
+					node.Type = mTypes.TY_INT32
+					return res
+
+				} else if a.IsType(mTypes.TY_STR) {
+					node.Type = mTypes.TY_STR
+					return res
+				} else {
+					log.Panic("unresolved variable: have %+v, %+s", a)
+				}
 			}
 		}
 
