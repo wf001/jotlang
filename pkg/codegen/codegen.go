@@ -156,8 +156,6 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 				} else if a.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
 					return res
-				} else {
-					log.Panic("unresolved variable: have %+v, %+s", a)
 				}
 			}
 		}
@@ -172,9 +170,6 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 				} else if s.Child.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
 					return s.VarPtr
-
-				} else {
-					log.Panic("unresolved variable: have %+v, %+s", s)
 				}
 			}
 		}
