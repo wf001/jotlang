@@ -54,20 +54,19 @@ summary(){
 
 testexec(){
   # operator
-  #echo "== operation ==="
+  echo "== operation ==="
   assertexec '(def main ::int (fn [] (prn 17)))' "17\\\n"
-  #assertexec '(def main (fn [] (prn (+ 4 13))))' "17\\\n"
-  #assertexec '(def main (fn [] (prn (+ 1 2 3))))' "6\\\n"
-  #assertexec '(def main (fn [] (prn (+ 1 2 3 4 10))))' "20\\\n"
-  #assertexec '(def main (fn [] (prn (+ 1 2 3 4 5 20))))' "35\\\n"
-  #assertexec '(def main (fn [] (prn (+ 1 2 (+ 3 4)))))' "10\\\n"
-  #assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ 3 4)))))' "10\\\n"
-  #assertexec '(def main (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))' "21\\\n"
-  #assertexec '(def main (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))' "39\\\n"
-  #assertexec '(def main (fn [] (prn (= 5 (+ 3 2)))))' "1\\\n"
-  #assertexec '(def main (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "0\\\n"
-  ## as often failed
-  #assertexec '(def main (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ 4 13))))' "17\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ 1 2 3))))' "6\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ 1 2 3 4 10))))' "20\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ 1 2 3 4 5 20))))' "35\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ 1 2 (+ 3 4)))))' "10\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ (+ 1 2) (+ 3 4)))))' "10\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))' "21\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))' "39\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 5 (+ 3 2)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "0\\\n"
+  assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
 
   ## variable
   #echo "== variable ==="
@@ -83,32 +82,32 @@ testexec(){
   #assertexec '(def x 1) (def y 2) (def main (fn [] (prn (= x y))))' "0\\\n"
 
   ## binding
-  #echo "== binding ==="
-  #assertexec '(def main (fn [] (let [x 1] (prn x))))' "1\\\n"
+  echo "== binding ==="
+  assertexec '(def main ::int (fn [] (let [x 1] (prn x))))' "1\\\n"
   #assertexec '(def x 4) (def main (fn [] (let [y 2] (prn (+ x y)))))' "6\\\n"
   #assertexec '(def x 4) (def main (fn [] (let [y 2 z (+ y 3)] (prn (+ x z)))))' "9\\\n"
 
   ## if
-  #echo "== if ==="
-  #assertexec '(def main (fn [] (if (= 1 1) (prn 11) (prn 12))))' "11\\\n"
-  #assertexec '(def main (fn [] (if (= 1 2) (prn 11) (prn 12))))' "12\\\n"
+  echo "== if ==="
+  assertexec '(def main ::int (fn [] (if (= 1 1) (prn 11) (prn 12))))' "11\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 2) (prn 11) (prn 12))))' "12\\\n"
 
-  #assertexec '(def main (fn [] (if (= 1 1) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' "11\\\n"
-  #assertexec '(def main (fn [] (if (= 1 1) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' "11\\\n"
-  #assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' "12\\\n"
-  #assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' "13\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 1) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' "11\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 1) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' "11\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (prn 12) (prn 13)))))' "12\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 2) (prn 11) (if (= 1 2) (prn 12) (prn 13)))))' "13\\\n"
 
-  #assertexec '(def main (fn [] (if (= 1 1) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' "11\\\n"
-  #assertexec '(def main (fn [] (if (= 1 1) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' "12\\\n"
-  #assertexec '(def main (fn [] (if (= 1 2) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' "13\\\n"
-  #assertexec '(def main (fn [] (if (= 1 2) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' "13\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 1) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' "11\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 1) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' "12\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 2) (if (= 1 1) (prn 11) (prn 12)) (prn 13))))' "13\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 2) (if (= 1 2) (prn 11) (prn 12)) (prn 13))))' "13\\\n"
 
-  #assertexec '(def main (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' "13\\\n"
+  assertexec '(def main ::int (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' "13\\\n"
 
   ## string
-  #echo "== string ==="
-  #assertexec '(def main (fn [] (prn "hello")))' "hello\\\n"
-  #assertexec '(def main ::int (fn [] (let [s "hello"] (prn s))))' "hello\\\n"
+  echo "== string ==="
+  assertexec '(def main ::int (fn [] (prn "hello")))' "hello\\\n"
+  assertexec '(def main ::int (fn [] (let [s "hello"] (prn s))))' "hello\\\n"
 
   ## multiline
   echo "== multi line ==="
@@ -116,7 +115,7 @@ testexec(){
   #assertexec '(def x :: int 4) (def main ::int (fn [] (let [y 2 z (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' "11\\\n6\\\n"
 
   ## prn multivalue
-  #echo "== prn ==="
+  echo "== prn ==="
   assertexec '(def main :: int (fn [] (prn 1 2 "hello")))' "1 2 hello\\\n"
   assertexec '(def main :: int (fn [] (prn (+ 1 2) (= 2 4) "world")))' "3 0 world\\\n"
 
