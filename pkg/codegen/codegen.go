@@ -34,7 +34,7 @@ func newI32(s string) *constant.Int {
 	if err != nil {
 		log.Panic("fail to newI32: %s", err)
 	}
-	return constant.NewInt(types.I32, i)
+	return constant.NewInt(mTypes.I32, i)
 }
 
 func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
@@ -45,12 +45,12 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 	globalStr.Immutable = true
 	globalStr.Align = 1
 
-	strPtr := ctx.block.NewAlloca(types.NewPointer(types.I8))
+	strPtr := ctx.block.NewAlloca(mTypes.I8Ptr)
 	strGEP := ctx.block.NewGetElementPtr(
 		types.NewArray(strConst.Typ.Len, types.I8),
 		globalStr,
-		constant.NewInt(types.I32, 0),
-		constant.NewInt(types.I32, 0),
+		constant.NewInt(mTypes.I32, 0),
+		constant.NewInt(mTypes.I32, 0),
 	)
 	ctx.block.NewStore(strGEP, strPtr)
 	str := ctx.block.NewLoad(types.I8Ptr, strPtr)
@@ -69,7 +69,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 			fnc := ctx.mod.NewFunc(
 				"main",
-				types.I32,
+				mTypes.I32,
 			)
 			llBlock := fnc.NewBlock("")
 
@@ -85,11 +85,11 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			// define function return type
 			var retType types.Type
 			if node.IsType(mTypes.TY_INT32) {
-				retType = types.I32
+				retType = mTypes.I32
 			} else if node.IsType(mTypes.TY_STR) {
-				retType = types.NewPointer(types.I8)
+				retType = mTypes.I8Ptr
 			} else if node.IsType(mTypes.TY_NIL) {
-				retType = types.I32
+				retType = mTypes.I32
 			}
 			funcName := fmt.Sprintf("fn.%s", node.Val)
 
@@ -100,11 +100,11 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			for a := node.Child.Args; a != nil; a = a.Next {
 				var t types.Type
 				if a.IsType(mTypes.TY_INT32) {
-					t = types.I32
+					t = mTypes.I32
 				} else if a.IsType(mTypes.TY_STR) {
-					t = types.NewPointer(types.I8)
+					t = mTypes.I8Ptr
 				} else if a.IsType(mTypes.TY_NIL) {
-					t = types.I32
+					t = mTypes.I32
 				}
 
 				arg = append(arg, ir.NewParam(a.Val, t))
@@ -161,7 +161,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			if scope.Val == node.Val {
 				if scope.Child.IsType(mTypes.TY_INT32) {
 					node.Type = mTypes.TY_INT32
-					return ctx.block.NewLoad(types.I32, scope.VarPtr)
+					return ctx.block.NewLoad(mTypes.I32, scope.VarPtr)
 
 				} else if scope.Child.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
@@ -206,7 +206,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			}
 
 			if bind.Type == mTypes.TY_INT32 {
-				bind.VarPtr = ctx.block.NewAlloca(types.I32)
+				bind.VarPtr = ctx.block.NewAlloca(mTypes.I32)
 				ctx.block.NewStore(v, bind.VarPtr)
 
 			} else if bind.Type == mTypes.TY_STR {

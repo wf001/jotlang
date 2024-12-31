@@ -8,6 +8,7 @@ import (
 
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
+	"github.com/wf001/modo/util"
 )
 
 func declarePrintf(
@@ -16,8 +17,8 @@ func declarePrintf(
 ) {
 	printfFunc := module.NewFunc(
 		"printf",
-		types.I32,
-		ir.NewParam("format", types.NewPointer(types.I8)),
+		mTypes.I32,
+		ir.NewParam("format", mTypes.I8Ptr),
 	)
 	printfFunc.Sig.Variadic = true
 
@@ -37,15 +38,15 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 
 		for n := node; n != nil; n = n.Next {
 			if n.IsType(mTypes.TY_INT32) || n.IsKindNary() || n.IsKindBinary() ||
-				n.IRValue.Type() == types.I32 {
+				util.EqualType(n.IRValue.Type(), mTypes.I32) {
 				formatStr = libs.GlobalVar.FormatDigit
 
-			} else if n.IsType(mTypes.TY_STR) || n.IRValue.Type().Equal(types.NewPointer(types.I8)) {
+			} else if n.IsType(mTypes.TY_STR) || util.EqualType(n.IRValue.Type(), mTypes.I8Ptr) {
 				formatStr = libs.GlobalVar.FormatStr
 
 			} else if n.IsKind(mTypes.ND_FUNCCALL) {
 				t := node.IRValue.Type()
-				if t == types.I32 {
+				if t == mTypes.I32 {
 					formatStr = libs.GlobalVar.FormatDigit
 				} else if _, ok := t.(*types.PointerType); ok {
 					formatStr = libs.GlobalVar.FormatStr
@@ -65,6 +66,6 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 
 		}
 		// todo: return nil
-		return constant.NewInt(types.I32, 0)
+		return constant.NewInt(mTypes.I32, 0)
 	},
 }
