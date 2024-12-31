@@ -69,7 +69,7 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
 
   ## variable
-  #echo "== variable ==="
+  echo "== variable ==="
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x 2))))' "3\\\n"
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ 2 x))))' "3\\\n"
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x (+ 2 3)))))' "6\\\n"
@@ -109,6 +109,8 @@ testexec(){
   echo "== string ==="
   assertexec '(def main ::int (fn [] (prn "hello")))' "hello\\\n"
   assertexec '(def main ::int (fn [] (let [s ::string "hello"] (prn s))))' "hello\\\n"
+  assertexec '(def main ::int (fn [] (let [s ::string "hello" t ::string "world"] (prn s))))' "hello\\\n"
+  assertexec '(def main ::int (fn [] (let [s ::string "hello" t ::string "world"] (prn t))))' "world\\\n"
 
   ## multiline
   echo "== multi line ==="

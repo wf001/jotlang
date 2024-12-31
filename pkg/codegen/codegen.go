@@ -14,7 +14,6 @@ import (
 	"github.com/wf001/modo/pkg/codegen/lib"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
-	"github.com/wf001/modo/util"
 )
 
 type assembler struct {
@@ -38,42 +37,25 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
-func arrayType(length uint64) *types.ArrayType {
-	return types.NewArray(length, types.I8)
-}
-
 func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
-	str1 := constant.NewCharArrayFromString(n.Val)
-	i := len(ctx.mod.Globals)
-	global := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", i), str1)
-	global.Linkage = enum.LinkagePrivate
-	global.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
-	global.Immutable = true
-	global.Align = 1
+	strConst := constant.NewCharArrayFromString(n.Val)
+	globalStr := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
+	globalStr.Linkage = enum.LinkagePrivate
+	globalStr.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
+	globalStr.Immutable = true
+	globalStr.Align = 1
 
 	strPtr := ctx.block.NewAlloca(types.NewPointer(types.I8))
-	gepF := ctx.block.NewGetElementPtr(
-		types.NewArray(str1.Typ.Len, types.I8),
-		global,
+	strGEP := ctx.block.NewGetElementPtr(
+		types.NewArray(strConst.Typ.Len, types.I8),
+		globalStr,
 		constant.NewInt(types.I32, 0),
 		constant.NewInt(types.I32, 0),
 	)
-	ctx.block.NewStore(gepF, strPtr)
-	strV := ctx.block.NewLoad(types.I8Ptr, strPtr)
-	ctx.prog.GlobalStr = append(ctx.prog.GlobalStr, strV)
-	return strV
-}
-
-func isNumericIR(arg value.Value) bool {
-	return util.EqualType(arg, (*constant.Int)(nil)) ||
-		util.EqualType(arg, (*ir.InstAdd)(nil)) ||
-		util.EqualType(arg, (*ir.InstLoad)(nil)) ||
-		// TODO: %d -> %s
-		util.EqualType(arg, (*ir.InstICmp)(nil))
-}
-
-func isStringIR(arg value.Value) bool {
-	return util.EqualType(arg, (*ir.InstGetElementPtr)(nil))
+	ctx.block.NewStore(strGEP, strPtr)
+	str := ctx.block.NewLoad(types.I8Ptr, strPtr)
+	ctx.prog.GlobalStr = append(ctx.prog.GlobalStr, str)
+	return str
 }
 
 func (ctx *context) gen(node *mTypes.Node) value.Value {
@@ -153,19 +135,19 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		// TODO: prohibit same name identify between global var, binded variable and function argument
 
 		// find in variable which is passed as function argument
-		for a := ctx.argument; a != nil; a = a.Next {
-			if a.Val == node.Val {
+		for arg := ctx.argument; arg != nil; arg = arg.Next {
+			if arg.Val == node.Val {
 				var res value.Value
 				for i := 0; i < len(ctx.function.Params); i = i + 1 {
 					if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
 						res = ctx.function.Params[i]
 					}
 				}
-				if a.IsType(mTypes.TY_INT32) {
+				if arg.IsType(mTypes.TY_INT32) {
 					node.Type = mTypes.TY_INT32
 					return res
 
-				} else if a.IsType(mTypes.TY_STR) {
+				} else if arg.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
 					return res
 				}
@@ -173,15 +155,15 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 
 		// find in local variable which is declared with let
-		for s := ctx.scope; s != nil; s = s.Next {
-			if s.Val == node.Val {
-				if s.Child.IsType(mTypes.TY_INT32) {
+		for scope := ctx.scope; scope != nil; scope = scope.Next {
+			if scope.Val == node.Val {
+				if scope.Child.IsType(mTypes.TY_INT32) {
 					node.Type = mTypes.TY_INT32
-					return ctx.block.NewLoad(types.I32, s.VarPtr)
+					return ctx.block.NewLoad(types.I32, scope.VarPtr)
 
-				} else if s.Child.IsType(mTypes.TY_STR) {
+				} else if scope.Child.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
-					return s.VarPtr
+					return scope.VarPtr
 				}
 			}
 		}
@@ -213,20 +195,20 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		return funcFn
 
 	} else if node.IsKind(mTypes.ND_BIND) {
-		for varDeclare := node.Bind; varDeclare != nil; varDeclare = varDeclare.Next {
-			v := ctx.gen(varDeclare.Child)
+		for bind := node.Bind; bind != nil; bind = bind.Next {
+			v := ctx.gen(bind.Child)
 			if ctx.scope.Child == nil {
-				ctx.scope = varDeclare
+				ctx.scope = bind
 			} else {
-				ctx.scope.Next = varDeclare
+				ctx.scope.Next = bind
 			}
 
-			if varDeclare.Type == mTypes.TY_INT32 {
-				varDeclare.VarPtr = ctx.block.NewAlloca(types.I32)
-				ctx.block.NewStore(v, varDeclare.VarPtr)
+			if bind.Type == mTypes.TY_INT32 {
+				bind.VarPtr = ctx.block.NewAlloca(types.I32)
+				ctx.block.NewStore(v, bind.VarPtr)
 
-			} else if varDeclare.Type == mTypes.TY_STR {
-				varDeclare.VarPtr = v
+			} else if bind.Type == mTypes.TY_STR {
+				bind.VarPtr = v
 			}
 
 		}
