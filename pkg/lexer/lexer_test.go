@@ -114,5 +114,5 @@ func TestLexOperationAddTakingAdd(t *testing.T) {
 func TestNewTokenMap(t *testing.T) {
 	res := newTokenMap()
 	assert.EqualValues(t, mTypes.INTEGER_REG_EXP, res.Head.Pattern)
-	assert.EqualValues(t, mTypes.STRING_REG_EXP, res.Head.Next.Pattern)
+	assert.EqualValues(t, mTypes.SYMBOL_TYPE_SIG, res.Head.Next.Pattern)
 }
