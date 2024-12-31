@@ -126,7 +126,7 @@ testexec(){
   assertexec '(def f :: int => nil (fn [a] (prn a))) (def main ::int (fn [] (f 4)))' "4\\\n"
   assertexec '(def f :: int => string => nil (fn [a s] (prn a) (prn s))) (def main ::int (fn [] (f 123 "hello")))' "123\\\nhello\\\n"
   assertexec '(def f :: int => int => int (fn [a b] (+ a b))) (def main ::int (fn [] (prn (f 1 2))))' "3\\\n"
-  # assertexec '(def f :: string => string (fn [a] a)) (def main ::int (fn [] (prn (f "hello"))))' "hello\\\n"
+  assertexec '(def f :: string => string (fn [a] a)) (def main ::int (fn [] (prn (f "hello"))))' "hello\\\n"
 
 }
 

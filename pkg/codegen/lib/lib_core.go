@@ -46,7 +46,7 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 				t := node.IRValue.Type()
 				if t == types.I32 {
 					formatStr = libs.GlobalVar.FormatDigit
-				} else if _, ok := t.(*types.ArrayType); ok {
+				} else if _, ok := t.(*types.PointerType); ok {
 					formatStr = libs.GlobalVar.FormatStr
 				} else {
 					log.Panic("unresolved type: have %+v", n)

@@ -43,7 +43,7 @@ func arrayType(length uint64) *types.ArrayType {
 }
 
 func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
-	str1 := constant.NewCharArrayFromString("modo")
+	str1 := constant.NewCharArrayFromString(n.Val)
 	i := len(ctx.mod.Globals)
 	global := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", i), str1)
 	global.Linkage = enum.LinkagePrivate
@@ -53,13 +53,14 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 
 	strPtr := ctx.block.NewAlloca(types.NewPointer(types.I8))
 	gepF := ctx.block.NewGetElementPtr(
-		types.NewArray(5, types.I8),
+		types.NewArray(str1.Typ.Len, types.I8),
 		global,
 		constant.NewInt(types.I32, 0),
 		constant.NewInt(types.I32, 0),
 	)
 	ctx.block.NewStore(gepF, strPtr)
 	strV := ctx.block.NewLoad(types.I8Ptr, strPtr)
+	ctx.prog.GlobalStr = append(ctx.prog.GlobalStr, strV)
 	return strV
 }
 
@@ -103,7 +104,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			if node.IsType(mTypes.TY_INT32) {
 				retType = types.I32
 			} else if node.IsType(mTypes.TY_STR) {
-				retType = arrayType(node.Len)
+				retType = types.NewPointer(types.I8)
 			} else if node.IsType(mTypes.TY_NIL) {
 				retType = types.I32
 			}
@@ -220,11 +221,11 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 				ctx.scope.Next = varDeclare
 			}
 
-			if isNumericIR(v) {
+			if varDeclare.Type == mTypes.TY_INT32 {
 				varDeclare.VarPtr = ctx.block.NewAlloca(types.I32)
 				ctx.block.NewStore(v, varDeclare.VarPtr)
 
-			} else if isStringIR(v) {
+			} else if varDeclare.Type == mTypes.TY_STR {
 				varDeclare.VarPtr = v
 			}
 
