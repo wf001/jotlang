@@ -54,7 +54,7 @@ summary(){
 
 testexec(){
   # operator
-  echo "== operation ==="
+  echo "== operator ==="
   assertexec '(def main ::int (fn [] (prn 17)))' "17\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 4 13))))' "17\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 1 2 3))))' "6\\\n"
@@ -68,8 +68,8 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "0\\\n"
   assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
 
-  ## variable
-  echo "== variable ==="
+  ## global variable
+  echo "== global variable ==="
   assertexec '(def x ::int 3) (def main ::int (fn [] (prn x)))' "3\\\n"
   assertexec '(def x ::string "hello") (def main ::int (fn [] (prn x)))' "hello\\\n"
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x 2))))' "3\\\n"
@@ -83,8 +83,8 @@ testexec(){
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (= x 1))))' "1\\\n"
   assertexec '(def x ::int 1) (def y ::int 2) (def main ::int (fn [] (prn (= x y))))' "0\\\n"
 
-  ## binding
-  echo "== binding ==="
+  ## binded variable
+  echo "== binded variable ==="
   assertexec '(def main ::int (fn [] (let [x ::int 1] (prn x))))' "1\\\n"
   assertexec '(def main ::int (fn [] (let [x ::int 1 y ::int (+ x 2)] (prn y))))' "3\\\n"
   assertexec '(def x ::int 4) (def main ::int (fn [] (let [y ::int 2] (prn (+ x y)))))' "6\\\n"
@@ -107,20 +107,20 @@ testexec(){
 
   assertexec '(def main ::int (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' "13\\\n"
 
-  ## string
-  echo "== string ==="
+  ## string type
+  echo "== string type ==="
   assertexec '(def main ::int (fn [] (prn "hello")))' "hello\\\n"
   assertexec '(def main ::int (fn [] (let [s ::string "hello"] (prn s))))' "hello\\\n"
   assertexec '(def main ::int (fn [] (let [s ::string "hello" t ::string "world"] (prn s))))' "hello\\\n"
   assertexec '(def main ::int (fn [] (let [s ::string "hello" t ::string "world"] (prn t))))' "world\\\n"
 
-  ## multiline
-  echo "== multi line ==="
+  ## prn multi-line
+  echo "== prn multi-line ==="
   assertexec '(def main :: int (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' "3\\\n7\\\n"
   assertexec '(def x :: int 4) (def main ::int (fn [] (let [y ::int 2 z ::int (+ x 3)] (prn (+ x z)) (prn (+ x y)))))' "11\\\n6\\\n"
 
-  ## prn multivalue
-  echo "== prn ==="
+  ## prn multi-value
+  echo "== prn multi-value ==="
   assertexec '(def main :: int (fn [] (prn 1 2 "hello")))' "1 2 hello\\\n"
   assertexec '(def main :: int (fn [] (prn (+ 1 2) (= 2 4) "world")))' "3 0 world\\\n"
 
