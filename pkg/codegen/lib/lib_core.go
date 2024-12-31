@@ -36,10 +36,11 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 		var formatStr *ir.Global
 
 		for n := node; n != nil; n = n.Next {
-			if n.IsType(mTypes.TY_INT32) || n.IsKindNary() || n.IsKindBinary() {
+			if n.IsType(mTypes.TY_INT32) || n.IsKindNary() || n.IsKindBinary() ||
+				n.IRValue.Type() == types.I32 {
 				formatStr = libs.GlobalVar.FormatDigit
 
-			} else if n.IsType(mTypes.TY_STR) {
+			} else if n.IsType(mTypes.TY_STR) || n.IRValue.Type().Equal(types.NewPointer(types.I8)) {
 				formatStr = libs.GlobalVar.FormatStr
 
 			} else if n.IsKind(mTypes.ND_FUNCCALL) {

@@ -82,6 +82,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		} else {
 			// means declaring global variable or function named except main
 
+			// define function return type
 			var retType types.Type
 			if node.IsType(mTypes.TY_INT32) {
 				retType = types.I32
@@ -95,8 +96,8 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			var arg []value.Value
 			var argp []*ir.Param
 
+			// define arguments type of function
 			for a := node.Child.Args; a != nil; a = a.Next {
-
 				var t types.Type
 				if a.IsType(mTypes.TY_INT32) {
 					t = types.I32
@@ -119,6 +120,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 			ctx.function = fnc
 			ctx.argument = node.Child.Args
+			ctx.block = llBlock
 			res := ctx.gen(node.Child)
 			if node.Child.IsKind(mTypes.ND_LAMBDA) {
 				r := llBlock.NewCall(res, arg...)
@@ -137,19 +139,19 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		// find in variable which is passed as function argument
 		for arg := ctx.argument; arg != nil; arg = arg.Next {
 			if arg.Val == node.Val {
-				var res value.Value
+				var param value.Value
 				for i := 0; i < len(ctx.function.Params); i = i + 1 {
 					if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
-						res = ctx.function.Params[i]
+						param = ctx.function.Params[i]
 					}
 				}
 				if arg.IsType(mTypes.TY_INT32) {
 					node.Type = mTypes.TY_INT32
-					return res
+					return param
 
 				} else if arg.IsType(mTypes.TY_STR) {
 					node.Type = mTypes.TY_STR
-					return res
+					return param
 				}
 			}
 		}
