@@ -70,6 +70,8 @@ testexec(){
 
   ## variable
   echo "== variable ==="
+  assertexec '(def x ::int 3) (def main ::int (fn [] (prn x)))' "3\\\n"
+  assertexec '(def x ::string "hello") (def main ::int (fn [] (prn x)))' "hello\\\n"
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x 2))))' "3\\\n"
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ 2 x))))' "3\\\n"
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x (+ 2 3)))))' "6\\\n"
@@ -122,13 +124,13 @@ testexec(){
   assertexec '(def main :: int (fn [] (prn 1 2 "hello")))' "1 2 hello\\\n"
   assertexec '(def main :: int (fn [] (prn (+ 1 2) (= 2 4) "world")))' "3 0 world\\\n"
 
-
   # function calling
   echo "== function calling ==="
   assertexec '(def f :: int => nil (fn [a] (prn a))) (def main ::int (fn [] (f 4)))' "4\\\n"
   assertexec '(def f :: int => string => nil (fn [a s] (prn a) (prn s))) (def main ::int (fn [] (f 123 "hello")))' "123\\\nhello\\\n"
   assertexec '(def f :: int => int => int (fn [a b] (+ a b))) (def main ::int (fn [] (prn (f 1 2))))' "3\\\n"
   assertexec '(def f :: string => string (fn [a] a)) (def main ::int (fn [] (prn (f "hello"))))' "hello\\\n"
+  assertexec '(def f :: string => string (fn [a] "modo")) (def main ::int (fn [] (prn (f "hello"))))' "modo\\\n"
 
 }
 
