@@ -54,6 +54,7 @@ const (
 type Program struct {
 	Declares    *Node
 	BuiltinLibs *BuiltinLibProp
+	GlobalStr   *ir.InstAlloca
 }
 
 type BuiltinLibProp struct {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -41,15 +42,25 @@ func arrayType(length uint64) *types.ArrayType {
 	return types.NewArray(length, types.I8)
 }
 
-func newStr(block *ir.Block, n *mTypes.Node) *ir.InstGetElementPtr {
-	strType := arrayType(n.Len)
-	strPtr := block.NewAlloca(strType)
+func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
+	str1 := constant.NewCharArrayFromString("modo")
+	i := len(ctx.mod.Globals)
+	global := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", i), str1)
+	global.Linkage = enum.LinkagePrivate
+	global.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
+	global.Immutable = true
+	global.Align = 1
 
-	strGEP := block.NewGetElementPtr(strType, strPtr)
-
-	block.NewStore(constant.NewCharArray([]byte(n.Val)), strPtr)
-
-	return strGEP
+	strPtr := ctx.block.NewAlloca(types.NewPointer(types.I8))
+	gepF := ctx.block.NewGetElementPtr(
+		types.NewArray(5, types.I8),
+		global,
+		constant.NewInt(types.I32, 0),
+		constant.NewInt(types.I32, 0),
+	)
+	ctx.block.NewStore(gepF, strPtr)
+	strV := ctx.block.NewLoad(types.I8Ptr, strPtr)
+	return strV
 }
 
 func isNumericIR(arg value.Value) bool {
@@ -314,7 +325,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			return newI32(node.Val)
 
 		} else if node.IsType(mTypes.TY_STR) {
-			return newStr(ctx.block, node)
+			return newStr(ctx, node)
 
 		} else {
 			log.Panic("unresolved Scalar: have %+v", node)
