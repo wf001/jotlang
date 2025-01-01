@@ -169,6 +169,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			nextToken, body := parseBody(tok, mTypes.ND_EXPR, "")
 			bind := newNodeParent(mTypes.ND_BIND, body, "")
 			bind.Bind = varHead.Next
+			// NOTE: why must proceed additionally?
+			nextToken = nextToken.Next
 
 			return nextToken, bind
 
