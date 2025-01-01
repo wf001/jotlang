@@ -53,8 +53,8 @@ summary(){
 }
 
 testexec(){
-  # operator
-  echo "== operator ==="
+  # arithmetic operator
+  echo "== arithmetic operator ==="
   assertexec '(def main ::int (fn [] (prn 17)))' "17\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 4 13))))' "17\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 1 2 3))))' "6\\\n"
@@ -64,9 +64,15 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (+ (+ 1 2) (+ 3 4)))))' "10\\\n"
   assertexec '(def main ::int (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))' "21\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 1 (+ 3 2) (+ (+ 9 4 5) 7 8)))))' "39\\\n"
+
+  # equality operator
+  echo "== equality operator ==="
+  assertexec '(def main ::int (fn [] (prn (= 123 123))))' "1\\\n"
   assertexec '(def main ::int (fn [] (prn (= 5 (+ 3 2)))))' "1\\\n"
   assertexec '(def main ::int (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "0\\\n"
   assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "foo" "bar"))))' "0\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "foo" "foo"))))' "1\\\n"
 
   ## global variable
   echo "== global variable ==="
