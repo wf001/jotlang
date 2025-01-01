@@ -244,7 +244,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			if head.Args != nil {
 				for a := head.Args; a != nil; a = a.Next {
 					if h.Type == "" {
-						log.Panic("must be ) :have %+v, %+v", t, a)
+						log.Panic("type required :have %+v, %+v", t, a)
 					}
 					a.Type = h.Type
 					h = h.Next
@@ -296,6 +296,7 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 			prevDeclare = prevDeclare.Next
 		}
 	}
+	// TODO: confirm all token read
 	return p
 }
 
