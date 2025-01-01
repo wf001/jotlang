@@ -17,8 +17,8 @@ func declarePrintf(
 ) {
 	printfFunc := module.NewFunc(
 		"printf",
-		mTypes.I32,
-		ir.NewParam("format", mTypes.I8Ptr),
+		types.I32,
+		ir.NewParam("format", types.I8Ptr),
 	)
 	printfFunc.Sig.Variadic = true
 
@@ -38,15 +38,15 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 
 		for n := node; n != nil; n = n.Next {
 			if n.IsType(mTypes.TY_INT32) || n.IsKindNary() || n.IsKindBinary() ||
-				util.EqualType(n.IRValue.Type(), mTypes.I32) {
+				util.EqualType(n.IRValue.Type(), types.I32) {
 				formatStr = libs.GlobalVar.FormatDigit
 
-			} else if n.IsType(mTypes.TY_STR) || util.EqualType(n.IRValue.Type(), mTypes.I8Ptr) {
+			} else if n.IsType(mTypes.TY_STR) || util.EqualType(n.IRValue.Type(), types.I8Ptr) {
 				formatStr = libs.GlobalVar.FormatStr
 
 			} else if n.IsKind(mTypes.ND_FUNCCALL) {
 				t := node.IRValue.Type()
-				if util.EqualType(t, mTypes.I32) {
+				if util.EqualType(t, types.I32) {
 					formatStr = libs.GlobalVar.FormatDigit
 				} else if _, ok := t.(*types.PointerType); ok {
 					formatStr = libs.GlobalVar.FormatStr
@@ -66,6 +66,6 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 
 		}
 		// todo: return nil
-		return constant.NewInt(mTypes.I32, 0)
+		return constant.NewInt(types.I32, 0)
 	},
 }
