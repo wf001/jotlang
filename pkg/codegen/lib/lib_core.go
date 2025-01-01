@@ -46,7 +46,7 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 
 			} else if n.IsKind(mTypes.ND_FUNCCALL) {
 				t := node.IRValue.Type()
-				if t == mTypes.I32 {
+				if util.EqualType(t, mTypes.I32) {
 					formatStr = libs.GlobalVar.FormatDigit
 				} else if _, ok := t.(*types.PointerType); ok {
 					formatStr = libs.GlobalVar.FormatStr
