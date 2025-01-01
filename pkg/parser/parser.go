@@ -206,7 +206,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 		} else if tok.IsKind(mTypes.TK_IDENT) {
 			log.Debug("is calling function :have %+v", tok)
-			return parseBody(tok, mTypes.ND_FUNCCALL, tok.Val)
+			tok, head = parseBody(tok, mTypes.ND_FUNCCALL, tok.Val)
 		}
 
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_CLOSE) {
