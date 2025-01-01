@@ -30,7 +30,14 @@ test-all:
 	make test-go
 
 test-compiler:
+	./script/test-lite.sh
 	./script/test-full.sh
+
+test-full-compiler:
+	./script/test-full.sh
+
+test-lite-compiler:
+	./script/test-lite.sh
 
 test-go:
 	go test -v ./... | tc

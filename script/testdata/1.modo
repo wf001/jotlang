@@ -1,0 +1,13 @@
+(def x ::int 1)
+
+(def f ::int => int => int
+  (fn [a b] (let [yes ::int 123 
+                no ::int 456]
+            (if (= 2 (+ x a)) yes no))))
+
+(def main ::int
+  (fn []
+    (prn "ans" (f 1 2))
+    (prn "done")))
+
+
