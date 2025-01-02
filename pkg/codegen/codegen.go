@@ -197,11 +197,14 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		return funcFn
 
 	} else if node.IsKind(mTypes.ND_BIND) {
+		// add node.Bind to last element of ctx.scope
+		// HACK: improve with better way
 		var lastScope *mTypes.Node
 		for s := ctx.scope; s != nil; s = s.Next {
 			lastScope = s
 		}
 		lastScope.Next = node.Bind
+		lastScope = lastScope.Next
 
 		for bind := node.Bind; bind != nil; bind = bind.Next {
 			v := ctx.gen(bind.Child)
