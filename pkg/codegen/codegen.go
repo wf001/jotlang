@@ -288,22 +288,25 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
 		exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
 
+		// cond
 		ctx.block = condBlock
-		node.CondRet = ctx.block.NewAlloca(types.I32)
+		// NOTE: is it the type truely?
+		node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
 		cond := ctx.gen(node.Cond)
 
-		exitBlock.NewRet(exitBlock.NewLoad(types.I32, node.CondRet))
-
-		thenBlock.NewBr(exitBlock)
-		elseBlock.NewBr(exitBlock)
+		// exit
+		// NOTE: is it the type truely?
+		exitBlock.NewRet(exitBlock.NewLoad(ctx.function.Sig.RetType, node.CondRet))
 
 		ctx.block = thenBlock
+		ctx.block.NewBr(exitBlock)
 		res := ctx.gen(node.Then)
 		if res != nil {
 			ctx.block.NewStore(res, node.CondRet)
 		}
 
 		ctx.block = elseBlock
+		ctx.block.NewBr(exitBlock)
 		res = ctx.gen(node.Else)
 		if res != nil {
 			ctx.block.NewStore(res, node.CondRet)
