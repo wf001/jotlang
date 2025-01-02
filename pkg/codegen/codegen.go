@@ -299,15 +299,17 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 		ctx.block = thenBlock
 		res := ctx.gen(node.Then)
-		ctx.block.NewStore(res, node.CondRet)
+		if res != nil {
+			ctx.block.NewStore(res, node.CondRet)
+		}
 
 		ctx.block = elseBlock
 		res = ctx.gen(node.Else)
-		ctx.block.NewStore(res, node.CondRet)
+		if res != nil {
+			ctx.block.NewStore(res, node.CondRet)
+		}
 
 		condBlock.NewCondBr(cond, thenBlock, elseBlock)
-
-		// need conditionally ret
 
 	} else if node.IsKind(mTypes.ND_SCALAR) {
 		if node.IsType(mTypes.TY_INT32) {

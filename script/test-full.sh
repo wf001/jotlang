@@ -63,6 +63,13 @@ testexec(){
 
   assertexec '(def main ::int (fn [] (if (= 1 2) (prn 11) (if (= 1 1) (if (= 1 2) (prn 12) (prn 13)) (prn 14) ))))' "13\\\n"
 
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) 123 (if (= 0 0) 456 789)))) (def main ::int (fn [] (prn (f 1))))' "123\\\n"
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) 123 (if (= 0 1) 456 789)))) (def main ::int (fn [] (prn (f 1))))' "123\\\n"
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) 123 (if (= 0 0) 456 789)))) (def main ::int (fn [] (prn (f 2))))' "456\\\n"
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) 123 (if (= 0 1) 456 789)))) (def main ::int (fn [] (prn (f 2))))' "789\\\n"
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) (+ 1 1) (if (= 0 1) (+ 1 2) (+ 1 3))))) (def main ::int (fn [] (prn (f 1))))' "2\\\n"
+
+
   ## string type
   echo "== string type ==="
   assertexec '(def main ::int (fn [] (prn "hello")))' "hello\\\n"

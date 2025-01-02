@@ -4,7 +4,7 @@
 
 testfile(){
   echo "== 1.modo ==="
-  assertfile "1.modo" "ans 0\\\ndone\\\n"
+  assertfile "1.modo" "ans 123\\\ndone\\\n"
 
 }
 
