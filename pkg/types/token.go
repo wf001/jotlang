@@ -54,6 +54,52 @@ func (tok *Token) IsKindType() bool {
 		tok.IsKind(TK_TYPE_NIL)
 }
 
+func (tok Token) MatchedType() (ModoType, bool) {
+	var typeMap = map[string]ModoType{
+		TK_TYPE_INT: TY_INT32,
+		TK_TYPE_STR: TY_STR,
+		TK_TYPE_NIL: TY_NIL,
+	}
+
+	if kind, exists := typeMap[tok.Kind]; exists {
+		return kind, true
+	}
+
+	return "", false
+}
+
+func (tok *Token) MatchedNary() (NodeKind, bool) {
+	var tokenMap = map[string]NodeKind{
+		NARY_OPERATOR_ADD: ND_ADD,
+	}
+
+	return tok.MatchedOperator(tokenMap)
+}
+
+func (tok *Token) MatchedBinary() (NodeKind, bool) {
+	var tokenMap = map[string]NodeKind{
+		BINARY_OPERATOR_EQ: ND_EQ,
+	}
+
+	return tok.MatchedOperator(tokenMap)
+}
+
+func (tok *Token) MatchedOperator(
+
+	tokenMap map[string]NodeKind,
+) (NodeKind, bool) {
+
+	if !tok.IsKind(TK_OPERATOR) {
+		return "", false
+	}
+
+	if kind, exists := tokenMap[tok.Val]; exists {
+		return kind, true
+	}
+
+	return "", false
+}
+
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {

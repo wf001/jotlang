@@ -23,54 +23,6 @@ func newNodeScalar(ty mTypes.ModoType, val string) *mTypes.Node {
 	}
 }
 
-func matchedNary(tok *mTypes.Token) (mTypes.NodeKind, bool) {
-	var tokenMap = map[string]mTypes.NodeKind{
-		mTypes.NARY_OPERATOR_ADD: mTypes.ND_ADD,
-	}
-
-	return matchedOperator(tok, tokenMap)
-}
-
-func matchedBinary(tok *mTypes.Token) (mTypes.NodeKind, bool) {
-	var tokenMap = map[string]mTypes.NodeKind{
-		mTypes.BINARY_OPERATOR_EQ: mTypes.ND_EQ,
-	}
-
-	return matchedOperator(tok, tokenMap)
-}
-
-func matchedOperator(
-	tok *mTypes.Token,
-	tokenMap map[string]mTypes.NodeKind,
-) (mTypes.NodeKind, bool) {
-
-	if !tok.IsKind(mTypes.TK_OPERATOR) {
-		return "", false
-	}
-
-	if kind, exists := tokenMap[tok.Val]; exists {
-		return kind, true
-	}
-
-	return "", false
-}
-
-func matchedType(
-	tok *mTypes.Token,
-) (mTypes.ModoType, bool) {
-	var typeMap = map[string]mTypes.ModoType{
-		mTypes.TK_TYPE_INT: mTypes.TY_INT32,
-		mTypes.TK_TYPE_STR: mTypes.TY_STR,
-		mTypes.TK_TYPE_NIL: mTypes.TY_NIL,
-	}
-
-	if kind, exists := typeMap[tok.Kind]; exists {
-		return kind, true
-	}
-
-	return "", false
-}
-
 func parseExprs(
 	rootToken *mTypes.Token,
 	exprKind mTypes.NodeKind,
@@ -153,10 +105,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			tok = tok.Next
 			for {
 
-				nextToken, nodeVar := parseDeclare(tok, mTypes.ND_DECLARE)
-				tok = nextToken
-
-				prev.Next = nodeVar
+				tok, prev.Next = parseDeclare(tok, mTypes.ND_DECLARE)
 				prev = prev.Next
 
 				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
@@ -175,12 +124,12 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 			return nextToken, bind
 
-		} else if kind, isNary := matchedNary(tok); isNary {
+		} else if kind, isNary := tok.MatchedNary(); isNary {
 			log.Debug("is nary operator :have %+v", tok)
 			tok, head = parseBody(tok, kind, tok.Val)
 			head.Type = mTypes.TY_INT32
 
-		} else if kind, isBinary := matchedBinary(tok); isBinary {
+		} else if kind, isBinary := tok.MatchedBinary(); isBinary {
 			log.Debug("is binary operator :have %+v", tok)
 			tok, head = parseBody(tok, kind, tok.Val)
 			// FIXME: TY_INT32 => TY_BOOL
@@ -229,7 +178,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 					if !tok.IsKindType() {
 						break
 					}
-					ty, _ := matchedType(tok)
+					ty, _ := tok.MatchedType()
 					typeList.Type = ty
 					typeList.Next = &mTypes.Node{}
 					typeList = typeList.Next

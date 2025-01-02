@@ -9,32 +9,28 @@ import (
 
 func TestMatchedNary(t *testing.T) {
 	// is nary
-	res, ok := matchedNary(
-		&mTypes.Token{Kind: mTypes.TK_OPERATOR, Val: mTypes.NARY_OPERATOR_ADD},
-	)
+	tok := &mTypes.Token{Kind: mTypes.TK_OPERATOR, Val: mTypes.NARY_OPERATOR_ADD}
+	res, ok := tok.MatchedNary()
 	assert.EqualValues(t, true, ok)
 	assert.EqualValues(t, mTypes.ND_ADD, res)
 
 	// is not nary
-	res, ok = matchedNary(
-		&mTypes.Token{Kind: mTypes.TK_BIND, Val: mTypes.SYMBOL_LET},
-	)
+	tok = &mTypes.Token{Kind: mTypes.TK_BIND, Val: mTypes.SYMBOL_LET}
+	res, ok = tok.MatchedNary()
 	assert.EqualValues(t, false, ok)
 	assert.EqualValues(t, "", res)
 }
 
 func TestMatchedBinary(t *testing.T) {
 	// is binary
-	res, ok := matchedBinary(
-		&mTypes.Token{Kind: mTypes.TK_OPERATOR, Val: mTypes.BINARY_OPERATOR_EQ},
-	)
+	tok := &mTypes.Token{Kind: mTypes.TK_OPERATOR, Val: mTypes.BINARY_OPERATOR_EQ}
+	res, ok := tok.MatchedBinary()
 	assert.EqualValues(t, true, ok)
 	assert.EqualValues(t, mTypes.ND_EQ, res)
 
 	// is not binary
-	res, ok = matchedNary(
-		&mTypes.Token{Kind: mTypes.TK_BIND, Val: mTypes.SYMBOL_LET},
-	)
+	tok = &mTypes.Token{Kind: mTypes.TK_BIND, Val: mTypes.SYMBOL_LET}
+	res, ok = tok.MatchedNary()
 	assert.EqualValues(t, false, ok)
 	assert.EqualValues(t, "", res)
 }
