@@ -289,21 +289,25 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
 
 		ctx.block = condBlock
+		node.CondRet = ctx.block.NewAlloca(types.I32)
 		cond := ctx.gen(node.Cond)
 
-		// NOTE: can not declare after then/else gen
-		exitBlock.NewRet(newI32("0"))
+		exitBlock.NewRet(exitBlock.NewLoad(types.I32, node.CondRet))
 
 		thenBlock.NewBr(exitBlock)
 		elseBlock.NewBr(exitBlock)
 
 		ctx.block = thenBlock
-		ctx.gen(node.Then)
+		res := ctx.gen(node.Then)
+		ctx.block.NewStore(res, node.CondRet)
 
 		ctx.block = elseBlock
-		ctx.gen(node.Else)
+		res = ctx.gen(node.Else)
+		ctx.block.NewStore(res, node.CondRet)
 
 		condBlock.NewCondBr(cond, thenBlock, elseBlock)
+
+		// need conditionally ret
 
 	} else if node.IsKind(mTypes.ND_SCALAR) {
 		if node.IsType(mTypes.TY_INT32) {

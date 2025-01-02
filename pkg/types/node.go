@@ -81,6 +81,7 @@ type Node struct {
 	Type    ModoType
 	Child   *Node
 	Cond    *Node
+	CondRet *ir.InstAlloca
 	Then    *Node
 	Else    *Node
 	Val     string
