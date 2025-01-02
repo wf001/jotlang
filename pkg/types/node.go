@@ -125,6 +125,15 @@ func (v *Node) GetBlockName(s string) string {
 	return fmt.Sprintf("%s.%p", s, v)
 }
 
+// Returns the last node of the linked list.
+func (v *Node) GetLastNode() *Node {
+	lastScope := v
+	for lastScope.Next != nil {
+		lastScope = lastScope.Next
+	}
+	return lastScope
+}
+
 // debug
 func indicate(s string, depth int) {
 	log.Debug(

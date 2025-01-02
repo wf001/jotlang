@@ -83,14 +83,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			// means declaring global variable or function named except main
 
 			// define function return type
-			var retType types.Type
-			if node.IsType(mTypes.TY_INT32) {
-				retType = types.I32
-			} else if node.IsType(mTypes.TY_STR) {
-				retType = types.I8Ptr
-			} else if node.IsType(mTypes.TY_NIL) {
-				retType = types.I32
-			}
+			retType := node.GetLLVMType()
 			funcName := fmt.Sprintf("fn.%s", node.Val)
 
 			var arg []value.Value
@@ -98,14 +91,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 			// define arguments type of function
 			for a := node.Child.Args; a != nil; a = a.Next {
-				var t types.Type
-				if a.IsType(mTypes.TY_INT32) {
-					t = types.I32
-				} else if a.IsType(mTypes.TY_STR) {
-					t = types.I8Ptr
-				} else if a.IsType(mTypes.TY_NIL) {
-					t = types.I32
-				}
+				t := a.GetLLVMType()
 
 				arg = append(arg, ir.NewParam(a.Val, t))
 				argp = append(argp, ir.NewParam(a.Val, t))
@@ -145,14 +131,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 						param = ctx.function.Params[i]
 					}
 				}
-				if arg.IsType(mTypes.TY_INT32) {
-					node.Type = mTypes.TY_INT32
-					return param
+				node.Type = arg.Type
+				return param
 
-				} else if arg.IsType(mTypes.TY_STR) {
-					node.Type = mTypes.TY_STR
-					return param
-				}
 			}
 		}
 
@@ -201,10 +182,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		if ctx.scope == nil {
 			ctx.scope = node.Bind
 		} else {
-			lastScope := ctx.scope
-			for lastScope.Next != nil {
-				lastScope = lastScope.Next
-			}
+			lastScope := ctx.scope.GetLastNode()
 			lastScope.Next = node.Bind
 		}
 
