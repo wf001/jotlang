@@ -197,13 +197,14 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		return funcFn
 
 	} else if node.IsKind(mTypes.ND_BIND) {
+		var lastScope *mTypes.Node
+		for s := ctx.scope; s != nil; s = s.Next {
+			lastScope = s
+		}
+		lastScope.Next = node.Bind
+
 		for bind := node.Bind; bind != nil; bind = bind.Next {
 			v := ctx.gen(bind.Child)
-			if ctx.scope.Child == nil {
-				ctx.scope = bind
-			} else {
-				ctx.scope.Next = bind
-			}
 
 			if bind.Type == mTypes.TY_INT32 {
 				bind.VarPtr = ctx.block.NewAlloca(types.I32)
@@ -214,6 +215,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			}
 
 		}
+
 		return ctx.gen(node.Child)
 
 	} else if node.IsKind(mTypes.ND_EXPR) {
