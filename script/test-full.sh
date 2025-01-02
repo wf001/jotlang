@@ -49,7 +49,8 @@ testexec(){
   assertexec '(def f ::int => int (fn [a] (let [yes ::int 123 another ::int 456 no ::int 789] (if (= 2 (+ 1 a)) yes (if (= 0 0) another no))))) (def main ::int (fn [] (prn (f 1))))' "123\\\n"
   assertexec '(def f ::int => int (fn [a] (let [yes ::int 123 another ::int 456 no ::int 789] (if (= 2 (+ 1 a)) yes (if (= 0 0) another no))))) (def main ::int (fn [] (prn (f 2))))' "456\\\n"
   assertexec '(def f ::int => int (fn [a] (let [yes ::int 123 another ::int 456 no ::int 789] (if (= 2 (+ 1 a)) yes (if (= 1 0) another no))))) (def main ::int (fn [] (prn (f 2))))' "789\\\n"
-
+  assertexec '(def main ::int (fn [] (let [x ::int 1] (let [y ::int (+ x 2)] (prn (+ x y))))))' "4\\\n"
+  assertexec '(def main ::int (fn [] (let [x ::int 1] (let [y ::int (+ x 2)] (prn y)))))' "3\\\n"
 
   ## if
   echo "== if ==="
