@@ -67,7 +67,15 @@ testexec(){
   assertexec '(def f ::int => int (fn [a] (if (= 1 a) 123 (if (= 0 1) 456 789)))) (def main ::int (fn [] (prn (f 1))))' "123\\\n"
   assertexec '(def f ::int => int (fn [a] (if (= 1 a) 123 (if (= 0 0) 456 789)))) (def main ::int (fn [] (prn (f 2))))' "456\\\n"
   assertexec '(def f ::int => int (fn [a] (if (= 1 a) 123 (if (= 0 1) 456 789)))) (def main ::int (fn [] (prn (f 2))))' "789\\\n"
+
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) (if (= 0 0) 123 456) 789))) (def main ::int (fn [] (prn (f 1))))' "123\\\n"
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) (if (= 0 1) 123 456) 789))) (def main ::int (fn [] (prn (f 1))))' "456\\\n"
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) (if (= 0 0) 123 456) 789))) (def main ::int (fn [] (prn (f 2))))' "789\\\n"
+  assertexec '(def f ::int => int (fn [a] (if (= 1 a) (if (= 0 1) 123 456) 789))) (def main ::int (fn [] (prn (f 2))))' "789\\\n"
+
   assertexec '(def f ::int => int (fn [a] (if (= 1 a) (+ 1 1) (if (= 0 1) (+ 1 2) (+ 1 3))))) (def main ::int (fn [] (prn (f 1))))' "2\\\n"
+  assertexec '(def f ::int => string (fn [a] (if (= 1 a) "y" "n"))) (def main ::int (fn [] (prn (f 1))))' "y\\\n"
+  assertexec '(def f ::int => string (fn [a] (if (= 1 a) "y" "n"))) (def main ::int (fn [] (prn (f 2))))' "n\\\n"
 
 
   ## string type
