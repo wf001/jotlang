@@ -103,9 +103,6 @@ func (node *Node) IsKindNary() bool {
 func (node *Node) IsKindBinary() bool {
 	return node.IsKind(ND_EQ)
 }
-func (node *Node) IsKindConvertibleToInt32() bool {
-	return node.IsKind(ND_SCALAR)
-}
 
 // pred type
 func (node *Node) IsType(ty ModoType) bool {

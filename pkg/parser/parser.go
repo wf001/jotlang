@@ -248,7 +248,6 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 			prevDeclare = prevDeclare.Next
 		}
 	}
-	// TODO: confirm all token read
 	return p
 }
 

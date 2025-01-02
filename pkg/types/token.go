@@ -73,7 +73,7 @@ func (tok *Token) MatchedNary() (NodeKind, bool) {
 		NARY_OPERATOR_ADD: ND_ADD,
 	}
 
-	return tok.MatchedOperator(tokenMap)
+	return tok.matchedOperator(tokenMap)
 }
 
 func (tok *Token) MatchedBinary() (NodeKind, bool) {
@@ -81,11 +81,10 @@ func (tok *Token) MatchedBinary() (NodeKind, bool) {
 		BINARY_OPERATOR_EQ: ND_EQ,
 	}
 
-	return tok.MatchedOperator(tokenMap)
+	return tok.matchedOperator(tokenMap)
 }
 
-func (tok *Token) MatchedOperator(
-
+func (tok *Token) matchedOperator(
 	tokenMap map[string]NodeKind,
 ) (NodeKind, bool) {
 
