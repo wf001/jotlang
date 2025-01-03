@@ -58,6 +58,68 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 	return str
 }
 
+func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
+	if node.Val == "main" {
+		// means declaring main function regarded as entrypoint
+
+		fnc := ctx.mod.NewFunc(
+			"main",
+			types.I32,
+		)
+		llBlock := fnc.NewBlock("")
+
+		ctx.function = fnc
+		ctx.block = llBlock
+		res := ctx.gen(node.Child)
+		llBlock.NewCall(res)
+		llBlock.NewRet(newI32("0"))
+
+	} else {
+		// means declaring global variable or function named except main
+
+		// define function return type
+		retType := node.GetLLVMType()
+		funcName := node.GetFuncName()
+
+		var arg []value.Value
+		var argp []*ir.Param
+
+		// define arguments type of function
+		for a := node.Child.Args; a != nil; a = a.Next {
+			t := a.GetLLVMType()
+
+			arg = append(arg, ir.NewParam(a.Val, t))
+			argp = append(argp, ir.NewParam(a.Val, t))
+		}
+
+		fnc := ctx.mod.NewFunc(
+			funcName,
+			retType,
+			argp...,
+		)
+		llBlock := fnc.NewBlock("")
+
+		ctx.function = fnc
+		ctx.argument = node.Child.Args
+		ctx.block = llBlock
+		res := ctx.gen(node.Child)
+		if node.Child.IsKind(mTypes.ND_LAMBDA) {
+			r := llBlock.NewCall(res, arg...)
+			node.FuncPtr = fnc
+			if r.Type() != types.Void {
+				llBlock.NewRet(r)
+			} else {
+				llBlock.NewRet(nil)
+			}
+		} else {
+			node.FuncPtr = fnc
+			llBlock.NewRet(res)
+		}
+
+	}
+	return nil
+}
+
 // TODO: reorder blocks
 func (ctx *context) gen(node *mTypes.Node) value.Value {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
@@ -65,64 +127,8 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		return ctx.gen(node.Child)
 
 	} else if node.IsKind(mTypes.ND_VAR_DECLARE) {
-		if node.Val == "main" {
-			// means declaring main function regarded as entrypoint
+		ctx.genVarDeclare(node)
 
-			fnc := ctx.mod.NewFunc(
-				"main",
-				types.I32,
-			)
-			llBlock := fnc.NewBlock("")
-
-			ctx.function = fnc
-			ctx.block = llBlock
-			res := ctx.gen(node.Child)
-			llBlock.NewCall(res)
-			llBlock.NewRet(newI32("0"))
-
-		} else {
-			// means declaring global variable or function named except main
-
-			// define function return type
-			retType := node.GetLLVMType()
-			funcName := node.GetFuncName()
-
-			var arg []value.Value
-			var argp []*ir.Param
-
-			// define arguments type of function
-			for a := node.Child.Args; a != nil; a = a.Next {
-				t := a.GetLLVMType()
-
-				arg = append(arg, ir.NewParam(a.Val, t))
-				argp = append(argp, ir.NewParam(a.Val, t))
-			}
-
-			fnc := ctx.mod.NewFunc(
-				funcName,
-				retType,
-				argp...,
-			)
-			llBlock := fnc.NewBlock("")
-
-			ctx.function = fnc
-			ctx.argument = node.Child.Args
-			ctx.block = llBlock
-			res := ctx.gen(node.Child)
-			if node.Child.IsKind(mTypes.ND_LAMBDA) {
-				r := llBlock.NewCall(res, arg...)
-				node.FuncPtr = fnc
-				if r.Type() != types.Void {
-					llBlock.NewRet(r)
-				} else {
-					llBlock.NewRet(nil)
-				}
-			} else {
-				node.FuncPtr = fnc
-				llBlock.NewRet(res)
-			}
-
-		}
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		// PERFORMANCE: too redundant
 		// TODO: prohibit same name identify between global var, binded variable and function argument
