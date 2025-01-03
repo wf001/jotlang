@@ -110,12 +110,12 @@ func (node *Node) IsType(ty ModoType) bool {
 }
 
 // naming
+func (v *Node) GetUnnamedFuncName() string {
+	return fmt.Sprintf("fn.%s.%p", "unnamed", v)
+}
+
 func (v *Node) GetFuncName() string {
-	s := v.Val
-	if s == "" {
-		s = "unnamed"
-	}
-	return fmt.Sprintf("fn.%s.%p", s, v)
+	return fmt.Sprintf("fn.%s", v.Val)
 }
 
 func (v *Node) GetBlockName(s string) string {

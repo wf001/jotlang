@@ -84,7 +84,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 			// define function return type
 			retType := node.GetLLVMType()
-			funcName := fmt.Sprintf("fn.%s", node.Val)
+			funcName := node.GetFuncName()
 
 			var arg []value.Value
 			var argp []*ir.Param
@@ -163,7 +163,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
 
 		funcFn := ctx.mod.NewFunc(
-			node.GetFuncName(),
+			node.GetUnnamedFuncName(),
 			ctx.function.Sig.RetType,
 			ctx.function.Params...,
 		)
@@ -228,7 +228,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 
 		for i := 0; i < len(ctx.mod.Funcs); i = i + 1 {
-			if ctx.mod.Funcs[i].GlobalName == fmt.Sprintf("fn.%s", node.Val) {
+			if ctx.mod.Funcs[i].GlobalName == node.GetFuncName() {
 				return ctx.block.NewCall(ctx.mod.Funcs[i], arg...)
 			}
 
