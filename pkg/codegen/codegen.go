@@ -58,6 +58,7 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 	return str
 }
 
+// TODO: reorder blocks
 func (ctx *context) gen(node *mTypes.Node) value.Value {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
 	if node.IsKind(mTypes.ND_DECLARE) {
@@ -166,9 +167,11 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
 
+		// NOTE: better to separate between main and not main
 		var retType types.Type
-		parentFuncName := ctx.function.GlobalName
-		if parentFuncName == "main" {
+		isParentMain := ctx.function.GlobalName == "main"
+
+		if isParentMain {
 			retType = types.Void
 		} else {
 			retType = ctx.function.Sig.RetType
@@ -183,11 +186,13 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		ctx.function = funcFn
 		ctx.block = llBlock
 
-		if parentFuncName == "main" {
+		if isParentMain {
 			llBlock.NewRet(nil)
 		}
+
 		res := ctx.gen(node.Child)
-		if parentFuncName != "main" && llBlock.Term == nil {
+
+		if !isParentMain && llBlock.Term == nil {
 			llBlock.NewRet(res)
 		}
 
