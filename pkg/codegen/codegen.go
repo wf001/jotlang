@@ -120,6 +120,51 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 	return nil
 }
 
+func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
+	// PERFORMANCE: too redundant
+	// TODO: prohibit same name identify between global var, binded variable and function argument
+
+	// find in variable which is passed as function argument
+	for arg := ctx.argument; arg != nil; arg = arg.Next {
+		if arg.Val == node.Val {
+			var param value.Value
+			for i := 0; i < len(ctx.function.Params); i = i + 1 {
+				if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
+					param = ctx.function.Params[i]
+				}
+			}
+			node.Type = arg.Type
+			return param
+
+		}
+	}
+
+	// find in local variable which is declared with let
+	for scope := ctx.scope; scope != nil; scope = scope.Next {
+		if scope.Val == node.Val {
+			if scope.Child.IsType(mTypes.TY_INT32) {
+				node.Type = mTypes.TY_INT32
+				return ctx.block.NewLoad(types.I32, scope.VarPtr)
+
+			} else if scope.Child.IsType(mTypes.TY_STR) {
+				node.Type = mTypes.TY_STR
+				return scope.VarPtr
+			}
+		}
+	}
+
+	// find in global variable which is declared with def
+	for declare := ctx.prog.Declares; declare != nil; declare = declare.Next {
+		if declare.Child.Val == node.Val {
+			return ctx.block.NewCall(declare.Child.FuncPtr)
+		}
+	}
+
+	log.Panic("unresolved symbol: '%s'", node.Val)
+
+	return nil
+}
+
 // TODO: reorder blocks
 func (ctx *context) gen(node *mTypes.Node) value.Value {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
@@ -130,46 +175,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		ctx.genVarDeclare(node)
 
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
-		// PERFORMANCE: too redundant
-		// TODO: prohibit same name identify between global var, binded variable and function argument
-
-		// find in variable which is passed as function argument
-		for arg := ctx.argument; arg != nil; arg = arg.Next {
-			if arg.Val == node.Val {
-				var param value.Value
-				for i := 0; i < len(ctx.function.Params); i = i + 1 {
-					if ctx.function.Params[i].LocalIdent.LocalName == node.Val {
-						param = ctx.function.Params[i]
-					}
-				}
-				node.Type = arg.Type
-				return param
-
-			}
-		}
-
-		// find in local variable which is declared with let
-		for scope := ctx.scope; scope != nil; scope = scope.Next {
-			if scope.Val == node.Val {
-				if scope.Child.IsType(mTypes.TY_INT32) {
-					node.Type = mTypes.TY_INT32
-					return ctx.block.NewLoad(types.I32, scope.VarPtr)
-
-				} else if scope.Child.IsType(mTypes.TY_STR) {
-					node.Type = mTypes.TY_STR
-					return scope.VarPtr
-				}
-			}
-		}
-
-		// find in global variable which is declared with def
-		for declare := ctx.prog.Declares; declare != nil; declare = declare.Next {
-			if declare.Child.Val == node.Val {
-				return ctx.block.NewCall(declare.Child.FuncPtr)
-			}
-		}
-
-		log.Panic("unresolved symbol: '%s'", node.Val)
+		return ctx.genVarReference(node)
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
 
