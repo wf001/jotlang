@@ -68,7 +68,7 @@ func add(kind mTypes.TokenKind, val string) *mTypes.Token {
 	}
 }
 
-func buildTokenList(tokens []*mTypes.Token) *mTypes.Token {
+func buildToken(tokens []*mTypes.Token) *mTypes.Token {
 	for i := 0; i < len(tokens)-1; i++ {
 		tokens[i].Next = tokens[i+1]
 	}
@@ -84,7 +84,7 @@ func TestLexOperationAdd(t *testing.T) {
 		add(mTypes.TK_PAREN, ")"),
 	}
 
-	want := buildTokenList(tokens)
+	want := buildToken(tokens)
 
 	assert.EqualValues(t, want, Lex("(+ 1 2)"))
 }
@@ -106,7 +106,7 @@ func TestLexOperationAddTakingAdd(t *testing.T) {
 		add(mTypes.TK_PAREN, ")"),
 	}
 
-	want := buildTokenList(tokens)
+	want := buildToken(tokens)
 
 	assert.EqualValues(t, want, Lex("(+ (+ 1 2) (+ 3 4))"))
 }
