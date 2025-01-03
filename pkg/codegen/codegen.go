@@ -165,6 +165,47 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 	return nil
 }
 
+func (ctx *context) genLambda(node *mTypes.Node) value.Value {
+	isParentMain := ctx.function.GlobalName == "main"
+	unnamedFuncName := node.GetUnnamedFuncName()
+	fnEntryBlockName := "fn.entry"
+
+	if isParentMain {
+		funcFn := ctx.mod.NewFunc(
+			unnamedFuncName,
+			types.Void,
+			ctx.function.Params...,
+		)
+		llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName))
+
+		ctx.function = funcFn
+		ctx.block = llBlock
+		llBlock.NewRet(nil)
+
+		ctx.gen(node.Child)
+
+		return funcFn
+
+	} else {
+		funcFn := ctx.mod.NewFunc(
+			unnamedFuncName,
+			ctx.function.Sig.RetType,
+			ctx.function.Params...,
+		)
+		llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName))
+
+		ctx.function = funcFn
+		ctx.block = llBlock
+
+		res := ctx.gen(node.Child)
+
+		if llBlock.Term == nil {
+			llBlock.NewRet(res)
+		}
+		return funcFn
+	}
+}
+
 func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
 	ctx.block.NewBr(condBlock)
@@ -221,45 +262,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		return ctx.genVarReference(node)
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
-
-		isParentMain := ctx.function.GlobalName == "main"
-		unnamedFuncName := node.GetUnnamedFuncName()
-		fnEntryBlockName := "fn.entry"
-
-		if isParentMain {
-			funcFn := ctx.mod.NewFunc(
-				unnamedFuncName,
-				types.Void,
-				ctx.function.Params...,
-			)
-			llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName))
-
-			ctx.function = funcFn
-			ctx.block = llBlock
-			llBlock.NewRet(nil)
-
-			ctx.gen(node.Child)
-
-			return funcFn
-
-		} else {
-			funcFn := ctx.mod.NewFunc(
-				unnamedFuncName,
-				ctx.function.Sig.RetType,
-				ctx.function.Params...,
-			)
-			llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName))
-
-			ctx.function = funcFn
-			ctx.block = llBlock
-
-			res := ctx.gen(node.Child)
-
-			if llBlock.Term == nil {
-				llBlock.NewRet(res)
-			}
-			return funcFn
-		}
+		return ctx.genLambda(node)
 
 	} else if node.IsKind(mTypes.ND_BIND) {
 		// add node.Bind to last element of ctx.scope
@@ -282,7 +285,6 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			}
 
 		}
-
 		return ctx.gen(node.Child)
 
 	} else if node.IsKind(mTypes.ND_EXPR) {
@@ -291,6 +293,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			res = ctx.gen(child)
 		}
 		return res
+
+	} else if node.IsKind(mTypes.ND_IF) {
+		ctx.genCondition(node)
 
 	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library
@@ -348,9 +353,6 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		binary := operatorInsts[node.Kind]
 		res := binary(ctx.block, fst, snd)
 		return res
-
-	} else if node.IsKind(mTypes.ND_IF) {
-		ctx.genCondition(node)
 
 	} else if node.IsKind(mTypes.ND_SCALAR) {
 		if node.IsType(mTypes.TY_INT32) {
