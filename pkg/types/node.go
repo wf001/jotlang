@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
 	"github.com/wf001/modo/pkg/log"
@@ -110,25 +111,39 @@ func (node *Node) IsType(ty ModoType) bool {
 }
 
 // naming
-func (v *Node) GetUnnamedFuncName() string {
-	return fmt.Sprintf("fn.%s.%p", "unnamed", v)
+func (node *Node) GetUnnamedFuncName() string {
+	return fmt.Sprintf("fn.%s.%p", "unnamed", node)
 }
 
-func (v *Node) GetFuncName() string {
-	return fmt.Sprintf("fn.%s", v.Val)
+func (node *Node) GetFuncName() string {
+	return fmt.Sprintf("fn.%s", node.Val)
 }
 
-func (v *Node) GetBlockName(s string) string {
-	return fmt.Sprintf("%s.%p", s, v)
+func (node *Node) GetBlockName(s string) string {
+	return fmt.Sprintf("%s.%p", s, node)
 }
 
 // Returns the last node of the linked list.
-func (v *Node) GetLastNode() *Node {
-	lastNode := v
+func (node *Node) GetLastNode() *Node {
+	lastNode := node
 	for lastNode.Next != nil {
 		lastNode = lastNode.Next
 	}
 	return lastNode
+}
+
+// Get LLVM type from corresponding custom type
+func (node *Node) GetLLVMType() types.Type {
+	var retType types.Type
+
+	if node.IsType(TY_INT32) {
+		return types.I32
+	} else if node.IsType(TY_STR) {
+		return types.I8Ptr
+	} else if node.IsType(TY_NIL) {
+		return types.Void
+	}
+	return retType
 }
 
 // debug

@@ -2,7 +2,6 @@ package lib
 
 import (
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -17,7 +16,7 @@ func declarePrintf(
 ) {
 	printfFunc := module.NewFunc(
 		"printf",
-		types.I32,
+		types.Void,
 		ir.NewParam("format", types.I8Ptr),
 	)
 	printfFunc.Sig.Variadic = true
@@ -66,6 +65,6 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 
 		}
 		// todo: return nil
-		return constant.NewInt(types.I32, 0)
+		return nil
 	},
 }

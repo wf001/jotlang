@@ -59,7 +59,7 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 }
 
 func (ctx *context) gen(node *mTypes.Node) value.Value {
-
+	log.Debug(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
 	if node.IsKind(mTypes.ND_DECLARE) {
 		return ctx.gen(node.Child)
 
@@ -111,7 +111,11 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			if node.Child.IsKind(mTypes.ND_LAMBDA) {
 				r := llBlock.NewCall(res, arg...)
 				node.FuncPtr = fnc
-				llBlock.NewRet(r)
+				if r.Type() != types.Void {
+					llBlock.NewRet(r)
+				} else {
+					llBlock.NewRet(nil)
+				}
 			} else {
 				node.FuncPtr = fnc
 				llBlock.NewRet(res)
@@ -162,19 +166,31 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
 
+		var retType types.Type
+		parentFuncName := ctx.function.GlobalName
+		if parentFuncName == "main" {
+			retType = types.Void
+		} else {
+			retType = ctx.function.Sig.RetType
+		}
 		funcFn := ctx.mod.NewFunc(
 			node.GetUnnamedFuncName(),
-			ctx.function.Sig.RetType,
+			retType,
 			ctx.function.Params...,
 		)
 		llBlock := funcFn.NewBlock(node.GetBlockName("fn.entry"))
 
 		ctx.function = funcFn
 		ctx.block = llBlock
+
+		if parentFuncName == "main" {
+			llBlock.NewRet(nil)
+		}
 		res := ctx.gen(node.Child)
-		if res != nil {
+		if parentFuncName != "main" && llBlock.Term == nil {
 			llBlock.NewRet(res)
 		}
+
 		return funcFn
 
 	} else if node.IsKind(mTypes.ND_BIND) {
@@ -276,12 +292,18 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		// cond
 		ctx.block = condBlock
 		// NOTE: is it the type truely?
-		node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
+		if ctx.function.Sig.RetType != types.Void {
+			node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
+		}
 		cond := ctx.gen(node.Cond)
 
 		// exit
 		// NOTE: is it the type truely?
-		exitBlock.NewRet(exitBlock.NewLoad(ctx.function.Sig.RetType, node.CondRet))
+		if ctx.function.Sig.RetType == types.Void {
+			exitBlock.NewRet(nil)
+		} else {
+			exitBlock.NewRet(exitBlock.NewLoad(ctx.function.Sig.RetType, node.CondRet))
+		}
 
 		ctx.block = thenBlock
 		ctx.block.NewBr(exitBlock)
