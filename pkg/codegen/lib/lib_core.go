@@ -64,7 +64,6 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 			}
 
 		}
-		// todo: return nil
 		return nil
 	},
 }
