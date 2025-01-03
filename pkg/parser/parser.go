@@ -53,6 +53,62 @@ func parseBody(
 	return nextToken, rootNode
 }
 
+func parseIdent(
+	tok *mTypes.Token,
+	head *mTypes.Node,
+	parentKind mTypes.NodeKind,
+) (*mTypes.Token, *mTypes.Node) {
+	if parentKind == mTypes.ND_DECLARE {
+		log.Debug("is Variable declaration :have %+v", tok)
+
+		identName := tok.Val
+		typeList := &mTypes.Node{}
+		h := typeList
+
+		if tok.Next.IsKind(mTypes.TK_TYPE_SIG) {
+			tok = tok.Next.Next
+			for {
+				if !tok.IsKindType() {
+					break
+				}
+				ty, _ := tok.MatchedType()
+				typeList.Type = ty
+				typeList.Next = &mTypes.Node{}
+				typeList = typeList.Next
+
+				tok = tok.Next
+				if tok.IsKind(mTypes.TK_TYPE_ARROW) {
+					tok = tok.Next
+				}
+			}
+		} else {
+			log.Panic("must be :: :have %+v", tok)
+		}
+
+		tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
+		if head.Args != nil {
+			for a := head.Args; a != nil; a = a.Next {
+				if h.Type == "" {
+					log.Panic("type required :have %+v, %+v", typeList, a)
+				}
+				a.Type = h.Type
+				h = h.Next
+			}
+
+		}
+
+		child := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
+		child.Type = h.Type
+		return tok, child
+
+	} else {
+		log.Debug("is Variable reference :have %+v", tok)
+		return tok.Next, newNodeParent(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+
+	}
+
+}
+
 // NOTE: typed at here: ND_SCALAR, ND_VAR_DECLARE, ND_VAR_REFERENCE(Args), ND_EQ, ND_ADD
 func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token, *mTypes.Node) {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
@@ -165,54 +221,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		return tok.Next, head
 
 	} else if tok.IsKind(mTypes.TK_IDENT) {
-		if parentKind == mTypes.ND_DECLARE {
-			log.Debug("is Variable declaration :have %+v", tok)
-
-			identName := tok.Val
-			typeList := &mTypes.Node{}
-			h := typeList
-
-			if tok.Next.IsKind(mTypes.TK_TYPE_SIG) {
-				tok = tok.Next.Next
-				for {
-					if !tok.IsKindType() {
-						break
-					}
-					ty, _ := tok.MatchedType()
-					typeList.Type = ty
-					typeList.Next = &mTypes.Node{}
-					typeList = typeList.Next
-
-					tok = tok.Next
-					if tok.IsKind(mTypes.TK_TYPE_ARROW) {
-						tok = tok.Next
-					}
-				}
-			} else {
-				log.Panic("must be :: :have %+v", tok)
-			}
-
-			tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
-			if head.Args != nil {
-				for a := head.Args; a != nil; a = a.Next {
-					if h.Type == "" {
-						log.Panic("type required :have %+v, %+v", typeList, a)
-					}
-					a.Type = h.Type
-					h = h.Next
-				}
-
-			}
-
-			child := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
-			child.Type = h.Type
-			return tok, child
-
-		} else {
-			log.Debug("is Variable reference :have %+v", tok)
-			return tok.Next, newNodeParent(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
-
-		}
+		return parseIdent(tok, head, parentKind)
 
 	} else if tok.IsKind(mTypes.TK_INT) {
 		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
