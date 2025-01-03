@@ -9,15 +9,10 @@ import (
 )
 
 // defines the structure for token patterns as a linked list
-type tokenPatternStruct struct {
+type tokenPattern struct {
 	Pattern   string
 	TokenType string
-	Next      *tokenPatternStruct
-}
-
-// holds the head of the linked list of TokenPatternStruct
-type tokenMap struct {
-	Head *tokenPatternStruct
+	Next      *tokenPattern
 }
 
 func isMatched(s string, typ string) bool {
@@ -26,8 +21,8 @@ func isMatched(s string, typ string) bool {
 }
 
 // traverses the linked list to find a matching pattern and returns the TokenType
-func (tm *tokenMap) match(input string) (string, bool) {
-	current := tm.Head
+func (tm *tokenPattern) matchTokenType(input string) (string, bool) {
+	current := tm
 	for current != nil {
 		if isMatched(input, current.Pattern) {
 			return current.TokenType, true
@@ -38,16 +33,15 @@ func (tm *tokenMap) match(input string) (string, bool) {
 }
 
 // initializes a TokenMap with predefined patterns and token types
-func newTokenMap() *tokenMap {
-	head := &tokenPatternStruct{
+func newTokenMap() *tokenPattern {
+	head := &tokenPattern{
 		Pattern:   mTypes.INTEGER_REG_EXP,
 		TokenType: mTypes.TK_INT,
 	}
 	current := head
 
-	// Helper function to add a new pattern to the linked list
 	add := func(pattern, tokenType string) {
-		newNode := &tokenPatternStruct{
+		newNode := &tokenPattern{
 			Pattern:   pattern,
 			TokenType: tokenType,
 		}
@@ -55,7 +49,6 @@ func newTokenMap() *tokenMap {
 		current = newNode
 	}
 
-	// Define all patterns and their types
 	add(mTypes.SYMBOL_TYPE_SIG, mTypes.TK_TYPE_SIG)
 	add(mTypes.SYMBOL_TYPE_ARROW, mTypes.TK_TYPE_ARROW)
 	add(mTypes.SYMBOL_TYPE_INT, mTypes.TK_TYPE_INT)
@@ -71,7 +64,7 @@ func newTokenMap() *tokenMap {
 	add(mTypes.SYMBOL_LET, mTypes.TK_BIND)
 	add(mTypes.SYMBOL_IF, mTypes.TK_IF)
 
-	return &tokenMap{Head: head}
+	return head
 }
 
 func newToken(kind mTypes.TokenKind, prev *mTypes.Token, val string) *mTypes.Token {
@@ -104,7 +97,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	tokenMap := newTokenMap()
 
 	for _, p := range splittedString {
-		if tokenType, matched := tokenMap.match(p); matched {
+		if tokenType, matched := tokenMap.matchTokenType(p); matched {
 			prev = newToken(tokenType, prev, p)
 		} else {
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
