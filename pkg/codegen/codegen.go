@@ -187,14 +187,14 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 
 		for bind := node.Bind; bind != nil; bind = bind.Next {
-			v := ctx.gen(bind.Child)
+			child := ctx.gen(bind.Child)
 
 			if bind.Type == mTypes.TY_INT32 {
 				bind.VarPtr = ctx.block.NewAlloca(types.I32)
-				ctx.block.NewStore(v, bind.VarPtr)
+				ctx.block.NewStore(child, bind.VarPtr)
 
 			} else if bind.Type == mTypes.TY_STR {
-				bind.VarPtr = v
+				bind.VarPtr = child
 			}
 
 		}

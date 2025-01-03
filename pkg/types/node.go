@@ -124,11 +124,11 @@ func (v *Node) GetBlockName(s string) string {
 
 // Returns the last node of the linked list.
 func (v *Node) GetLastNode() *Node {
-	lastScope := v
-	for lastScope.Next != nil {
-		lastScope = lastScope.Next
+	lastNode := v
+	for lastNode.Next != nil {
+		lastNode = lastNode.Next
 	}
-	return lastScope
+	return lastNode
 }
 
 // debug
