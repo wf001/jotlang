@@ -165,6 +165,49 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 	return nil
 }
 
+func (ctx *context) genCondition(node *mTypes.Node) value.Value {
+	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
+	ctx.block.NewBr(condBlock)
+
+	thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then"))
+	elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
+	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
+
+	// cond
+	ctx.block = condBlock
+	// NOTE: is it the type truely?
+	if ctx.function.Sig.RetType != types.Void {
+		node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
+	}
+	cond := ctx.gen(node.Cond)
+
+	// exit
+	// NOTE: is it the type truely?
+	if ctx.function.Sig.RetType == types.Void {
+		exitBlock.NewRet(nil)
+	} else {
+		exitBlock.NewRet(exitBlock.NewLoad(ctx.function.Sig.RetType, node.CondRet))
+	}
+
+	ctx.block = thenBlock
+	ctx.block.NewBr(exitBlock)
+	res := ctx.gen(node.Then)
+	if res != nil {
+		ctx.block.NewStore(res, node.CondRet)
+	}
+
+	ctx.block = elseBlock
+	ctx.block.NewBr(exitBlock)
+	res = ctx.gen(node.Else)
+	if res != nil {
+		ctx.block.NewStore(res, node.CondRet)
+	}
+
+	condBlock.NewCondBr(cond, thenBlock, elseBlock)
+	return nil
+
+}
+
 // TODO: reorder blocks
 func (ctx *context) gen(node *mTypes.Node) value.Value {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
@@ -307,44 +350,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		return res
 
 	} else if node.IsKind(mTypes.ND_IF) {
-		condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
-		ctx.block.NewBr(condBlock)
-
-		thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then"))
-		elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
-		exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
-
-		// cond
-		ctx.block = condBlock
-		// NOTE: is it the type truely?
-		if ctx.function.Sig.RetType != types.Void {
-			node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
-		}
-		cond := ctx.gen(node.Cond)
-
-		// exit
-		// NOTE: is it the type truely?
-		if ctx.function.Sig.RetType == types.Void {
-			exitBlock.NewRet(nil)
-		} else {
-			exitBlock.NewRet(exitBlock.NewLoad(ctx.function.Sig.RetType, node.CondRet))
-		}
-
-		ctx.block = thenBlock
-		ctx.block.NewBr(exitBlock)
-		res := ctx.gen(node.Then)
-		if res != nil {
-			ctx.block.NewStore(res, node.CondRet)
-		}
-
-		ctx.block = elseBlock
-		ctx.block.NewBr(exitBlock)
-		res = ctx.gen(node.Else)
-		if res != nil {
-			ctx.block.NewStore(res, node.CondRet)
-		}
-
-		condBlock.NewCondBr(cond, thenBlock, elseBlock)
+		ctx.genCondition(node)
 
 	} else if node.IsKind(mTypes.ND_SCALAR) {
 		if node.IsType(mTypes.TY_INT32) {
