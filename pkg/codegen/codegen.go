@@ -167,36 +167,44 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 	} else if node.IsKind(mTypes.ND_LAMBDA) {
 
-		// NOTE: better to separate between main and not main
-		var retType types.Type
 		isParentMain := ctx.function.GlobalName == "main"
+		unnamedFuncName := node.GetUnnamedFuncName()
+		fnEntryBlockName := "fn.entry"
 
 		if isParentMain {
-			retType = types.Void
-		} else {
-			retType = ctx.function.Sig.RetType
-		}
-		funcFn := ctx.mod.NewFunc(
-			node.GetUnnamedFuncName(),
-			retType,
-			ctx.function.Params...,
-		)
-		llBlock := funcFn.NewBlock(node.GetBlockName("fn.entry"))
+			funcFn := ctx.mod.NewFunc(
+				unnamedFuncName,
+				types.Void,
+				ctx.function.Params...,
+			)
+			llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName))
 
-		ctx.function = funcFn
-		ctx.block = llBlock
-
-		if isParentMain {
+			ctx.function = funcFn
+			ctx.block = llBlock
 			llBlock.NewRet(nil)
+
+			ctx.gen(node.Child)
+
+			return funcFn
+
+		} else {
+			funcFn := ctx.mod.NewFunc(
+				unnamedFuncName,
+				ctx.function.Sig.RetType,
+				ctx.function.Params...,
+			)
+			llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName))
+
+			ctx.function = funcFn
+			ctx.block = llBlock
+
+			res := ctx.gen(node.Child)
+
+			if llBlock.Term == nil {
+				llBlock.NewRet(res)
+			}
+			return funcFn
 		}
-
-		res := ctx.gen(node.Child)
-
-		if !isParentMain && llBlock.Term == nil {
-			llBlock.NewRet(res)
-		}
-
-		return funcFn
 
 	} else if node.IsKind(mTypes.ND_BIND) {
 		// add node.Bind to last element of ctx.scope
