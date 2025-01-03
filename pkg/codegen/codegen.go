@@ -324,34 +324,21 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 		log.Panic("unresolved function name: have %+v", node)
 
-	} else if node.IsKindNary() {
-		// nary takes more than 2 arguments
+	} else if node.IsKindNary() || node.IsKindBinary() {
 		child := node.Child
 		fst := ctx.gen(child)
 
 		child = child.Next
 		snd := ctx.gen(child)
 
-		nary := operatorInsts[node.Kind]
-		res := nary(ctx.block, fst, snd)
+		operation := operatorInsts[node.Kind]
+		res := operation(ctx.block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
 			snd = ctx.gen(child)
-			res = nary(ctx.block, fst, snd)
+			res = operation(ctx.block, fst, snd)
 		}
-		return res
-
-	} else if node.IsKindBinary() {
-		// binary takes exactly 2 arguments
-		child := node.Child
-		fst := ctx.gen(child)
-
-		child = child.Next
-		snd := ctx.gen(child)
-
-		binary := operatorInsts[node.Kind]
-		res := binary(ctx.block, fst, snd)
 		return res
 
 	} else if node.IsKind(mTypes.ND_SCALAR) {
