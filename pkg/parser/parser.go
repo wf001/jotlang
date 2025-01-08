@@ -186,17 +186,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 			return nextToken, bind
 
-			//} else if kind, isNary := tok.MatchedNary(); isNary {
-			//	log.Debug("is nary operator :have %+v", tok)
-			//	tok, head = parseBody(tok, kind, tok.Val)
-			//	head.Type = mTypes.TY_INT32
-
-			//} else if kind, isBinary := tok.MatchedBinary(); isBinary {
-			//	log.Debug("is binary operator :have %+v", tok)
-			//	tok, head = parseBody(tok, kind, tok.Val)
-			//	// FIXME: TY_INT32 => TY_BOOL
-			//	head.Type = mTypes.TY_INT32
-
 		} else if tok.IsKind(mTypes.TK_LIBCALL) {
 			log.Debug("is Library :have %+v", tok)
 			v := tok.Val

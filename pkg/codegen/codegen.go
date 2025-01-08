@@ -255,7 +255,6 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 
 }
 
-// TODO: reorder blocks
 func (ctx *context) gen(node *mTypes.Node) value.Value {
 	log.Debug(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
 	if node.IsKind(mTypes.ND_DECLARE) {
