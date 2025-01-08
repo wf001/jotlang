@@ -306,24 +306,6 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 	} else if node.IsKind(mTypes.ND_IF) {
 		ctx.genCondition(node)
 
-	} else if node.IsKindNary() || node.IsKindBinary() {
-		// TODO: to be same as LibCall, for example prn
-		child := node.Child
-		fst := ctx.gen(child)
-
-		child = child.Next
-		snd := ctx.gen(child)
-
-		operate := operatorInsts[node.Val]
-		res := operate(ctx.block, fst, snd)
-
-		for child = child.Next; child != nil; child = child.Next {
-			fst = res
-			snd = ctx.gen(child)
-			res = operate(ctx.block, fst, snd)
-		}
-		return res
-
 	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library
 		arg := ctx.gen(node.Child)
