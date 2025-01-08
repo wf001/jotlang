@@ -62,8 +62,8 @@ func parseIdent(
 		log.Debug("is Variable declaration :have %+v", tok)
 
 		identName := tok.Val
-		typeList := &mTypes.Node{}
-		h := typeList
+		typeCur := &mTypes.Node{}
+		typeHead := typeCur
 
 		if tok.Next.IsKind(mTypes.TK_TYPE_SIG) {
 			tok = tok.Next.Next
@@ -72,9 +72,9 @@ func parseIdent(
 					break
 				}
 				ty, _ := tok.MatchedType()
-				typeList.Type = ty
-				typeList.Next = &mTypes.Node{}
-				typeList = typeList.Next
+				typeCur.Type = ty
+				typeCur.Next = &mTypes.Node{}
+				typeCur = typeCur.Next
 
 				tok = tok.Next
 				if tok.IsKind(mTypes.TK_TYPE_ARROW) {
@@ -88,17 +88,17 @@ func parseIdent(
 		tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
 		if head.Args != nil {
 			for a := head.Args; a != nil; a = a.Next {
-				if h.Type == "" {
-					log.Panic("type required :have %+v, %+v", typeList, a)
+				if typeHead.Type == "" {
+					log.Panic("type required :have %+v, %+v", typeCur, a)
 				}
-				a.Type = h.Type
-				h = h.Next
+				a.Type = typeHead.Type
+				typeHead = typeHead.Next
 			}
 
 		}
 
 		child := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
-		child.Type = h.Type
+		child.Type = typeHead.Type
 		return tok, child
 
 	} else {
@@ -112,8 +112,8 @@ func parseIdent(
 func parseLambda(tok *mTypes.Token, head *mTypes.Node) (*mTypes.Token, *mTypes.Node) {
 
 	// arguments
-	argHead := &mTypes.Node{}
-	argCur := argHead
+	argCur := &mTypes.Node{}
+	argHead := argCur
 
 	tok = tok.Next
 
@@ -144,7 +144,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
-	// NOTE: too huge
 	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		tok = tok.Next
 
