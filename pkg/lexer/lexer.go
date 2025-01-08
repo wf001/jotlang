@@ -21,10 +21,10 @@ func isMatched(s string, typ string) bool {
 }
 
 // traverses the linked list to find a matching pattern and returns the TokenType
-func (tm *tokenPattern) matchTokenType(input string) (string, bool) {
-	current := tm
+func (tp *tokenPattern) matchTokenType(s string) (string, bool) {
+	current := tp
 	for current != nil {
-		if isMatched(input, current.Pattern) {
+		if isMatched(s, current.Pattern) {
 			return current.TokenType, true
 		}
 		current = current.Next
@@ -32,8 +32,8 @@ func (tm *tokenPattern) matchTokenType(input string) (string, bool) {
 	return "", false
 }
 
-// initializes a TokenMap with predefined patterns and token types
-func newTokenMap() *tokenPattern {
+// initializes a TokenPattern with predefined patterns and token types
+func newTokenPattern() *tokenPattern {
 	head := &tokenPattern{
 		Pattern:   mTypes.INTEGER_REG_EXP,
 		TokenType: mTypes.TK_INT,
@@ -94,7 +94,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	prev := &mTypes.Token{}
 	head := prev
 
-	tokenMap := newTokenMap()
+	tokenMap := newTokenPattern()
 
 	for _, p := range splittedString {
 		if tokenType, matched := tokenMap.matchTokenType(p); matched {
@@ -123,8 +123,10 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 func Lex(s string) *mTypes.Token {
 	log.Debug(log.YELLOW("original source: '%s'"), s)
 	log.DebugMessage("code lexing")
+
 	arr := splitString(s)
 	res := doLexicalAnalyse(arr)
+
 	log.DebugMessage("code lexed")
 	return res
 }
