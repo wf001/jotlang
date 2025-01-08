@@ -27,18 +27,6 @@ const (
 	ND_FUNCCALL      = NodeKind("ND_FUNCCALL")
 	ND_LIBCALL       = NodeKind("ND_LIBCALL")
 
-	// Arithmetic signature
-	ND_ADD = NodeKind("ND_ADD") // +
-	ND_SUB = NodeKind("ND_SUB") // -
-	ND_MUL = NodeKind("ND_MUL") // *
-	ND_DIV = NodeKind("ND_DIV") // /
-	ND_MOD = NodeKind("ND_MOD") // mod
-	ND_EQ  = NodeKind("ND_EQ")  // =
-
-	// Logical signature
-	ND_AND = NodeKind("ND_AND") // and
-	ND_OR  = NodeKind("ND_OR")  // or
-
 	// type
 	ND_SCALAR     = NodeKind("ND_SCALAR")     // int32, string, bool
 	ND_COLLECTION = NodeKind("ND_COLLECTION") // vector, map, list

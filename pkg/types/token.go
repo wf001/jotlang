@@ -68,37 +68,6 @@ func (tok Token) MatchedType() (ModoType, bool) {
 	return "", false
 }
 
-func (tok *Token) MatchedNary() (NodeKind, bool) {
-	var tokenMap = map[string]NodeKind{
-		NARY_OPERATOR_ADD: ND_ADD,
-	}
-
-	return tok.matchedOperator(tokenMap)
-}
-
-func (tok *Token) MatchedBinary() (NodeKind, bool) {
-	var tokenMap = map[string]NodeKind{
-		BINARY_OPERATOR_EQ: ND_EQ,
-	}
-
-	return tok.matchedOperator(tokenMap)
-}
-
-func (tok *Token) matchedOperator(
-	tokenMap map[string]NodeKind,
-) (NodeKind, bool) {
-
-	if !tok.IsKind(TK_OPERATOR) {
-		return "", false
-	}
-
-	if kind, exists := tokenMap[tok.Val]; exists {
-		return kind, true
-	}
-
-	return "", false
-}
-
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {

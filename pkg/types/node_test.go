@@ -43,7 +43,7 @@ func buildNode(tokens []*Node) *Node {
 func TestGetLastNode(t *testing.T) {
 	node := []*Node{
 		add(ND_PROGRAM_ROOT, ""),
-		add(ND_ADD, ""),
+		add(ND_LIBCALL, ""),
 		add(ND_SCALAR, ""),
 	}
 	want := add(ND_SCALAR, "")
