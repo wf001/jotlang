@@ -7,7 +7,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func DeclareBuiltin(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
+func declareVariable(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	globalVars := &mTypes.BuiltinGlobalVarsProp{}
 
 	globalVars.FormatDigit = ir.NewGlobalDef(
@@ -29,7 +29,5 @@ func DeclareBuiltin(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 
 	libs.GlobalVar = globalVars
 
-	declareCore(ir, libs)
-
-	log.DebugMessage("built-in library declared")
+	log.DebugMessage("built-in variable declared")
 }

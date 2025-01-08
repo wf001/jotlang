@@ -12,6 +12,7 @@ import (
 	"github.com/llir/llvm/ir/value"
 
 	"github.com/wf001/modo/pkg/codegen/lib"
+	"github.com/wf001/modo/pkg/codegen/lib/core"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -315,7 +316,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			n.IRValue = arg
 		}
 
-		libFunc := lib.LibInsts[node.Val]
+		libFunc := core.LibInsts[node.Val]
 		return libFunc(ctx.block, ctx.prog.BuiltinLibs, node.Child)
 
 	} else if node.IsKind(mTypes.ND_FUNCCALL) {
