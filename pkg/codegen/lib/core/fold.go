@@ -8,30 +8,30 @@ import (
 )
 
 func InvokeAdd(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	return InvokeFold(node, func(x, y value.Value) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
 		return block.NewAdd(x, y)
 	})
 }
 
 func InvokeSub(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	return InvokeFold(node, func(x, y value.Value) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
 		return block.NewSub(x, y)
 	})
 }
 
 func InvokeMul(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	return InvokeFold(node, func(x, y value.Value) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
 		return block.NewMul(x, y)
 	})
 }
 
 func InvokeEq(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	return InvokeFold(node, func(x, y value.Value) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
 		return block.NewICmp(enum.IPredEQ, x, y)
 	})
 }
 
-func InvokeFold(
+func invokeFold(
 	node *mTypes.Node,
 	operate func(value.Value, value.Value) value.Value,
 ) value.Value {
