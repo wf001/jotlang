@@ -78,7 +78,7 @@ func buildToken(tokens []*mTypes.Token) *mTypes.Token {
 func TestLexOperationAdd(t *testing.T) {
 	tokens := []*mTypes.Token{
 		add(mTypes.TK_PAREN, "("),
-		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_LIBCALL, "+"),
 		add(mTypes.TK_INT, "1"),
 		add(mTypes.TK_INT, "2"),
 		add(mTypes.TK_PAREN, ")"),
@@ -92,14 +92,14 @@ func TestLexOperationAdd(t *testing.T) {
 func TestLexOperationAddTakingAdd(t *testing.T) {
 	tokens := []*mTypes.Token{
 		add(mTypes.TK_PAREN, "("),
-		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_LIBCALL, "+"),
 		add(mTypes.TK_PAREN, "("),
-		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_LIBCALL, "+"),
 		add(mTypes.TK_INT, "1"),
 		add(mTypes.TK_INT, "2"),
 		add(mTypes.TK_PAREN, ")"),
 		add(mTypes.TK_PAREN, "("),
-		add(mTypes.TK_OPERATOR, "+"),
+		add(mTypes.TK_LIBCALL, "+"),
 		add(mTypes.TK_INT, "3"),
 		add(mTypes.TK_INT, "4"),
 		add(mTypes.TK_PAREN, ")"),

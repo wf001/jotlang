@@ -186,28 +186,30 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 			return nextToken, bind
 
-		} else if kind, isNary := tok.MatchedNary(); isNary {
-			log.Debug("is nary operator :have %+v", tok)
-			tok, head = parseBody(tok, kind, tok.Val)
-			head.Type = mTypes.TY_INT32
+			//} else if kind, isNary := tok.MatchedNary(); isNary {
+			//	log.Debug("is nary operator :have %+v", tok)
+			//	tok, head = parseBody(tok, kind, tok.Val)
+			//	head.Type = mTypes.TY_INT32
 
-		} else if kind, isBinary := tok.MatchedBinary(); isBinary {
-			log.Debug("is binary operator :have %+v", tok)
-			tok, head = parseBody(tok, kind, tok.Val)
-			// FIXME: TY_INT32 => TY_BOOL
-			head.Type = mTypes.TY_INT32
+			//} else if kind, isBinary := tok.MatchedBinary(); isBinary {
+			//	log.Debug("is binary operator :have %+v", tok)
+			//	tok, head = parseBody(tok, kind, tok.Val)
+			//	// FIXME: TY_INT32 => TY_BOOL
+			//	head.Type = mTypes.TY_INT32
 
 		} else if tok.IsKind(mTypes.TK_LIBCALL) {
 			log.Debug("is Library :have %+v", tok)
-			tok, head = parseBody(tok, mTypes.ND_LIBCALL, tok.Val)
+			v := tok.Val
+			tok, head = parseBody(tok, mTypes.ND_LIBCALL, v)
+
+			head.Type = mTypes.RetType[v]
 
 		} else if tok.IsKind(mTypes.TK_IF) {
 			log.Debug("is If :have %+v", tok)
 			head.Kind = mTypes.ND_IF
 
 			nextToken, cond := parseDeclare(tok.Next, mTypes.ND_IF)
-			head.Cond = cond
-			head.Cond.Val = "cond"
+			head.Cond = newNodeParent(mTypes.ND_EXPR, cond, "cond")
 
 			nextToken, then := parseDeclare(nextToken, mTypes.ND_IF)
 			head.Then = newNodeParent(mTypes.ND_EXPR, then, "then")
