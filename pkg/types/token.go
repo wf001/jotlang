@@ -16,9 +16,8 @@ const (
 
 	TK_PAREN = TokenKind("TK_PAREN")
 
-	TK_OPERATOR = TokenKind("TK_OPERATOR")
-	TK_LIBCALL  = TokenKind("TK_LIBCALL")
-	TK_IDENT    = TokenKind("TK_IDENT")
+	TK_LIBCALL = TokenKind("TK_LIBCALL")
+	TK_IDENT   = TokenKind("TK_IDENT")
 
 	TK_TYPE_SIG   = TokenKind("TK_TYPE_SIG")
 	TK_TYPE_ARROW = TokenKind("TK_TYPE_ARROW")

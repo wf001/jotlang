@@ -14,7 +14,7 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	var formatStr *ir.Global
 
 	for n := node; n != nil; n = n.Next {
-		if n.IsType(mTypes.TY_INT32) || n.IsKindNary() || n.IsKindBinary() ||
+		if n.IsType(mTypes.TY_INT32) ||
 			n.IRValue.Type().Equal(types.I32) {
 			formatStr = libs.GlobalVar.FormatDigit
 

@@ -40,6 +40,11 @@ const (
 	TY_NIL   = ModoType("TY_NIL")
 )
 
+var RetType = map[string]ModoType{
+	NARY_OPERATOR_ADD:  TY_INT32,
+	BINARY_OPERATOR_EQ: TY_INT32,
+}
+
 type Program struct {
 	Declares    *Node
 	BuiltinLibs *BuiltinLibProp
@@ -87,16 +92,6 @@ func (node *Node) IsKind(kind NodeKind) bool {
 	return node.Kind == kind
 }
 
-// Check if Kind is nary operator that takes more than 2 arguments
-func (node *Node) IsKindNary() bool {
-	return node.IsKind(ND_LIBCALL) && node.Val == "+"
-}
-
-// Check if Kind is binary operator that takes more than 2 arguments
-func (node *Node) IsKindBinary() bool {
-	return node.IsKind(ND_LIBCALL) && node.Val == "="
-}
-
 // pred type
 func (node *Node) IsType(ty ModoType) bool {
 	return node.Type == ty
@@ -136,11 +131,6 @@ func (node *Node) GetLLVMType() types.Type {
 		return types.Void
 	}
 	return retType
-}
-
-var RetType = map[string]ModoType{
-	NARY_OPERATOR_ADD:  TY_INT32,
-	BINARY_OPERATOR_EQ: TY_INT32,
 }
 
 // debug
