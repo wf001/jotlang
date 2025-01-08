@@ -49,8 +49,8 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 	strGEP := ctx.block.NewGetElementPtr(
 		types.NewArray(strConst.Typ.Len, types.I8),
 		globalStr,
-		constant.NewInt(types.I32, 0),
-		constant.NewInt(types.I32, 0),
+		newI32("0"),
+		newI32("0"),
 	)
 	ctx.block.NewStore(strGEP, strPtr)
 	str := ctx.block.NewLoad(types.I8Ptr, strPtr)
@@ -102,18 +102,19 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 		ctx.function = fnc
 		ctx.argument = node.Child.Args
 		ctx.block = llBlock
-		res := ctx.gen(node.Child)
+		child := ctx.gen(node.Child)
+		node.FuncPtr = fnc
+
 		if node.Child.IsKind(mTypes.ND_LAMBDA) {
-			r := llBlock.NewCall(res, arg...)
-			node.FuncPtr = fnc
-			if r.Type() != types.Void {
-				llBlock.NewRet(r)
-			} else {
+			lambda := llBlock.NewCall(child, arg...)
+
+			if lambda.Type().Equal(types.Void) {
 				llBlock.NewRet(nil)
+			} else {
+				llBlock.NewRet(lambda)
 			}
 		} else {
-			node.FuncPtr = fnc
-			llBlock.NewRet(res)
+			llBlock.NewRet(child)
 		}
 
 	}
@@ -122,7 +123,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 
 func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 	// PERFORMANCE: too redundant
-	// TODO: prohibit same name identify between global var, binded variable and function argument
+	// TODO: prohibit same name identifier between global var, binded variable and function argument
 
 	// find in variable which is passed as function argument
 	for arg := ctx.argument; arg != nil; arg = arg.Next {
@@ -149,6 +150,9 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 			} else if scope.Child.IsType(mTypes.TY_STR) {
 				node.Type = mTypes.TY_STR
 				return scope.VarPtr
+
+			} else {
+				log.Panic("unresolved NodeType: have %+v", node)
 			}
 		}
 	}
@@ -217,14 +221,14 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	// cond
 	ctx.block = condBlock
 	// NOTE: is it the type truely?
-	if ctx.function.Sig.RetType != types.Void {
+	if !ctx.function.Sig.RetType.Equal(types.Void) {
 		node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
 	}
 	cond := ctx.gen(node.Cond)
 
 	// exit
 	// NOTE: is it the type truely?
-	if ctx.function.Sig.RetType == types.Void {
+	if ctx.function.Sig.RetType.Equal(types.Void) {
 		exitBlock.NewRet(nil)
 	} else {
 		exitBlock.NewRet(exitBlock.NewLoad(ctx.function.Sig.RetType, node.CondRet))
@@ -245,6 +249,7 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	}
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)
+
 	return nil
 
 }
@@ -276,12 +281,15 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		for bind := node.Bind; bind != nil; bind = bind.Next {
 			child := ctx.gen(bind.Child)
 
-			if bind.Type == mTypes.TY_INT32 {
+			if bind.IsType(mTypes.TY_INT32) {
 				bind.VarPtr = ctx.block.NewAlloca(types.I32)
 				ctx.block.NewStore(child, bind.VarPtr)
 
-			} else if bind.Type == mTypes.TY_STR {
+			} else if bind.IsType(mTypes.TY_STR) {
 				bind.VarPtr = child
+
+			} else {
+				log.Panic("unresolved NodeType: have %+v", node)
 			}
 
 		}
@@ -312,6 +320,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 	} else if node.IsKind(mTypes.ND_FUNCCALL) {
 		var arg []value.Value
+		// generate ir of their arguments
 		for node := node.Child; node != nil; node = node.Next {
 			arg = append(arg, ctx.gen(node))
 		}
@@ -325,19 +334,20 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		log.Panic("unresolved function name: have %+v", node)
 
 	} else if node.IsKindNary() || node.IsKindBinary() {
+		// TODO: to be same as LibCall, for example prn
 		child := node.Child
 		fst := ctx.gen(child)
 
 		child = child.Next
 		snd := ctx.gen(child)
 
-		operation := operatorInsts[node.Kind]
-		res := operation(ctx.block, fst, snd)
+		operate := operatorInsts[node.Kind]
+		res := operate(ctx.block, fst, snd)
 
 		for child = child.Next; child != nil; child = child.Next {
 			fst = res
 			snd = ctx.gen(child)
-			res = operation(ctx.block, fst, snd)
+			res = operate(ctx.block, fst, snd)
 		}
 		return res
 
@@ -365,9 +375,8 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
 		c := &context{
-			mod:   module,
-			scope: &mTypes.Node{},
-			prog:  prog,
+			mod:  module,
+			prog: prog,
 		}
 		c.gen(declare)
 	}
