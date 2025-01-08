@@ -8,7 +8,7 @@ import (
 )
 
 var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) value.Value{
-	"prn": InvokePrn,
+	mTypes.LIB_CORE_PRN: InvokePrn,
 	// nary
 	mTypes.NARY_OPERATOR_ADD:  InvokeAdd,
 	mTypes.NARY_OPERATOR_SUB:  InvokeSub,
