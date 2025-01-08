@@ -93,6 +93,11 @@ testexec(){
   assertexec '(def main ::int (fn [] (let [s ::string "hello" t ::string "world"] (prn s))))' "hello\\\n"
   assertexec '(def main ::int (fn [] (let [s ::string "hello" t ::string "world"] (prn t))))' "world\\\n"
 
+  ## nil type
+  echo "== nil type ==="
+  assertexec '(def main ::int (fn [] (prn nil)))' "nil\\\n"
+  assertexec '(def f :: int => string => nil (fn [a s] (prn a) (prn s))) (def main ::int (fn [] (prn(f 123 "hello"))))' "123\\\nhello\\\nnil\\\n"
+
   ## prn multi-line
   echo "== prn multi-line ==="
   assertexec '(def main :: int (fn [] (prn (+ 1 2)) (prn (+ 3 4))))' "3\\\n7\\\n"

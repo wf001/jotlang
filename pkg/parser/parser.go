@@ -223,6 +223,10 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	} else if tok.IsKind(mTypes.TK_INT) {
 		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
 
+		// 'nil' means both of type signature and nil value anyways
+	} else if tok.IsKind(mTypes.TK_TYPE_NIL) {
+		return tok.Next, newNodeScalar(mTypes.TY_NIL, "nil")
+
 	} else if tok.IsKind(mTypes.TK_STR) {
 		strNode := newNodeScalar(mTypes.TY_STR, tok.Val)
 		strNode.Len = uint64(len(tok.Val))

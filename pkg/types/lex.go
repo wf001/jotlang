@@ -34,6 +34,7 @@ var (
 	BINARY_OPERATOR_EQ = "="
 	BINARY_OPERATOR_LT = "<"
 	BINARY_OPERATOR_GT = ">"
+	// TODO: replace < or =, remove it
 	BINARY_OPERATOR_LE = "<="
 	BINARY_OPERATOR_GE = ">="
 

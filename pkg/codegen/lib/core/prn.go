@@ -25,6 +25,8 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			t := node.IRValue.Type()
 			if util.EqualType(t, types.I32) {
 				formatStr = libs.GlobalVar.FormatDigit
+			} else if t.Equal(types.Void) {
+				formatStr = libs.GlobalVar.FormatStr
 			} else if _, ok := t.(*types.PointerType); ok {
 				formatStr = libs.GlobalVar.FormatStr
 			} else {

@@ -315,6 +315,13 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			n.IRValue = arg
 		}
 
+		if node.Child.IRValue.Type().Equal(types.Void) {
+			n := &mTypes.Node{
+				Val: "nil",
+			}
+			node.Child.IRValue = newStr(ctx, n)
+		}
+
 		libFunc := core.LibInsts[node.Val]
 		return libFunc(ctx.block, ctx.prog.BuiltinLibs, node.Child)
 
@@ -338,6 +345,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			return newI32(node.Val)
 
 		} else if node.IsType(mTypes.TY_STR) {
+			return newStr(ctx, node)
+
+		} else if node.IsType(mTypes.TY_NIL) {
 			return newStr(ctx, node)
 
 		} else {
