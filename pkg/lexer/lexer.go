@@ -104,8 +104,15 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 			prev = newToken(mTypes.TK_IDENT, prev, p)
 		}
 	}
+	trimQuote(head)
 
-	// post processing: remove escaped \" from origin string
+	head = head.Next
+	head.DebugTokens()
+	return head
+}
+
+// remove escaped \" from origin string
+func trimQuote(head *mTypes.Token) {
 	for t := head.Next; t != nil; t = t.Next {
 		if t.IsKind(mTypes.TK_STR) {
 			s := strings.Trim(t.Val, "\"")
@@ -113,10 +120,6 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 			t.Val = s
 		}
 	}
-
-	head = head.Next
-	head.DebugTokens()
-	return head
 }
 
 // take string, return Token object

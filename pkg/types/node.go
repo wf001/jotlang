@@ -67,7 +67,6 @@ type BuiltinGlobalVarsProp struct {
 	FormatStr   *ir.Global
 	FormatSpace *ir.Global
 	FormatCR    *ir.Global
-	ValueNil    *ir.Global
 }
 
 type Node struct {
