@@ -105,6 +105,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 		}
 	}
 	trimQuote(head)
+	accurateNilType(head)
 
 	head = head.Next
 	head.DebugTokens()
@@ -120,6 +121,18 @@ func trimQuote(head *mTypes.Token) {
 			t.Val = s
 		}
 	}
+}
+
+// 'nil' denotes both a type name and a value of type nil,
+// so when 'nil' is used in a non-type declaration context, it is reinterpreted as the value nil.
+func accurateNilType(head *mTypes.Token) {
+	for t := head.Next; t.Next != nil; t = t.Next {
+		if !(t.IsKind(mTypes.TK_TYPE_ARROW) || t.IsKind(mTypes.TK_TYPE_SIG)) &&
+			t.Next.IsKind(mTypes.TK_TYPE_NIL) {
+			t.Next.Kind = mTypes.TK_NIL
+		}
+	}
+
 }
 
 // take string, return Token object

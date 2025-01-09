@@ -224,7 +224,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
 
 		// 'nil' means both of type signature and nil value anyway
-	} else if tok.IsKind(mTypes.TK_TYPE_NIL) {
+	} else if tok.IsKind(mTypes.TK_NIL) {
 		return tok.Next, newNodeScalar(mTypes.TY_NIL, "nil")
 
 	} else if tok.IsKind(mTypes.TK_STR) {
