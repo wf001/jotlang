@@ -87,8 +87,8 @@ func trimQuote(head *mTypes.Token) {
 	}
 }
 
-// 'nil' denotes both a type name and a value of type nil,
-// so when 'nil' is used in a non-type declaration context, it is reinterpreted as the value nil.
+// In modo, 'nil' denotes both a type name and a value of type nil, all 'nil' are interpreted as type signature at first.
+// so 'nil' which is used in a non-type declaration context is reinterpreted as the value nil with this function.
 func accurateNilType(head *mTypes.Token) {
 	for t := head.Next; t.Next != nil; t = t.Next {
 		if !(t.IsKind(mTypes.TK_TYPE_ARROW) || t.IsKind(mTypes.TK_TYPE_SIG)) &&
@@ -99,7 +99,6 @@ func accurateNilType(head *mTypes.Token) {
 
 }
 
-// Replace strings enclosed in double quotes with \"
 func splitString(expr string) []string {
 	re := regexp.MustCompile(mTypes.STRING_REG_EXP)
 	expr = re.ReplaceAllString(expr, `"$1"`)
