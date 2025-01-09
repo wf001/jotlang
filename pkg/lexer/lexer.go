@@ -76,8 +76,31 @@ func newToken(kind mTypes.TokenKind, prev *mTypes.Token, val string) *mTypes.Tok
 	return tok
 }
 
+// remove escaped \" from origin string
+func trimQuote(head *mTypes.Token) {
+	for t := head.Next; t != nil; t = t.Next {
+		if t.IsKind(mTypes.TK_STR) {
+			s := strings.Trim(t.Val, "\"")
+			s = s + string([]byte{0})
+			t.Val = s
+		}
+	}
+}
+
+// 'nil' denotes both a type name and a value of type nil,
+// so when 'nil' is used in a non-type declaration context, it is reinterpreted as the value nil.
+func accurateNilType(head *mTypes.Token) {
+	for t := head.Next; t.Next != nil; t = t.Next {
+		if !(t.IsKind(mTypes.TK_TYPE_ARROW) || t.IsKind(mTypes.TK_TYPE_SIG)) &&
+			t.Next.IsKind(mTypes.TK_TYPE_NIL) {
+			t.Next.Kind = mTypes.TK_NIL
+		}
+	}
+
+}
+
+// Replace strings enclosed in double quotes with \"
 func splitString(expr string) []string {
-	// Replace strings enclosed in double quotes with \"
 	re := regexp.MustCompile(mTypes.STRING_REG_EXP)
 	expr = re.ReplaceAllString(expr, `"$1"`)
 
@@ -110,29 +133,6 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	head = head.Next
 	head.DebugTokens()
 	return head
-}
-
-// remove escaped \" from origin string
-func trimQuote(head *mTypes.Token) {
-	for t := head.Next; t != nil; t = t.Next {
-		if t.IsKind(mTypes.TK_STR) {
-			s := strings.Trim(t.Val, "\"")
-			s = s + string([]byte{0})
-			t.Val = s
-		}
-	}
-}
-
-// 'nil' denotes both a type name and a value of type nil,
-// so when 'nil' is used in a non-type declaration context, it is reinterpreted as the value nil.
-func accurateNilType(head *mTypes.Token) {
-	for t := head.Next; t.Next != nil; t = t.Next {
-		if !(t.IsKind(mTypes.TK_TYPE_ARROW) || t.IsKind(mTypes.TK_TYPE_SIG)) &&
-			t.Next.IsKind(mTypes.TK_TYPE_NIL) {
-			t.Next.Kind = mTypes.TK_NIL
-		}
-	}
-
 }
 
 // take string, return Token object
