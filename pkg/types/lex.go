@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	// Scholar
+	// Scalar
 	FRACTIONAL_REG_EXP = `-?\d+\.\d+`
 	INTEGER_REG_EXP    = `-?\d+`
 	STRING_REG_EXP     = `"([^"]*)"`
