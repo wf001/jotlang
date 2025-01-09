@@ -19,6 +19,9 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (mod 17 5))))' "2\\\n"
   assertexec '(def main ::int (fn [] (prn (= 0 (mod 20 5)))))' "1\\\n"
 
+  assertexec '(def main ::int (fn [] (prn (* 4 5))))' "20\\\n"
+  assertexec '(def main ::int (fn [] (prn (* 9 5))))' "45\\\n"
+
   # equality operator
   echo "== equality operator ==="
   assertexec '(def main ::int (fn [] (prn (= 123 123))))' "1\\\n"
