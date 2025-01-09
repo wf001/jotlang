@@ -6,10 +6,12 @@ import (
 )
 
 var (
+	// Scholar
 	FRACTIONAL_REG_EXP = `-?\d+\.\d+`
 	INTEGER_REG_EXP    = `-?\d+`
 	STRING_REG_EXP     = `"([^"]*)"`
 
+	// Brachets
 	PARREN_OPEN      = "("
 	PARREN_CLOSE     = ")"
 	BRACKET_OPEN     = "["
@@ -26,27 +28,25 @@ var (
 		BRACE_CLOSE,
 	)
 
-	NARY_OPERATOR_ADD = "+"
-	NARY_OPERATOR_SUB = "-"
-	NARY_OPERATOR_MUL = "*"
-	NARY_OPERATOR_DIV = "/"
+	// operators
+	OPERATOR_ADD = "+"
+	OPERATOR_SUB = "-"
+	OPERATOR_MUL = "*"
+	OPERATOR_DIV = "/"
 
-	BINARY_OPERATOR_EQ = "="
-	BINARY_OPERATOR_LT = "<"
-	BINARY_OPERATOR_GT = ">"
-	// TODO: replace < or =, remove it
-	BINARY_OPERATOR_LE = "<="
-	BINARY_OPERATOR_GE = ">="
+	OPERATOR_EQ = "="
+	OPERATOR_LT = "<"
+	OPERATOR_GT = ">"
 
 	OPERATORS_REG_EXP = fmt.Sprintf(
 		"[%s\\%s%s%s%s%s%s]",
-		NARY_OPERATOR_ADD,
-		NARY_OPERATOR_SUB,
-		NARY_OPERATOR_MUL,
-		NARY_OPERATOR_DIV,
-		BINARY_OPERATOR_EQ,
-		BINARY_OPERATOR_LT,
-		BINARY_OPERATOR_GT,
+		OPERATOR_ADD,
+		OPERATOR_SUB,
+		OPERATOR_MUL,
+		OPERATOR_DIV,
+		OPERATOR_EQ,
+		OPERATOR_LT,
+		OPERATOR_GT,
 	)
 
 	SYMBOL_THREADING_FIRST = "->"
@@ -62,9 +62,11 @@ var (
 	SYMBOL_LET      = "let"
 	DECLARE_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s)\\b", SYMBOL_DEF, SYMBOL_LET, SYMBOL_FN)
 
+	// Core library
 	LIB_CORE_PRN     = "prn"
 	LIB_CORE_REG_EXP = fmt.Sprintf("\\b(%s)\\b", LIB_CORE_PRN)
 
+	// Type signature
 	SYMBOL_TYPE_SIG   = "::"
 	SYMBOL_TYPE_ARROW = "=>"
 	SYMBOL_TYPE_INT   = "int"

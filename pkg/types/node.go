@@ -41,8 +41,8 @@ const (
 )
 
 var RetType = map[string]ModoType{
-	NARY_OPERATOR_ADD:  TY_INT32,
-	BINARY_OPERATOR_EQ: TY_INT32,
+	OPERATOR_ADD: TY_INT32,
+	OPERATOR_EQ:  TY_INT32,
 }
 
 type Program struct {
