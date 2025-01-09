@@ -34,12 +34,14 @@ var (
 	OPERATOR_MUL = "*"
 	OPERATOR_DIV = "/"
 
+	OPERATOR_MOD = "mod"
+
 	OPERATOR_EQ = "="
 	OPERATOR_LT = "<"
 	OPERATOR_GT = ">"
 
 	OPERATORS_REG_EXP = fmt.Sprintf(
-		"[%s\\%s%s%s%s%s%s]",
+		"[%s\\%s%s%s%s%s%s]|\\b(%s)\\b",
 		OPERATOR_ADD,
 		OPERATOR_SUB,
 		OPERATOR_MUL,
@@ -47,6 +49,7 @@ var (
 		OPERATOR_EQ,
 		OPERATOR_LT,
 		OPERATOR_GT,
+		OPERATOR_MOD,
 	)
 
 	SYMBOL_THREADING_FIRST = "->"
