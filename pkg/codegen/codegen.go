@@ -218,11 +218,12 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then"))
 	elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
 	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
+	isVoid := ctx.function.Sig.RetType.Equal(types.Void)
 
 	// cond
 	ctx.block = condBlock
 	// NOTE: is it the type truely?
-	if !ctx.function.Sig.RetType.Equal(types.Void) {
+	if !isVoid {
 		node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
 	}
 	cond := ctx.gen(node.Cond)
@@ -238,14 +239,14 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	ctx.block = thenBlock
 	ctx.block.NewBr(exitBlock)
 	res := ctx.gen(node.Then)
-	if res != nil {
+	if res != nil && !isVoid {
 		ctx.block.NewStore(res, node.CondRet)
 	}
 
 	ctx.block = elseBlock
 	ctx.block.NewBr(exitBlock)
 	res = ctx.gen(node.Else)
-	if res != nil {
+	if res != nil && !isVoid {
 		ctx.block.NewStore(res, node.CondRet)
 	}
 

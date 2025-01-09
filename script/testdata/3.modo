@@ -1,0 +1,9 @@
+(def f ::int => int => int
+  (fn [a sum] 
+    (if (= 10 a) 
+      sum
+      (f (+ a 1) (+ sum a)))))
+
+(def main ::int
+  (fn []
+    (prn (f 1 0))))

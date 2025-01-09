@@ -117,6 +117,9 @@ testexec(){
   assertexec '(def f :: string => string (fn [a] "modo")) (def main ::int (fn [] (prn (f "hello"))))' "modo\\\n"
   assertexec '(def f :: string => string (fn [a] (let [s ::string "modo"] s))) (def main ::int (fn [] (prn (f "hello"))))' "modo\\\n"
 
+  # loop
+  echo "== loop ==="
+  assertexec '(def f ::int => nil (fn [a] (prn a) (if (= 3 a) nil (f (+ a 1))))) (def main ::int (fn [] (f 1))))' "1\\\n2\\\n3\\\n"
 }
 
 build-compiler
