@@ -185,9 +185,9 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 
 		ctx.function = funcFn
 		ctx.block = llBlock
-		llBlock.NewRet(nil)
 
 		ctx.gen(node.Child)
+		ctx.block.NewRet(nil)
 
 		return funcFn
 
@@ -204,8 +204,8 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 
 		res := ctx.gen(node.Child)
 
-		if llBlock.Term == nil {
-			llBlock.NewRet(res)
+		if ctx.block.Term == nil {
+			ctx.block.NewRet(res)
 		}
 		return funcFn
 	}
@@ -232,7 +232,7 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
 	ctx.block.NewBr(condBlock)
 
-	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
+	exitBlock := node.NextBlock
 	isVoid := ctx.function.Sig.RetType.Equal(types.Void)
 
 	// cond
@@ -259,7 +259,7 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)
 
-	return nil
+	return condBlock
 
 }
 
@@ -305,13 +305,18 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 	} else if node.IsKind(mTypes.ND_EXPR) {
 		var res value.Value
+
 		for child := node.Child; child != nil; child = child.Next {
-			res = ctx.gen(child)
+			child.NextBlock = ctx.function.NewBlock(child.GetBlockName("expr"))
+			ctx.gen(child)
+
+			ctx.block.NewBr(child.NextBlock)
+			ctx.block = child.NextBlock
 		}
 		return res
 
 	} else if node.IsKind(mTypes.ND_IF) {
-		ctx.genCondition(node)
+		return ctx.genCondition(node)
 
 	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library

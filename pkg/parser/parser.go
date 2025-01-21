@@ -198,7 +198,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head.Kind = mTypes.ND_IF
 
 			nextToken, cond := parseDeclare(tok.Next, mTypes.ND_IF)
-			head.Cond = newNodeParent(mTypes.ND_EXPR, cond, "cond")
+			head.Cond = cond
 
 			nextToken, then := parseDeclare(nextToken, mTypes.ND_IF)
 			head.Then = newNodeParent(mTypes.ND_EXPR, then, "then")
