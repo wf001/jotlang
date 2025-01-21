@@ -201,10 +201,10 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			head.Cond = cond
 
 			nextToken, then := parseDeclare(nextToken, mTypes.ND_IF)
-			head.Then = newNodeParent(mTypes.ND_EXPR, then, "then")
+			head.Then = then
 
 			nextToken, els := parseDeclare(nextToken, mTypes.ND_IF)
-			head.Else = newNodeParent(mTypes.ND_EXPR, els, "els")
+			head.Else = els
 			tok = nextToken
 
 		} else if tok.IsKind(mTypes.TK_IDENT) {
