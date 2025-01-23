@@ -70,22 +70,21 @@ type BuiltinGlobalVarsProp struct {
 }
 
 type Node struct {
-	Kind      NodeKind
-	Next      *Node
-	Type      ModoType
-	Child     *Node
-	Cond      *Node
-	CondRet   *ir.InstAlloca
-	Then      *Node
-	Else      *Node
-	Val       string
-	Len       uint64 // the number of bytes, only used with string type
-	Bind      *Node
-	Args      *Node
-	VarPtr    value.Value // binded local variable
-	FuncPtr   *ir.Func    // declared function, library function
-	IRValue   value.Value //
-	NextBlock *ir.Block
+	Kind    NodeKind
+	Next    *Node
+	Type    ModoType
+	Child   *Node
+	Cond    *Node
+	CondRet *ir.InstAlloca
+	Then    *Node
+	Else    *Node
+	Val     string
+	Len     uint64 // the number of bytes, only used with string type
+	Bind    *Node
+	Args    *Node
+	VarPtr  value.Value // binded local variable
+	FuncPtr *ir.Func    // declared function, library function
+	IRValue value.Value //
 }
 
 // pred kind
