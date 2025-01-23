@@ -211,27 +211,12 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 	}
 }
 
-func (ctx *context) genBranch(
-	node *mTypes.Node,
-	isVoid bool,
-	name string,
-	condRet value.Value,
-) *ir.Block {
-
-	newBlock := ctx.function.NewBlock(name)
-	ctx.block = newBlock
-	res := ctx.gen(node)
-	if res != nil && !isVoid {
-		ctx.block.NewStore(res, condRet)
-	}
-
-	return newBlock
-}
-
 func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
 	ctx.block.NewBr(condBlock)
 
+	thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then"))
+	elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
 	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
 	isVoid := ctx.function.Sig.RetType.Equal(types.Void)
 
@@ -251,11 +236,19 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 		exitBlock.NewRet(exitBlock.NewLoad(ctx.function.Sig.RetType, node.CondRet))
 	}
 
-	thenBlock := ctx.genBranch(node.Then, isVoid, node.GetBlockName("if.then"), node.CondRet)
+	ctx.block = thenBlock
 	ctx.block.NewBr(exitBlock)
+	res := ctx.gen(node.Then)
+	if res != nil && !isVoid {
+		ctx.block.NewStore(res, node.CondRet)
+	}
 
-	elseBlock := ctx.genBranch(node.Else, isVoid, node.GetBlockName("if.else"), node.CondRet)
+	ctx.block = elseBlock
 	ctx.block.NewBr(exitBlock)
+	res = ctx.gen(node.Else)
+	if res != nil && !isVoid {
+		ctx.block.NewStore(res, node.CondRet)
+	}
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)
 
