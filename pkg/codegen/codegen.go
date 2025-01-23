@@ -259,7 +259,7 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)
 
-	return nil
+	return condBlock
 
 }
 
@@ -308,17 +308,15 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 		for child := node.Child; child != nil; child = child.Next {
 			child.NextBlock = ctx.function.NewBlock(child.GetBlockName("expr"))
-			res = ctx.gen(child)
+			ctx.gen(child)
 
-			if ctx.block.Term == nil {
-				ctx.block.NewBr(child.NextBlock)
-				ctx.block = child.NextBlock
-			}
+			ctx.block.NewBr(child.NextBlock)
+			ctx.block = child.NextBlock
 		}
 		return res
 
 	} else if node.IsKind(mTypes.ND_IF) {
-		ctx.genCondition(node)
+		return ctx.genCondition(node)
 
 	} else if node.IsKind(mTypes.ND_LIBCALL) {
 		// means calling standard library
