@@ -244,7 +244,7 @@ func (ctx *context) genBranch(
 	}
 }
 
-func (ctx *context) genCondition(node *mTypes.Node) value.Value {
+func (ctx *context) genCondition(node *mTypes.Node) {
 	// cond
 	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
 	ctx.block.NewBr(condBlock)
@@ -279,8 +279,6 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)
 	ctx.block = exitBlock
-
-	return nil
 }
 
 func (ctx *context) gen(node *mTypes.Node) value.Value {
