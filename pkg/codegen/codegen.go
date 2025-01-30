@@ -185,9 +185,10 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 
 		ctx.function = funcFn
 		ctx.block = llBlock
-		llBlock.NewRet(nil)
 
 		ctx.gen(node.Child)
+
+		ctx.block.NewRet(nil)
 
 		return funcFn
 
@@ -204,8 +205,8 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 
 		res := ctx.gen(node.Child)
 
-		if llBlock.Term == nil {
-			llBlock.NewRet(res)
+		if ctx.block.Term == nil {
+			ctx.block.NewRet(res)
 		}
 		return funcFn
 	}
