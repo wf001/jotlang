@@ -213,8 +213,9 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 }
 
 func isConstant(v value.Value) bool {
-	_, ok := v.(*ir.InstLoad)
-	return ok
+	_, isStr := v.(*ir.InstLoad)
+	isInt := v.Type().Equal(types.I32)
+	return isStr || isInt
 }
 
 func (ctx *context) genCondition(node *mTypes.Node) value.Value {

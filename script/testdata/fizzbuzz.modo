@@ -1,0 +1,18 @@
+(def fizzbuzz :: int => int => nil
+  (fn [n max] 
+    (let [fizz ::int 3
+          buzz ::int 5]
+      (if (= n max)
+        nil
+        (if (= 0 (mod n (* fizz buzz)))
+          (prn "FizzBuzz")
+          (if (= 0 (mod n fizz))
+            (prn "Fizz")
+            (if (= 0 (mod n buzz))
+              (prn "Buzz")
+              (prn n)))) )
+      (fizzbuzz (+ 1 n) max))))
+
+(def main :: int
+  (fn []
+    (fizzbuzz 1 20)))
