@@ -7,7 +7,6 @@ import (
 
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
-	"github.com/wf001/modo/util"
 )
 
 func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
@@ -23,7 +22,7 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 
 		} else if n.IsKind(mTypes.ND_FUNCCALL) {
 			t := node.IRValue.Type()
-			if util.EqualType(t, types.I32) {
+			if t.Equal(types.I32) {
 				formatStr = libs.GlobalVar.FormatDigit
 			} else if t.Equal(types.Void) {
 				formatStr = libs.GlobalVar.FormatStr
