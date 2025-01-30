@@ -212,6 +212,11 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 	}
 }
 
+func isConstant(v value.Value) bool {
+	_, ok := v.(*ir.InstLoad)
+	return ok
+}
+
 func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
 	ctx.block.NewBr(condBlock)
@@ -238,20 +243,41 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	}
 
 	ctx.block = thenBlock
-	ctx.block.NewBr(exitBlock)
 	res := ctx.gen(node.Then)
+
+	if res != nil && isConstant(res) {
+		if ctx.function.Sig.RetType.Equal(types.Void) {
+			ctx.block.NewRet(nil)
+		} else {
+			ctx.block.NewRet(res)
+		}
+	} else {
+		ctx.block.NewBr(exitBlock)
+	}
+
 	if res != nil && !isVoid {
 		ctx.block.NewStore(res, node.CondRet)
 	}
 
 	ctx.block = elseBlock
-	ctx.block.NewBr(exitBlock)
 	res = ctx.gen(node.Else)
+
+	if res != nil && isConstant(res) {
+		if ctx.function.Sig.RetType.Equal(types.Void) {
+			ctx.block.NewRet(nil)
+		} else {
+			ctx.block.NewRet(res)
+		}
+	} else {
+		ctx.block.NewBr(exitBlock)
+	}
+
 	if res != nil && !isVoid {
 		ctx.block.NewStore(res, node.CondRet)
 	}
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)
+	ctx.block = exitBlock
 
 	return nil
 
