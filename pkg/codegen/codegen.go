@@ -222,14 +222,14 @@ func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 
 	// cond
 	ctx.block = condBlock
-	// NOTE: is it the type truely?
+	// NOTE: is it the type truly?
 	if !isVoid {
 		node.CondRet = ctx.block.NewAlloca(ctx.function.Sig.RetType)
 	}
 	cond := ctx.gen(node.Cond)
 
 	// exit
-	// NOTE: is it the type truely?
+	// NOTE: is it the type truly?
 	if ctx.function.Sig.RetType.Equal(types.Void) {
 		exitBlock.NewRet(nil)
 	} else {
