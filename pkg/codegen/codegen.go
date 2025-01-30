@@ -30,6 +30,12 @@ type context struct {
 	argument *mTypes.Node
 }
 
+func isConstant(v value.Value) bool {
+	_, isStr := v.(*ir.InstLoad)
+	isInt := v.Type().Equal(types.I32)
+	return isStr || isInt
+}
+
 func newI32(s string) *constant.Int {
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
@@ -212,77 +218,69 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 	}
 }
 
-func isConstant(v value.Value) bool {
-	_, isStr := v.(*ir.InstLoad)
-	isInt := v.Type().Equal(types.I32)
-	return isStr || isInt
-}
-
-func (ctx *context) genCondition(node *mTypes.Node) value.Value {
-	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
-	ctx.block.NewBr(condBlock)
-
-	thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then"))
-	elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
-	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
+func (ctx *context) genBranch(
+	block *ir.Block,
+	node *mTypes.Node,
+	condRet value.Value,
+	exitBlock *ir.Block,
+) {
+	ctx.block = block
+	res := ctx.gen(node)
 	retType := ctx.function.Sig.RetType
 	isVoid := retType.Equal(types.Void)
 
+	if res != nil && isConstant(res) {
+		if retType.Equal(types.Void) {
+			ctx.block.NewRet(nil)
+		} else {
+			ctx.block.NewRet(res)
+		}
+	} else {
+		ctx.block.NewBr(exitBlock)
+	}
+
+	if res != nil && !isVoid {
+		ctx.block.NewStore(res, condRet)
+	}
+}
+
+func (ctx *context) genCondition(node *mTypes.Node) value.Value {
 	// cond
+	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
+	ctx.block.NewBr(condBlock)
 	ctx.block = condBlock
+	cond := ctx.gen(node.Cond)
+
+	retType := ctx.function.Sig.RetType
+	isVoid := retType.Equal(types.Void)
+
 	// NOTE: is it the type truly?
 	if !isVoid {
 		node.CondRet = ctx.block.NewAlloca(retType)
 	}
-	cond := ctx.gen(node.Cond)
 
 	// exit
 	// NOTE: is it the type truly?
+	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit"))
+
 	if retType.Equal(types.Void) {
 		exitBlock.NewRet(nil)
 	} else {
 		exitBlock.NewRet(exitBlock.NewLoad(retType, node.CondRet))
 	}
 
-	ctx.block = thenBlock
-	res := ctx.gen(node.Then)
+	// then
+	thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then"))
+	ctx.genBranch(thenBlock, node.Then, node.CondRet, exitBlock)
 
-	if res != nil && isConstant(res) {
-		if retType.Equal(types.Void) {
-			ctx.block.NewRet(nil)
-		} else {
-			ctx.block.NewRet(res)
-		}
-	} else {
-		ctx.block.NewBr(exitBlock)
-	}
-
-	if res != nil && !isVoid {
-		ctx.block.NewStore(res, node.CondRet)
-	}
-
-	ctx.block = elseBlock
-	res = ctx.gen(node.Else)
-
-	if res != nil && isConstant(res) {
-		if retType.Equal(types.Void) {
-			ctx.block.NewRet(nil)
-		} else {
-			ctx.block.NewRet(res)
-		}
-	} else {
-		ctx.block.NewBr(exitBlock)
-	}
-
-	if res != nil && !isVoid {
-		ctx.block.NewStore(res, node.CondRet)
-	}
+	// else
+	elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else"))
+	ctx.genBranch(elseBlock, node.Else, node.CondRet, exitBlock)
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)
 	ctx.block = exitBlock
 
 	return nil
-
 }
 
 func (ctx *context) gen(node *mTypes.Node) value.Value {
