@@ -26,14 +26,12 @@ func InvokeMul(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	})
 }
 
-func InvokeMod(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	return invokeFold(node, func(x, y value.Value) value.Value {
-		return block.NewSRem(x, y)
-	})
-}
-
 func InvokeEq(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	return invokeFold(node, func(x, y value.Value) value.Value {
 		return block.NewICmp(enum.IPredEQ, x, y)
 	})
+}
+
+func InvokeMod(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	return block.NewSRem(node.IRValue, node.Next.IRValue)
 }
