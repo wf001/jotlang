@@ -3,12 +3,11 @@
 . ./script/test.sh
 
 testexec(){
+  # integer type
+  echo "== integer type ==="
+  assertexec '(def main ::int (fn [] (prn 17)))' "17\\\n"
   # arithmetic operator
   echo "== arithmetic operator ==="
-  assertexec '(def main ::int (fn [] (prn 17)))' "17\\\n"
-  assertexec '(def main ::int (fn [] (prn (+ 4 13))))' "17\\\n"
-  assertexec '(def main ::int (fn [] (prn (+ 1 2 3))))' "6\\\n"
-  assertexec '(def main ::int (fn [] (prn (+ 1 2 3 4 10))))' "20\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 1 2 3 4 5 20))))' "35\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 1 2 (+ 3 4)))))' "10\\\n"
   assertexec '(def main ::int (fn [] (prn (+ (+ 1 2) (+ 3 4)))))' "10\\\n"
@@ -18,9 +17,11 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (mod 20 5))))' "0\\\n"
   assertexec '(def main ::int (fn [] (prn (mod 17 5))))' "2\\\n"
   assertexec '(def main ::int (fn [] (prn (= 0 (mod 20 5)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 0 (mod (+ 18 2) 5)))))' "1\\\n"
 
   assertexec '(def main ::int (fn [] (prn (* 4 5))))' "20\\\n"
   assertexec '(def main ::int (fn [] (prn (* 9 5))))' "45\\\n"
+  assertexec '(def main ::int (fn [] (prn (* (+ 2 3) 5))))' "25\\\n"
 
   # equality operator
   echo "== equality operator ==="
