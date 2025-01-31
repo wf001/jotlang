@@ -25,6 +25,11 @@ func InvokeMul(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 		return block.NewMul(x, y)
 	})
 }
+func InvokeDiv(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
+		return block.NewSDiv(x, y)
+	})
+}
 
 func InvokeEq(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	return invokeFold(node, func(x, y value.Value) value.Value {
