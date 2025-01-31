@@ -40,9 +40,12 @@ const (
 	TY_NIL   = ModoType("TY_NIL")
 )
 
+// NOTE: must improve
 var RetType = map[string]ModoType{
 	OPERATOR_ADD: TY_INT32,
 	OPERATOR_EQ:  TY_INT32,
+	OPERATOR_GT:  TY_INT32,
+	OPERATOR_LT:  TY_INT32,
 }
 
 type Program struct {

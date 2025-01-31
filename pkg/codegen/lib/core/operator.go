@@ -36,6 +36,16 @@ func InvokeEq(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) v
 		return block.NewICmp(enum.IPredEQ, x, y)
 	})
 }
+func InvokeGt(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
+		return block.NewICmp(enum.IPredSGT, x, y)
+	})
+}
+func InvokeLt(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
+		return block.NewICmp(enum.IPredSLT, x, y)
+	})
+}
 
 func InvokeMod(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	return block.NewSRem(node.IRValue, node.Next.IRValue)
