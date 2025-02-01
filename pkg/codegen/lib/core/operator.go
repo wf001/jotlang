@@ -8,6 +8,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+// arithmetic
 func InvokeAdd(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	return invokeFold(node, func(x, y value.Value) value.Value {
 		return block.NewAdd(x, y)
@@ -31,6 +32,11 @@ func InvokeDiv(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	})
 }
 
+func InvokeMod(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	return block.NewSRem(node.IRValue, node.Next.IRValue)
+}
+
+// equality
 func InvokeEq(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	return invokeFold(node, func(x, y value.Value) value.Value {
 		return block.NewICmp(enum.IPredEQ, x, y)
@@ -47,6 +53,4 @@ func InvokeLt(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) v
 	})
 }
 
-func InvokeMod(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	return block.NewSRem(node.IRValue, node.Next.IRValue)
-}
+// logical
