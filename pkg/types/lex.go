@@ -40,8 +40,11 @@ var (
 	OPERATOR_LT = "<"
 	OPERATOR_GT = ">"
 
+	OPERATOR_AND = "and"
+	OPERATOR_OR  = "or"
+
 	OPERATORS_REG_EXP = fmt.Sprintf(
-		"[%s\\%s%s%s%s%s%s]|\\b(%s)\\b",
+		"[%s\\%s%s%s%s%s%s]|\\b(%s|%s|%s)\\b",
 		OPERATOR_ADD,
 		OPERATOR_SUB,
 		OPERATOR_MUL,
@@ -50,6 +53,8 @@ var (
 		OPERATOR_LT,
 		OPERATOR_GT,
 		OPERATOR_MOD,
+		OPERATOR_AND,
+		OPERATOR_OR,
 	)
 
 	SYMBOL_THREADING_FIRST = "->"

@@ -46,6 +46,8 @@ var RetType = map[string]ModoType{
 	OPERATOR_EQ:  TY_INT32,
 	OPERATOR_GT:  TY_INT32,
 	OPERATOR_LT:  TY_INT32,
+	OPERATOR_AND: TY_INT32,
+	OPERATOR_OR:  TY_INT32,
 }
 
 type Program struct {

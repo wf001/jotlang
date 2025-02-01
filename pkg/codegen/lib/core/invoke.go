@@ -17,6 +17,8 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 	mTypes.OPERATOR_EQ:  InvokeEq,
 	mTypes.OPERATOR_GT:  InvokeGt,
 	mTypes.OPERATOR_LT:  InvokeLt,
+	mTypes.OPERATOR_AND: InvokeAnd,
+	mTypes.OPERATOR_OR:  InvokeOr,
 	// binary
 	mTypes.OPERATOR_MOD: InvokeMod,
 }

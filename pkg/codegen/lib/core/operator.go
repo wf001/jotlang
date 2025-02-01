@@ -54,3 +54,13 @@ func InvokeLt(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) v
 }
 
 // logical
+func InvokeAnd(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
+		return block.NewAnd(x, y)
+	})
+}
+func InvokeOr(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	return invokeFold(node, func(x, y value.Value) value.Value {
+		return block.NewOr(x, y)
+	})
+}

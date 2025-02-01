@@ -47,6 +47,15 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (< 1 2))))' "1\\\n"
   assertexec '(def main ::int (fn [] (prn (< 2 2))))' "0\\\n"
 
+  # logical operator
+  echo "== logical operator ==="
+  assertexec '(def main ::int (fn [] (prn (and (= 1 1) (= 1 0)))))' "0\\\n"
+  assertexec '(def main ::int (fn [] (prn (and (= 1 1) (= 0 0)))))' "1\\\n"
+
+  assertexec '(def main ::int (fn [] (prn (or (= 1 0) (= 1 0)))))' "0\\\n"
+  assertexec '(def main ::int (fn [] (prn (or (= 1 1) (= 1 0)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (or (= 1 1) (= 1 1)))))' "1\\\n"
+
   ## global variable
   echo "== global variable ==="
   assertexec '(def x ::int 3) (def main ::int (fn [] (prn x)))' "3\\\n"
