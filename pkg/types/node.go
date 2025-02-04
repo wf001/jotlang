@@ -38,16 +38,17 @@ const (
 	TY_INT32 = ModoType("TY_INT32")
 	TY_STR   = ModoType("TY_STR")
 	TY_NIL   = ModoType("TY_NIL")
+	TY_BOOL  = ModoType("TY_BOOL")
 )
 
 // NOTE: must improve
 var RetType = map[string]ModoType{
 	OPERATOR_ADD: TY_INT32,
-	OPERATOR_EQ:  TY_INT32,
-	OPERATOR_GT:  TY_INT32,
-	OPERATOR_LT:  TY_INT32,
-	OPERATOR_AND: TY_INT32,
-	OPERATOR_OR:  TY_INT32,
+	OPERATOR_EQ:  TY_BOOL,
+	OPERATOR_GT:  TY_BOOL,
+	OPERATOR_LT:  TY_BOOL,
+	OPERATOR_AND: TY_BOOL,
+	OPERATOR_OR:  TY_BOOL,
 }
 
 type Program struct {
@@ -72,6 +73,8 @@ type BuiltinGlobalVarsProp struct {
 	FormatStr   *ir.Global
 	FormatSpace *ir.Global
 	FormatCR    *ir.Global
+	TrueValue   *ir.Global
+	FalseValue  *ir.Global
 }
 
 type Node struct {
@@ -130,6 +133,8 @@ func (node *Node) GetLLVMType() types.Type {
 
 	if node.IsType(TY_INT32) {
 		return types.I32
+	} else if node.IsType(TY_BOOL) {
+		return types.I1
 	} else if node.IsType(TY_STR) {
 		return types.I8Ptr
 	} else if node.IsType(TY_NIL) {

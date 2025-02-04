@@ -10,6 +10,7 @@ var (
 	FRACTIONAL_REG_EXP = `-?\d+\.\d+`
 	INTEGER_REG_EXP    = `-?\d+`
 	STRING_REG_EXP     = `"([^"]*)"`
+	BOOL_REG_EXP       = "\\b(true|false)\\b"
 
 	// Brachets
 	PARREN_OPEN      = "("

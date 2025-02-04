@@ -13,8 +13,13 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	var formatStr *ir.Global
 
 	for n := node; n != nil; n = n.Next {
+		v := n.IRValue
 		if n.IsType(mTypes.TY_INT32) || n.IRValue.Type().Equal(types.I32) {
 			formatStr = libs.GlobalVar.FormatDigit
+
+		} else if n.IsType(mTypes.TY_BOOL) || n.IRValue.Type().Equal(types.I1) {
+			formatStr = libs.GlobalVar.FormatStr
+			v = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
 
 		} else if n.IsType(mTypes.TY_STR) || n.IRValue.Type().Equal(types.I8Ptr) {
 			formatStr = libs.GlobalVar.FormatStr
@@ -23,6 +28,9 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			t := node.IRValue.Type()
 			if t.Equal(types.I32) {
 				formatStr = libs.GlobalVar.FormatDigit
+			} else if t.Equal(types.I1) {
+				formatStr = libs.GlobalVar.FormatStr
+				v = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
 			} else if t.Equal(types.Void) {
 				formatStr = libs.GlobalVar.FormatStr
 			} else if _, ok := t.(*types.PointerType); ok {
@@ -33,7 +41,7 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 		} else {
 			log.Panic("unresolved type: have %+v", n)
 		}
-		block.NewCall(libs.Printf.FuncPtr, formatStr, n.IRValue)
+		block.NewCall(libs.Printf.FuncPtr, formatStr, v)
 
 		if n.Next == nil {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatCR)

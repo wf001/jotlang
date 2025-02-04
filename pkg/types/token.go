@@ -24,10 +24,12 @@ const (
 	TK_TYPE_INT   = TokenKind("TK_TYPE_INT")
 	TK_TYPE_FLOAT = TokenKind("TK_TYPE_FLOAT")
 	TK_TYPE_STR   = TokenKind("TK_TYPE_STR")
+	TK_TYPE_BOOL  = TokenKind("TK_TYPE_BOOL")
 	TK_TYPE_NIL   = TokenKind("TK_TYPE_NIL")
 
 	TK_INT   = TokenKind("TK_INT")
 	TK_FLOAT = TokenKind("TK_FLOAT")
+	TK_BOOL  = TokenKind("TK_BOOL")
 	TK_STR   = TokenKind("TK_STR")
 	TK_NIL   = TokenKind("TK_NIL")
 )
@@ -55,9 +57,10 @@ func (tok *Token) IsKindType() bool {
 
 func (tok Token) MatchedType() (ModoType, bool) {
 	var typeMap = map[string]ModoType{
-		TK_TYPE_INT: TY_INT32,
-		TK_TYPE_STR: TY_STR,
-		TK_TYPE_NIL: TY_NIL,
+		TK_TYPE_INT:  TY_INT32,
+		TK_TYPE_STR:  TY_STR,
+		TK_TYPE_NIL:  TY_NIL,
+		TK_TYPE_BOOL: TY_BOOL,
 	}
 
 	if kind, exists := typeMap[tok.Kind]; exists {

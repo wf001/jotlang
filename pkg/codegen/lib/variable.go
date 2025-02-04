@@ -26,6 +26,14 @@ func declareVariable(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 		"format.cr",
 		constant.NewCharArrayFromString("\n\x00"),
 	)
+	globalVars.TrueValue = ir.NewGlobalDef(
+		"value.true",
+		constant.NewCharArrayFromString("true\x00"),
+	)
+	globalVars.FalseValue = ir.NewGlobalDef(
+		"value.false",
+		constant.NewCharArrayFromString("false\x00"),
+	)
 
 	libs.GlobalVar = globalVars
 

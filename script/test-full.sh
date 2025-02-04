@@ -16,8 +16,8 @@ testexec(){
 
   assertexec '(def main ::int (fn [] (prn (mod 20 5))))' "0\\\n"
   assertexec '(def main ::int (fn [] (prn (mod 17 5))))' "2\\\n"
-  assertexec '(def main ::int (fn [] (prn (= 0 (mod 20 5)))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (= 0 (mod (+ 18 2) 5)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 0 (mod 20 5)))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 0 (mod (+ 18 2) 5)))))' "true\\\n"
 
   assertexec '(def main ::int (fn [] (prn (* 4 5))))' "20\\\n"
   assertexec '(def main ::int (fn [] (prn (* 9 5))))' "45\\\n"
@@ -30,31 +30,31 @@ testexec(){
 
   # equality operator
   echo "== equality operator ==="
-  assertexec '(def main ::int (fn [] (prn (= 123 123))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (= 123 123 123))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (= 123 123 456))))' "0\\\n"
-  assertexec '(def main ::int (fn [] (prn (= 5 (+ 3 2)))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "0\\\n"
-  assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (= "foo" "bar"))))' "0\\\n"
-  assertexec '(def main ::int (fn [] (prn (= "foo" "foo"))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 123 123))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 123 123 123))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 123 123 456))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (= 5 (+ 3 2)))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "foo" "bar"))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "foo" "foo"))))' "true\\\n"
 
-  assertexec '(def main ::int (fn [] (prn (> 8 2))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (> 1 2))))' "0\\\n"
-  assertexec '(def main ::int (fn [] (prn (> 2 2))))' "0\\\n"
+  assertexec '(def main ::int (fn [] (prn (> 8 2))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (> 1 2))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (> 2 2))))' "false\\\n"
 
-  assertexec '(def main ::int (fn [] (prn (< 8 2))))' "0\\\n"
-  assertexec '(def main ::int (fn [] (prn (< 1 2))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (< 2 2))))' "0\\\n"
+  assertexec '(def main ::int (fn [] (prn (< 8 2))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (< 1 2))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (< 2 2))))' "false\\\n"
 
   # logical operator
   echo "== logical operator ==="
-  assertexec '(def main ::int (fn [] (prn (and (= 1 1) (= 1 0)))))' "0\\\n"
-  assertexec '(def main ::int (fn [] (prn (and (= 1 1) (= 0 0)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (and (= 1 1) (= 1 0)))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (and (= 1 1) (= 0 0)))))' "true\\\n"
 
-  assertexec '(def main ::int (fn [] (prn (or (= 1 0) (= 1 0)))))' "0\\\n"
-  assertexec '(def main ::int (fn [] (prn (or (= 1 1) (= 1 0)))))' "1\\\n"
-  assertexec '(def main ::int (fn [] (prn (or (= 1 1) (= 1 1)))))' "1\\\n"
+  assertexec '(def main ::int (fn [] (prn (or (= 1 0) (= 1 0)))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (or (= 1 1) (= 1 0)))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (or (= 1 1) (= 1 1)))))' "true\\\n"
 
   ## global variable
   echo "== global variable ==="
@@ -67,9 +67,9 @@ testexec(){
   assertexec '(def x ::int 1) (def y ::int 2) (def main ::int (fn [] (prn (+ x y))))' "3\\\n"
   assertexec '(def x ::int 1) (def main ::int (fn [] (prn (+ x x))))' "2\\\n"
 
-  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (= x 2))))' "0\\\n"
-  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (= x 1))))' "1\\\n"
-  assertexec '(def x ::int 1) (def y ::int 2) (def main ::int (fn [] (prn (= x y))))' "0\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (= x 2))))' "false\\\n"
+  assertexec '(def x ::int 1) (def main ::int (fn [] (prn (= x 1))))' "true\\\n"
+  assertexec '(def x ::int 1) (def y ::int 2) (def main ::int (fn [] (prn (= x y))))' "false\\\n"
 
   ## binded variable
   echo "== binded variable ==="
@@ -136,7 +136,7 @@ testexec(){
   ## prn multi-value
   echo "== prn multi-value ==="
   assertexec '(def main :: int (fn [] (prn 1 2 "hello")))' "1 2 hello\\\n"
-  assertexec '(def main :: int (fn [] (prn (+ 1 2) (= 2 4) "world")))' "3 0 world\\\n"
+  assertexec '(def main :: int (fn [] (prn (+ 1 2) (= 2 4) "world")))' "3 false world\\\n"
 
   # function calling
   echo "== function calling ==="
