@@ -133,6 +133,7 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn true)))' "true\\\n"
   assertexec '(def main ::int (fn [] (prn false)))' "false\\\n"
   assertexec '(def main ::int (fn [] (prn (= false (= 1 2)))))' "true\\\n"
+  assertexec '(def isEven ::int => bool (fn [a] (= 0 (mod a 2)))) (def main ::int (fn [] (prn (isEven 5))))' "false\\\n"
 
   ## prn multi-line
   echo "== prn multi-line ==="

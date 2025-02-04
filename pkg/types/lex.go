@@ -81,14 +81,16 @@ var (
 	SYMBOL_TYPE_INT   = "int"
 	SYMBOL_TYPE_STR   = "string"
 	SYMBOL_TYPE_NIL   = "nil"
+	SYMBOL_TYPE_BOOL  = "bool"
 
 	TYPE_REG_EXP = fmt.Sprintf(
-		"(%s|%s|\\b(%s|%s|%s)\\b)",
+		"(%s|%s|\\b(%s|%s|%s|%s)\\b)",
 		SYMBOL_TYPE_SIG,
 		SYMBOL_TYPE_ARROW,
 		SYMBOL_TYPE_INT,
 		SYMBOL_TYPE_STR,
 		SYMBOL_TYPE_NIL,
+		SYMBOL_TYPE_BOOL,
 	)
 
 	SYMBOL_UNDEFINED_REG_EXP = `\w+`

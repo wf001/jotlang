@@ -54,6 +54,7 @@ func newTokenPattern() *tokenPattern {
 	add(mTypes.SYMBOL_TYPE_INT, mTypes.TK_TYPE_INT)
 	add(mTypes.SYMBOL_TYPE_STR, mTypes.TK_TYPE_STR)
 	add(mTypes.SYMBOL_TYPE_NIL, mTypes.TK_TYPE_NIL)
+	add(mTypes.SYMBOL_TYPE_BOOL, mTypes.TK_TYPE_BOOL)
 
 	add(mTypes.STRING_REG_EXP, mTypes.TK_STR)
 	add(mTypes.BOOL_REG_EXP, mTypes.TK_BOOL)

@@ -52,7 +52,8 @@ func (tok *Token) IsKindType() bool {
 	return tok.IsKind(TK_TYPE_ARROW) ||
 		tok.IsKind(TK_TYPE_INT) ||
 		tok.IsKind(TK_TYPE_STR) ||
-		tok.IsKind(TK_TYPE_NIL)
+		tok.IsKind(TK_TYPE_NIL) ||
+		tok.IsKind(TK_TYPE_BOOL)
 }
 
 func (tok Token) MatchedType() (ModoType, bool) {
