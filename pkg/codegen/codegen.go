@@ -36,6 +36,14 @@ func isConstant(v value.Value) bool {
 	return isStr || isInt
 }
 
+func newBool(s string) *constant.Int {
+	i, err := strconv.ParseInt(s, 2, 2)
+	if err != nil {
+		log.Panic("fail to newBool: %s", err)
+	}
+	return constant.NewInt(types.I1, i)
+}
+
 func newI32(s string) *constant.Int {
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
@@ -375,6 +383,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 		} else if node.IsType(mTypes.TY_NIL) {
 			return newStr(ctx, node)
+
+		} else if node.IsType(mTypes.TY_BOOL) {
+			return newBool(node.Val)
 
 		} else {
 			log.Panic("unresolved Scalar: have %+v", node)

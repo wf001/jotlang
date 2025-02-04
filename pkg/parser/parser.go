@@ -33,6 +33,7 @@ func parseExprs(
 	// NOTE: what means?
 	for nextToken.IsKind(mTypes.TK_INT) ||
 		nextToken.IsKind(mTypes.TK_STR) ||
+		nextToken.IsKind(mTypes.TK_BOOL) ||
 		nextToken.IsKind(mTypes.TK_IDENT) ||
 		nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 
@@ -222,8 +223,17 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 	} else if tok.IsKind(mTypes.TK_INT) {
 		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
-	} else if tok.IsKind(mTypes.TK_INT) {
-		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
+
+	} else if tok.IsKind(mTypes.TK_BOOL) {
+		v := ""
+		if tok.Val == "true" {
+			v = "1"
+		} else if tok.Val == "false" {
+			v = "0"
+		} else {
+			log.Panic("unresolved bool value :have %+v", tok)
+		}
+		return tok.Next, newNodeScalar(mTypes.TY_BOOL, v)
 
 		// 'nil' means both of type signature and nil value anyway
 	} else if tok.IsKind(mTypes.TK_NIL) {
