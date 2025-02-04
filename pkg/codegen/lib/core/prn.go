@@ -28,6 +28,7 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 
 		} else if ty.Equal(types.Void) {
 			formatStr = libs.GlobalVar.FormatStr
+			value = libs.GlobalVar.NilValue
 
 		} else {
 			log.Panic("unresolved type: have %+v", n)

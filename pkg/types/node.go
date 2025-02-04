@@ -75,6 +75,7 @@ type BuiltinGlobalVarsProp struct {
 	FormatCR    *ir.Global
 	TrueValue   *ir.Global
 	FalseValue  *ir.Global
+	NilValue    *ir.Global
 }
 
 type Node struct {

@@ -34,6 +34,10 @@ func declareVariable(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 		"value.false",
 		constant.NewCharArrayFromString("false\x00"),
 	)
+	globalVars.NilValue = ir.NewGlobalDef(
+		"value.nil",
+		constant.NewCharArrayFromString("nil\x00"),
+	)
 
 	libs.GlobalVar = globalVars
 
