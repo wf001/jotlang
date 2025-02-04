@@ -33,7 +33,8 @@ type context struct {
 func isConstant(v value.Value) bool {
 	_, isStr := v.(*ir.InstLoad)
 	isInt := v.Type().Equal(types.I32)
-	return isStr || isInt
+	isBool := v.Type().Equal(types.I1)
+	return isStr || isInt || isBool
 }
 
 func newBool(s string) *constant.Int {
@@ -93,7 +94,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 		// means declaring global variable or function named except main
 
 		// define function return type
-		retType := node.GetLLVMType()
+		varType := node.GetLLVMType()
 		funcName := node.GetFuncName()
 
 		var arg []value.Value
@@ -101,15 +102,15 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		// define arguments type of function
 		for a := node.Child.Args; a != nil; a = a.Next {
-			t := a.GetLLVMType()
+			childType := a.GetLLVMType()
 
-			arg = append(arg, ir.NewParam(a.Val, t))
-			argp = append(argp, ir.NewParam(a.Val, t))
+			arg = append(arg, ir.NewParam(a.Val, childType))
+			argp = append(argp, ir.NewParam(a.Val, childType))
 		}
 
 		fnc := ctx.mod.NewFunc(
 			funcName,
-			retType,
+			varType,
 			argp...,
 		)
 		llBlock := fnc.NewBlock("")
@@ -164,6 +165,10 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 
 			} else if scope.Child.IsType(mTypes.TY_STR) {
 				node.Type = mTypes.TY_STR
+				return scope.VarPtr
+
+			} else if scope.Child.IsType(mTypes.TY_BOOL) {
+				node.Type = mTypes.TY_BOOL
 				return scope.VarPtr
 
 			} else {
@@ -320,6 +325,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 				ctx.block.NewStore(child, bind.VarPtr)
 
 			} else if bind.IsType(mTypes.TY_STR) {
+				bind.VarPtr = child
+
+			} else if bind.IsType(mTypes.TY_BOOL) {
 				bind.VarPtr = child
 
 			} else {

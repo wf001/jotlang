@@ -1,0 +1,16 @@
+(def isEven ::int => bool
+  (fn [x]
+    (if (= 0 (mod x 2))
+      true
+      false)))
+
+(def f ::int => string
+  (fn [a] 
+    (let [t ::bool true]
+      (if (and (isEven a) t)
+          "t"
+          "f"))))
+
+(def main ::int
+  (fn []
+    (prn (f 3))))
