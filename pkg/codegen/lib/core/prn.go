@@ -13,27 +13,28 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	var formatStr *ir.Global
 
 	for n := node; n != nil; n = n.Next {
-		v := n.IRValue
-		if n.IsType(mTypes.TY_INT32) || n.IRValue.Type().Equal(types.I32) {
+		value := n.IRValue
+		ty := n.IRValue.Type()
+
+		if n.IsType(mTypes.TY_INT32) || ty.Equal(types.I32) {
 			formatStr = libs.GlobalVar.FormatDigit
 
-		} else if n.IsType(mTypes.TY_BOOL) || n.IRValue.Type().Equal(types.I1) {
+		} else if n.IsType(mTypes.TY_BOOL) || ty.Equal(types.I1) {
 			formatStr = libs.GlobalVar.FormatStr
-			v = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
+			value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
 
-		} else if n.IsType(mTypes.TY_STR) || n.IRValue.Type().Equal(types.I8Ptr) {
+		} else if n.IsType(mTypes.TY_STR) || ty.Equal(types.I8Ptr) {
 			formatStr = libs.GlobalVar.FormatStr
 
 		} else if n.IsKind(mTypes.ND_FUNCCALL) {
-			t := node.IRValue.Type()
-			if t.Equal(types.I32) {
+			if ty.Equal(types.I32) {
 				formatStr = libs.GlobalVar.FormatDigit
-			} else if t.Equal(types.I1) {
+			} else if ty.Equal(types.I1) {
 				formatStr = libs.GlobalVar.FormatStr
-				v = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
-			} else if t.Equal(types.Void) {
+				value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
+			} else if ty.Equal(types.Void) {
 				formatStr = libs.GlobalVar.FormatStr
-			} else if _, ok := t.(*types.PointerType); ok {
+			} else if _, ok := ty.(*types.PointerType); ok {
 				formatStr = libs.GlobalVar.FormatStr
 			} else {
 				log.Panic("unresolved type: have %+v", n)
@@ -41,7 +42,7 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 		} else {
 			log.Panic("unresolved type: have %+v", n)
 		}
-		block.NewCall(libs.Printf.FuncPtr, formatStr, v)
+		block.NewCall(libs.Printf.FuncPtr, formatStr, value)
 
 		if n.Next == nil {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatCR)
